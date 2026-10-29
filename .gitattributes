@@ -1,0 +1,4 @@
+# The TCR material curves are imported straight into EScribe on Windows.
+# Commit their bytes verbatim so a raw download from GitHub carries native
+# Windows (CRLF) line endings rather than git's normalized LF.
+release/materials/*.csv -text
