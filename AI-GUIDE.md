@@ -10,11 +10,11 @@ Everything in this repo was built with an AI assistant, and the docs are written
    - *"Read these files. My mod is a DNA75C on international firmware. Make me a TCR 180 material CSV for a standard V5 cup, and a matching profile."*
    - *"Using the theme format and field IDs in these docs, change the Gremlin home screen to show battery voltage instead of the session time."*
    - *"I'm doing the Thelema chip swap and the screen stays blank after power-up. Walk me through troubleshooting."*
-5. **Ask for versioned output files** (e.g., `Gremlin-Color-Themes-v2.2-beta1.ecigtheme`) so you can roll back.
+5. **Ask for versioned output files** (e.g., `Gremlin-Color-Themes-v2.3-beta1.ecigtheme`) so you can roll back. Only test builds carry the version; the published file never does.
 6. **Load the file in EScribe, upload it to the mod, and test.** Send photos of the screen back to the assistant and describe what's wrong. Expect a few rounds. That's how Gremlin was built.
 
 ## Two themes
-- **Gremlin - Color Themes v2.1** (`release/`): seven switchable looks.
+- **Gremlin - Color Themes v2.2** (`release/`): seven switchable looks.
 - **Gremlin High Contrast - Large Text v1.1** (`high-contrast/`): built for low vision.
 Tell the assistant which one you're changing.
 

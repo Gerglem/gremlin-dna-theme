@@ -20,7 +20,7 @@ The mod compares the heater's **live resistance** to its **locked cold resistanc
 | **DT Lightning Quest (LQ)** | **120** (swab-verified on this DNA100C; Divine Tribe publishes 125, reported values range 105–135 at 28W) | 25W | **Swab at 470°F: tan at TCR 125, light gold at 120.** One step. For comparison, a Pico Plus needed **TCR 95** (110 → medium brown, 100 → tan, 95 → light gold), which does **not** carry over to the DNA. |
 | Original (SiC) Quest crucible | ~345 | ~30–48W | Reference only |
 
-Reference V5 XL profile: **36W, set temperature ~392°F** (380–420°F is a usable range; vapor appears even at 380°F because terpenes and THC volatilize below 350°F), **session 60s** (Divine Tribe guidance). Reference Lightning Quest profile: **25W, set temperature 385°F, session 60s**.
+Reference V5 XL profile: **36W, set temperature 380°F** (380–420°F is a usable range; vapor appears even at 380°F because terpenes and THC volatilize below 350°F), **session 60s** (Divine Tribe guidance). Reference Lightning Quest profile: **25W, set temperature 380°F, session 60s**. Both vaping profiles ship at the bottom of the range so the user ramps up rather than down.
 
 **No temperature ramp feature:** the DNA can't do a scheduled 380→420°F ramp, and a theme can't run timers. The workaround of using up/down steps was explored, but the step-size toggles (fields 10 and 266) seemed to do nothing and were removed from the theme.
 

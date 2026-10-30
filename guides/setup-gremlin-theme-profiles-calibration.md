@@ -7,10 +7,10 @@ This is the setup half of my Thelema Solo DNA100C build (**[chip swap guide](chi
 ![Gremlin screens](../images/20-gremlin-screens-render.png)
 
 **Downloads:** https://github.com/Gerglem/gremlin-dna-theme/tree/main/release
-- `Gremlin-Color-Themes-v2.1.ecigtheme`: the theme
+- `Gremlin-Color-Themes.ecigtheme`: the theme
 - `materials/dtv5xl-tcr200.csv` and `materials/questcup-tcr120.csv`: the TCR material curves
 - `profiles/DTv5XL-Profile.ecigprofile`, `QuestCup.ecigprofile`, `DTv5XL-Clean.ecigprofile`, `QuestCup-Clean.ecigprofile`
-- `Gremlin-Color-Themes-Full-Setup-v2.1.ecig`: the full setup — the theme plus the four profiles, with cold resistance cleared so you measure your own
+- `Gremlin-Color-Themes-Full-Setup.ecig`: the full setup — the theme plus the four profiles, with cold resistance cleared so you measure your own
 
 ---
 
@@ -18,8 +18,8 @@ This is the setup half of my Thelema Solo DNA100C build (**[chip swap guide](chi
 
 | Profile | Mode | TCR | Power | Temp | Session |
 |---|---|---|---|---|---|
-| **DTv5XL** | Temp control | 200 | 36W | 392°F (start here, work up) | 60s |
-| **QuestCup** (Lightning Quest) | Temp control | 120 | 25W | 385°F (start here, work up) | 60s |
+| **DTv5XL** | Temp control | 200 | 36W | 380°F (start here, work up) | 60s |
+| **QuestCup** (Lightning Quest) | Temp control | 120 | 25W | 380°F (start here, work up) | 60s |
 | **DTv5XL-Clean** | Wattage | — | 38W | — | 120s |
 | **QuestCup-Clean** | Wattage | — | 35W | — | 45s |
 
@@ -88,7 +88,7 @@ Vapor comes off much lower than people expect — terpenes and THC volatilize be
 
 ## 5. Load the theme
 
-**Theme** tab → load `Gremlin-Color-Themes-v2.1.ecigtheme` → **Upload Settings to Device.**
+**Theme** tab → load `Gremlin-Color-Themes.ecigtheme` → **Upload Settings to Device.**
 
 ### What Gremlin does
 - **Seven looks:** Classic, Retro, Synth, Toxic, Ice, Desert and Terminal, picked under **MENU → THEMES** (turn on one at a time; all off is Classic). They recolor the home screen, the lock screen, and each menu's title.

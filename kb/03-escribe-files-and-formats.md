@@ -39,9 +39,9 @@
 - **Default Evolv theme fonts were extracted from the default `.ecig`:** "Built SemiBold" at sizes 18 (Normal), 24 (Big), and 13 (Small), with `<Metrics Ascender/Descender>`. Gremlin uses these exact bitmaps.
 
 ## Reference setups (as published)
-**Gremlin - Color Themes v2.1** (`../release/Gremlin-Color-Themes-Full-Setup-v2.1.ecig`, also as single profiles in `../release/profiles/`):
-- Slot 1 **DTv5XL** (material DTv5XL/TCR 200, 36W, 392°F, session 60s)
-- Slot 2 **QuestCup** (material QuestCup/TCR 120, 25W, 385°F)
+**Gremlin - Color Themes v2.2** (`../release/Gremlin-Color-Themes-Full-Setup.ecig`, also as single profiles in `../release/profiles/`):
+- Slot 1 **DTv5XL** (material DTv5XL/TCR 200, 36W, 380°F, session 60s)
+- Slot 2 **QuestCup** (material QuestCup/TCR 120, 25W, 380°F)
 - Slot 3 **DTv5XL-Clean** (Watts, 38W, 120s), slot 4 **QuestCup-Clean** (Watts, 35W, 45s)
 - Slots 5–8 hidden. Cold resistance 0 and unlocked on all slots. Battery soft cutoff 3.0V. Color theme switches off (Classic).
 
