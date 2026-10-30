@@ -105,6 +105,79 @@ all. Cheap, and worth doing next time the mod is connected.
 
   **Read on the XL profile at 0.464:** the value went **red** (`ohms > 0.4`, flat) and MEASURE went **cyan** (`ohms < 0.9`, flat), but LOCKED stayed yellow (`AND(profile == 1, ohms > 0.4)`). So **operator 2 works, operator 3 works, and the field is readable in a `Compare`** — only the nested AND fails. **Rebuilt 2026-10-30** as five layered flat variants instead (`07` #24); the layering is now the untested part, though every operator in it is confirmed on-device. `10` corrected: operator 2 promoted to confirmed, operator 64 marked as not working on this firmware.
 
+## Registered test card: v2.2.03 / v1.2.03 - WRITTEN BEFORE RUNNING, 2026-10-30
+
+Neither build has been on hardware since the replace warning was rebuilt as layered flat variants.
+This is the gate on pushing. Designed first, outcomes fixed before the run, per the rule that a verdict
+is not recorded until it has been waited out.
+
+### What is actually at risk
+
+`v1.0`, the only build with a clean service history, used **one** operator: `3`. Everything else is new.
+
+| Operator | Uses in v2.2.03 | Proven on this device? |
+|---|---|---|
+| `1` (!=) | 187 | **Yes** - the new-coil lock guard hides at cold ohms 0 |
+| `2` (>) | 4 | **Yes** - the probe build, 2026-10-30 |
+| `3` (<) | 3 | **Yes** - the v1.0 low-battery red |
+| `129` (equals) | 12 | **No. Never exercised.** `10` marks it confirmed; that overstates what was checked |
+
+The whole per-cup design rests on `129`. If it does not resolve, every cup falls back to the single
+0.41 limit and the XL reads red from the day it is fitted.
+
+### The variant chain, as built
+
+Identical on all four displays (CT home 17825794, CT prompt 1048579, HC prompt 1048579, HC OHMS 17825794).
+Last matching variant wins:
+
+    default -> red if ohms > 0.41 -> plain if profile == 1 -> plain if profile == 3 -> red if ohms > 0.6
+
+Profiles are 1-based and, confirmed from `EvolvATFriendlyName` in the config, are
+**1 XL, 2 Quest, 3 XL-Clean, 4 Quest-Clean**. So the two whitelisted profiles are both the XL, which is
+the intent: the XL is governed by 0.6 and the Quest by 0.41.
+
+### The bench configs
+
+Two configs, one per theme, each locking a different resistance on each of the four profiles so a single
+upload exercises every layer. Built in the scratchpad, **not committed** - published configs ship cold
+ohms 0 (`12`), and these lock a resistance that will not match the fitted cup.
+
+**Do not fire on these.** Reload the real config afterwards.
+
+| Profile | Cup | Locked ohms | Layers that match | Expected |
+|---|---|---|---|---|
+| 1 | XL | 0.4637 | red(>0.41), plain(p==1) | **plain** |
+| 2 | Quest | 0.4504 | red(>0.41) | **RED** |
+| 3 | XL-Clean | 0.6500 | red(>0.41), plain(p==3), red(>0.6) | **RED** |
+| 4 | Quest-Clean | 0.3141 | none | **plain** |
+
+### What each result means, decided in advance
+
+- **plain / RED / RED / plain** - everything works. The warning ships, and `129` is genuinely confirmed.
+- **Profile 1 RED** - `129` does not resolve. Not a layering bug: red(>0.41) is simply the last match.
+  Rebuild the whitelist on operator `1` (!=) instead, which is proven, by inverting the sense.
+- **Profile 3 plain** - the `>0.6` layer is not winning. Either operator `2` regressed at that value or
+  variant precedence is not last-match-wins, which would contradict `04`.
+- **Profile 2 plain** - operator `2` regression. Contradicts the probe build; re-run the probe.
+- **Profile 4 RED** - something matches unconditionally. Suspect the default variant.
+
+### The rest of the run, same sitting
+
+| # | Check | Expected |
+|---|---|---|
+| E | Fresh upload of the real config, both themes | Both non-cleaning profiles start at **380F**; resistance **0**, lock **off** |
+| F | New-atomizer screen at cold ohms 0 | **No `LOCK?` row** (the guard). After a reading is committed the row appears, and locking takes the real value, never 0 |
+| G | HC menu -> `Omega OHMS` | Child screen opens, the omega glyph renders, MEASURE resamples, BACK returns |
+
+`F` carries the one question left from 2026-10-30: **does the prompt survive `NewCoilAccept`?** If YES
+dismisses the screen, the lock row is only reachable on a later swap, and a first lock has to be done
+from the OHMS page (HC) or PROFILE (CT). Either way nothing can lock 0, so this decides documentation,
+not correctness.
+
+### Result
+
+_Not yet run._
+
 ## Deferred: known simplifications
 
 Things we know are now unnecessarily complicated, held back deliberately so they can be applied in one
