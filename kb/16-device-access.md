@@ -118,6 +118,56 @@ generation - worth confirming, not yet confirmed.
 And the design is a **differential uploader**: regions are hashed, and only changed chunks go over the
 wire. That explains the SHA-1 cache, and it means an upload is not a blind whole-image write.
 
+### Tested 2026-10-30, in and out of process
+
+Device plugged in and confirmed `Present: True` on all four interfaces; serial baseline
+`DNA 100 Color`, cold ohms 0.464, setpoint 385F, 186 puffs.
+
+**`CreateForDNAColor(null)` works.** The SHA-1 cache may be null, so question 1 is closed twice over.
+It returns an **`A.ECC`** - so `OCC` is the base and `ECC` the DNA Color implementation - with
+`Stream = null` and `UserModeVersion = null`, waiting for a link.
+
+**`HLF.XK()` is not a device list.** It returns an `A.QMQ` holding two empty byte arrays and
+`XE = 256`, and `HLF.GK()` also returns 256. That is the hash chunk size, and `QMQ` is the SHA-1 chunk
+cache itself - i.e. **`CreateForDNAColor(HLF.XK())` is the intended call**, and `GK()` is not a device
+count as its shape suggested.
+
+**`HLF.AS` is null even inside Device Monitor**, with the mod connected and live. So the static
+current-device slot is not what Device Monitor's own connection uses, and finding the live link means
+looking at the script host's `ECig` object instead.
+
+**Out of process the device layer is simply not initialized** - `HLF.AS` throws. Nothing here works
+from a standalone script without reconstructing EScribe's startup through obfuscated code.
+
+### `BVF` is the board registry
+
+`A.BVF` is a sealed class with **16 static instances** - against 17 firmware folders in the install
+(`13`), so very nearly one per supported board. Each carries two fields:
+
+| Field | Type | What |
+|---|---|---|
+| `IE` | `A.CSH` | wraps `Dictionary<A.WSH, object>` from **HidSharp** - that is HidSharp's `OpenConfiguration` / `OpenOption` pair |
+| `KE` | `A.VLF` | an enum board code. Values seen: `3`, `131`, `195`, `259`, `1027`, `2051`, `2179` - every one with low byte `0x03` |
+
+Which instance is the DNA 100 Color is not yet known; they are distinguishable only by that code.
+
+### EScribe's HID transport is HidSharp, and that changes the shape of the problem
+
+`HidSharp, Version=2.6.4.0` ships in the install (`HidSharp.dll`, plus `HidSharp.Net.dll` and
+`HidSharp.NordicDfu.dll` for the Bluetooth boards). It is **open source**, so although Evolv obfuscated
+their copy in place, the library itself is public and documented.
+
+That means `A.BGQ.FE(String, Int32, Int32, Int32, CSH, Int32, IGI) -> POT` is a thin wrapper over
+"open this HID device path with these options", and **we never need Evolv's transport code**. A
+standalone client can open `MI_00` with stock HidSharp from NuGet, or Python `hid` / `pywinusb`.
+
+What is *not* solved by that is the **protocol** carried over the HID reports. Evolv's 2015 statement
+says HID is serial tunneled over HID, which would mean the same `LETTER=ACTION` text we already drive
+on COM4 (`17`) - and that gives us nothing new, because text cannot carry a settings image. EScribe
+plainly moves binary settings across the same link, so either the tunnel carries more than text or the
+upload uses its own report. **That question is now the crux, and it is the one thing reflection cannot
+answer.** It needs a capture.
+
 ### The next experiment: read, not write
 
 The read path exercises the entire chain - open HID, attach the stream, `Initialize()`, pull an
