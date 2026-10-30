@@ -92,6 +92,8 @@ Released file: `Gremlin-Color-Themes-v2.1.ecigtheme` (theme title "Gremlin - Col
 
 **Implementation:** `skins.py` (palettes, `SKINS`, `skinned()` / `skinned_img()` variant builders; a skin variant is a duplicate child element with `<Compare Operator="1" Field="<toggle>" RefValue="0" />`), `screens_skinned.py` (home and lock), `menus.py` (titles via `_sktitle`, THEMES screen ID 11).
 
+**Version history (v2.x):** v1.1 FIRING box, profile colors → v1.2 menu wrap fixes → v1.3 LOW BATTERY banner → v1.4 white profile names with colored accent line → v2.0 betas: themes via User Toggles (Contrast built in, then split into its own theme), memory trims → **v2.1**: Retro, Synth, Toxic, Ice, Desert, Terminal; menu titles themed; LED sequences stripped; title "Gremlin - Color Themes".
+
 **Memory (DNA75C, beta15 = v2.1):** off-board 93.6%, on-board 56.0%. Images and fonts use off-board memory; controls and variants use on-board. Off-board is the limit, so any new theme needs image savings first.
 
 **High contrast** is a separate theme: `high-contrast/` (Gremlin High Contrast - Large Text v1.0).

@@ -1,20 +1,21 @@
-# 09 – Known Limitations and Untested Items
+# 09 – Open Items
+
+## Open work
+- **Lightning Quest swab calibration on the DNA.** Load QuestCup, lock cold resistance at room temperature, swab at 470°F. Light gold = TCR 125 is right; adjust the curve if not (`02`).
 
 ## Firmware limitations (not fixable in a theme)
 - No "at temperature" indicator: Heating Time Done (353173506) is rejected by the DNA100C firmware.
 - No live session countdown: Puff Time can't be displayed (Theme Designer crashes when it's set as a Field source).
-- The chip can't report atomizer presence before the first fire, so the theme relies on the chip's own "No Atomizer" status.
+- The chip can't report atomizer presence before the first fire; the themes rely on the chip's own "No Atomizer" status.
 - Firing with no atomizer still enters the session state (no power flows).
+- Full-screen pictures don't draw while firing; pure black picture pixels are transparent (`07`).
 
 ## Untested
-- **Lightning Quest swab calibration on a DNA board.** Start at TCR 125.
 - New-coil screen **OLD** value (field 1048835). It only appears with ohm lock off.
-- Wattage-mode profiles: the main-screen temperature readout may show blank or "Off."
-- Whether other chip warnings (e.g., "Battery Low," "Temp Protected") appear in the Status line.
+- Whether every chip warning (e.g., "Temp Protected") appears in the status line.
 
-## Possible improvements
+## Ideas
+- **More color themes:** off-board memory is the limit (93.6% on the DNA75C). Free image space first, e.g. let more themes use the standard gremlin.
+- **Full menu coloring** for one or two themes would fit in on-board memory (56%).
 - An "at temperature" indicator via a math condition comparing live vs set temperature.
-- Warnings on the lock screen beyond the existing Status line.
-- Adding indicator-LED color sequences (both themes ship with none; irrelevant if the mod has no LED).
-- More color themes: off-board memory is at 93.6% on the DNA75C. Free image space first (e.g., use the standard gremlin for more themes).
-- Full menu coloring for one or two themes would fit in on-board memory (56%).
+- Larger temperature in the High Contrast theme would need a bigger custom font and layout rework (`11`).

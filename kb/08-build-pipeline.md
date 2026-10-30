@@ -27,6 +27,20 @@ Change the output filename in `assemble.py` (search for `Gremlin-v`) for each ne
 | `theme/fontlib.py, gen.py, gen2.py` | Font tooling: decode font XML, generate bitmap fonts from TTF (used during the font experiments) |
 | `gremlin/draw.py`, `gremlin_head.png` | Original gremlin pixel art (60×44) |
 
+## v2.x additions (Color Themes and High Contrast)
+The private kit (the maintainer keeps `gremlin-build-kit-v2.1.zip`; verified to rebuild both released themes byte-for-byte) adds:
+| Path | Role |
+|---|---|
+| `build/skins.py` | Palettes (`PAL`), `SKINS` (theme name → User Toggle field), `COLOR_SKINS`, `skinned()` and `skinned_img()` that append one Compare-gated variant per theme, `add_cmp()` |
+| `build/screens_skinned.py` | Themed home and lock screens: battery bars per theme, icon and gremlin recolors, FIRING box, LOW BATTERY banner |
+| `build/menus.py` | Menus; titles and dividers themed via `_sktitle` / `_sktline`; THEMES screen (design ID 11) |
+| `hc/fonts.py` | High Contrast fonts: Built 24 (missing glyphs synthesized from Built 18 ×4/3), Built 24 ×1.5 for temperatures only, Built 18 |
+| `hc/build_hc.py` | Whole High Contrast theme in one script (4 screens) |
+
+Commands: `cd build && python3 assemble.py` (Color Themes) and `cd hc && python3 build_hc.py` (High Contrast). Both strip LED color sequences and clear Localization.
+
+**Without the kit:** `04`, `05`, `06`, `10`, `11` plus a released `.ecigtheme` (unzip it; every screen is base64 XML) are enough to rebuild or edit by hand.
+
 ## Common changes
 - **Move or resize a home element:** edit its `ctl(x,y,w,h, …)` in `screens.py`.
 - **Add a menu row:** add `row_field/row_toggle/row_link` in `menus.py` (rows are 0-based, max ~8 per page with BACK).

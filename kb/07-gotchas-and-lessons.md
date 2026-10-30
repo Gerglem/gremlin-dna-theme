@@ -12,9 +12,17 @@
 9. Built SemiBold **Small** needs **≥19px** control height for Status text, or the tops of the letters get clipped (v0.21 → v0.22 fix).
 10. Fire on non-main screens = **back one level** (not home) on this firmware.
 11. With **ohm lock on**, the new-coil screen **doesn't appear** when the atomizer is swapped.
-12. **Display step toggles (10, 266)** showed ON/OFF but had no visible effect. Removed.
+12. Fields **10 and 266 are User Toggles 1 and 2**, not step-size settings (they were mislabeled early on, which is why they "did nothing"). See `05`.
 13. A populated **Localization** block forces d/M/yy. Clear it for US dates.
 14. Session Mode needs **international firmware**. The theme won't upload without it.
+
+15. **Fields wrap.** A value wider than its control wraps onto a second line, and anything past the control's height is cut off. Theme Designer shows this; the local preview (`render.py`) does not. Size controls from measured glyph widths.
+16. **Pure black picture pixels are drawn as transparent,** and a **full-screen (80×160) picture is not drawn at all** while firing. To take over the screen, give every other control a Hidden variant instead.
+17. **Controls redraw in layers while firing.** Live (`UpdateLive`) controls repaint over static ones. A "takeover" only works if every other control hides itself and is live.
+18. **The Status element paints a solid background almost constantly,** even with no message. Never overlap it with anything you want visible; give it its own row.
+19. **Two memory pools.** Images and fonts use **off-board** memory; controls and condition variants use **on-board**. Check both with Theme Designer → Space Used, on the **DNA75C** (least room). Recolored images are expensive off-board; text color variants are cheap.
+20. **Evolv's large font (24 px) has only ~56 characters.** It lacks I, G, E, D, L, U and more. Use it for numbers, or synthesize missing glyphs.
+21. User Toggles are **not** saved in `.ecig` exports; they live on the device.
 
 ## Theme building
 - Explicit `Color="(1, 1, 1, 1)"` on selectable items keeps text **white on the white highlight** (invisible). Omit the color for default white.

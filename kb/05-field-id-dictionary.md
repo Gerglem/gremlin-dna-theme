@@ -41,7 +41,7 @@ Confidence: **C** = confirmed (labeled test or on-device), **H** = high (consist
 | **17825798** | **General → Firing (UI)**: true during a session/fire | C |
 | 0 | What Theme Designer saved for General → Firing → **Puff Time**. **Invalid** (shows blank); setting it as a Field source crashes Theme Designer | C |
 | 1048582 | General → Theme → Status Displayed. True at boot and for about 1s after firing, **even with empty text** | C |
-| 262151 | Selected profile (editable: switches profile) | C |
+| 262151 | Selected profile (editable: switches profile). **Numbered from 1** (confirmed: `Compare Operator="129" RefValue="1"` matches profile slot 1) | C |
 
 ## Display / device settings
 | ID | Meaning | Conf |

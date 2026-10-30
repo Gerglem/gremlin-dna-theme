@@ -38,10 +38,19 @@
 `<DESabertooth Device="109" …>` with many `<Feature Name="…" Index="n">value</Feature>` entries. Text values are base64, and some are XML-escaped plain text. Theme parts live here too: EvolvFont (XML-escaped font XML), EvolvUIDesign, EvolvWallpaper (PNG), EvolvThemeTitle/Author, EvolvColorScheme, EvolvLEDTrack, EvolvBatteryDischargeCurve, EvolvCVMaterialTemperatureProfile.
 - **Default Evolv theme fonts were extracted from the default `.ecig`:** "Built SemiBold" at sizes 18 (Normal), 24 (Big), and 13 (Small), with `<Metrics Ascender/Descender>`. Gremlin uses these exact bitmaps.
 
-## Reference device setup (as published in `../release/`)
-- **DTv5XL** (material DTv5XL/TCR 200, 36W, 392°F, session 60s)
-- **QuestCup** (material QuestCup/TCR 125, 25W, 470°F for calibration)
-- **DTv5XL-Clean** (Watts, 38W, 120s), **QuestCup-Clean** (Watts, 35W, 45s)
+## Reference setups (as published)
+**Gremlin - Color Themes v2.1** (`../release/Gremlin-Color-Themes-Full-Setup-v2.1.ecig`, also as single profiles in `../release/profiles/`):
+- Slot 1 **DTv5XL** (material DTv5XL/TCR 200, 36W, 392°F, session 60s)
+- Slot 2 **QuestCup** (material QuestCup/TCR 125, 25W, 470°F for calibration)
+- Slot 3 **DTv5XL-Clean** (Watts, 38W, 120s), slot 4 **QuestCup-Clean** (Watts, 35W, 45s)
+- Slots 5–8 hidden. Cold resistance 0 and unlocked on all slots. Battery soft cutoff 3.0V. Color theme switches off (Classic).
+
+**Gremlin High Contrast v1.1** (`../high-contrast/files/Gremlin-High-Contrast-Full-Setup-v1.1.ecig`):
+- Same settings with short names **XL / QUEST / XL CLEAN / Q CLEAN**, both temperature profiles at 420°F, and **auto-lock off** (`EvolvXAutoLock=0`).
+
+Notes:
 - Materials needed on the device: **DTv5XL, QuestCup, Watts**. Others can be removed if no profile uses them.
-- Battery cutoff 3.0V recommended. Theme: **Gremlin v1.0**. Full config: `gremlin_v1.0.ecig` in `../release/` (cold ohms ship at 0 with the lock off — measure and lock your own cup after loading).
+- **User Toggles (the color theme switches) are not stored in `.ecig` files.** They are on-device state; a mod that has never set them starts with all off.
+- `EvolvXPassword=FFFFF` and `EvolvPowerLockPassword=SSS` are **Evolv factory defaults** (they match Evolv's default config), not personal codes. Default unlock: press fire 5 times.
 - A DNA "Temp Protect" error usually means a wattage material is on a TC profile (or vice versa).
+- How to sanitize an export before publishing: `12-release-and-privacy-checklist.md`.

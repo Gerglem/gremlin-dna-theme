@@ -7,13 +7,15 @@ A Lost Vape Thelema Solo converted to an **Evolv DNA100C**, set up for Divine Tr
 ![Gremlin screens](images/20-gremlin-screens-render.png)
 
 > **Using AI to customize or troubleshoot?** Start with **[AI-GUIDE.md](AI-GUIDE.md)**: step-by-step instructions for using these docs with Claude, ChatGPT, or similar.
+>
+> **AI assistant continuing this project?** Read **[kb/00-README.md](kb/00-README.md)** first. It has the current state, conventions, and the file index, and the rest of `kb/` holds the details.
 
 ## Contents
 - [`AI-GUIDE.md`](AI-GUIDE.md): how to use these docs with an AI assistant
 - [`guides/chip-swap-thelema-solo-dna100c.md`](guides/chip-swap-thelema-solo-dna100c.md): chip swap guide (parts, soldering, screen, power-up)
 - [`guides/setup-gremlin-theme-profiles-calibration.md`](guides/setup-gremlin-theme-profiles-calibration.md): setup guide — loading the theme, materials, profiles, and calibration
 - [`release/`](release/): **`Gremlin-Color-Themes-v2.1.ecigtheme`** (current theme) and **`Gremlin-Color-Themes-Full-Setup-v2.1.ecig`** (v2.1 full device config: the theme plus the four Divine Tribe profiles), `gremlin_v1.0_theme.ecigtheme` and `gremlin_v1.0.ecig` (v1.0 theme and full device config), `profiles/*.ecigprofile`, `materials/*.csv`
-- [`high-contrast/`](high-contrast/): **Gremlin High Contrast - Large Text v1.0**, a separate theme for low vision
+- [`high-contrast/`](high-contrast/): **Gremlin High Contrast - Large Text v1.1**, a separate theme for low vision
 - [`kb/`](kb/): detailed technical notes (reverse-engineered theme format, DNA field IDs, design spec, gotchas)
 - [`images/`](images/): build photos
 
