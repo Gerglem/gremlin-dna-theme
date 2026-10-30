@@ -109,29 +109,25 @@ Cheaper and safer than writing raw bytes: connect the Serial Terminal to **Greml
 also has its own **Scripting** menu, unmapped, which may already be the structured interface this whole
 effort is looking for.
 
-### COM4 tested 2026-10-30: silent
+### SOLVED 2026-10-30: COM4 is the command console
 
-Opened at 9600 8-N-1 with DTR and RTS asserted, mod connected and powered:
+**Everything in this section's earlier conclusions was wrong, and the error was ours.** COM4 returned
+nothing to `?`, `help`, `dir` and friends, and that was read as a dead channel - possibly a path to
+external serial hardware rather than to the mod.
 
-| Sent | Reply |
-|---|---|
-| nothing, six seconds of listening | 0 bytes |
-| `?` + CRLF | 0 bytes |
-| `help` + CRLF | 0 bytes |
+It is the mod's command console. The commands are `LETTER=ACTION`, and **an unrecognised command draws
+no reply at all**, so every probe looked like silence. With real syntax the board answers immediately:
 
-The port opens and accepts writes without error, and the device never answers. Not a text console, at
-least not on these terms.
+```
+R=GET COLD     ->  R=0.464OHM
+E=GET PRODUCT  ->  E=DNA 100 Color
+M=GET          ->  M=1
+```
 
-**Not exhausted, but not worth more effort before the HID route:** untried are other baud rates (CDC
-often ignores the setting anyway), bare LF or no terminator, and the possibility of a binary protocol
-that would never answer a text probe. Record any further attempts here so they are not repeated.
-
-### What COM4 probably is
-
-Given the *Wiring Information* link and that the DNA exposes UART pins, COM4 is more likely a path to
-**external** serial hardware wired to the board than a console on the mod. Unconfirmed, but it would
-explain the silence, and it downgrades the serial route from "backup plan" to "probably not the
-thing at all".
+**This is the goal of this document, reached.** Full detail, the verified command table and the
+`tools/dna-query.ps1` helper are in `17`. What follows below is kept for the record of how the HID
+route was scoped, which is still the right path for *writing* a config - but for reading the device
+and driving it, the serial console is the answer and needs no reverse engineering at all.
 
 ## The serial fallback
 
