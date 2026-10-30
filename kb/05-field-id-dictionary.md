@@ -31,7 +31,6 @@ Confidence: **C** = confirmed (labeled test or on-device), **H** = high (consist
 | 150994946 | 0x9000002 | Preheat temperature | H |
 | 151257090 / 151584770 | | Preheat punch | H |
 | 151388162 | | Boost punch | H |
-| 778 | 0x30A | Preheat by temp vs punch | H |
 | 419889154 / 419954690 | | Can boost / can preheat | M |
 | 1048579 | 0x100003 | New coil → cold ohms. **Blank outside the new-coil screen** | C |
 | 1048835 | 0x100103 | Old coil cold ohms | M (unverified) |
@@ -53,8 +52,6 @@ Confidence: **C** = confirmed (labeled test or on-device), **H** = high (consist
 | 131079 | Temperature unit °F/°C | C |
 | 327687 | Flip screen | H |
 | 720903 | Keep screen on | H |
-| 10 | Watt step toggle. **Did nothing visible**, so removed | C |
-| 266 | Temp step toggle. **Did nothing visible**, so removed | C |
 | 393223 | Auto lock | H |
 | 458759 | Auto lock time | H |
 | 524295 | Clicks to lock | H |
@@ -62,6 +59,20 @@ Confidence: **C** = confirmed (labeled test or on-device), **H** = high (consist
 | 65551 | Time | H |
 | 15 | Date | H |
 | 196615 | 12/24 hour | H |
+
+## User toggles (theme-defined on/off switches)
+These are free switches a theme can use for its own options. They persist on the device. Gremlin v2.x uses them for the color themes.
+| ID | Meaning | Gremlin v2.1 use | Conf |
+|---|---|---|---|
+| 10 | User Toggle 1 | Retro | C |
+| 266 | User Toggle 2 | Synth | C |
+| 522 | User Toggle 3 | (unused; was Contrast in betas) | C |
+| 778 | User Toggle 4 | Desert | C |
+| 1034 | User Toggle 5 | Terminal | C |
+| 1290 | User Toggle 6 | Toxic | C |
+| 1546 | User Toggle 7 | Ice | C |
+| 1802 | User Toggle 8 | (unused) | H |
+Pattern: ID = 10 + 256 × (n − 1). Source: ProVapers' "User Toggle" screen. **Correction:** 10 and 266 were previously mislabeled as watt/temperature step toggles, which is why they "did nothing." 778 was previously listed as "preheat by temp vs punch"; it's User Toggle 4 (ProVapers uses it for its own T/P heat option).
 
 ## Battery / USB / power bank
 | ID | Meaning | Conf |

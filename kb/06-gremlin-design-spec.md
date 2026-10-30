@@ -77,3 +77,21 @@ Battery bar (+ red variant), time (65551, Normal), date (15, Small, gray), **gre
 
 ## Version history (condensed)
 v0.1 initial (Built font, main/lock/coil) · v0.2 inverted highlight, outlined icons, Heating Done removed · v0.3 static session length, status attempt · v0.4 new menu screens · v0.5 white labels/gray values · v0.6 author metadata cleared · v0.7 description · v0.8 lock icons · v0.9 Ω icon, re-measure removed from main · v0.10–v0.12 status/box experiments → baked images · v0.13 SET white/value gray, date fix · v0.14–v0.18 custom NO ATOMIZER attempts (false positives) · v0.19–v0.24 chip Status line, boxes removed, READY removed, amber status color, red error color · v0.25 red battery under 15% · v0.26 removed T/W step · **v1.0 = v0.26.**
+
+
+## Gremlin - Color Themes v2.x
+Released file: `Gremlin-Color-Themes-v2.1.ecigtheme` (theme title "Gremlin - Color Themes").
+
+**Themes:** Classic (all switches off) plus six color themes under **MENU → THEMES**: Retro, Synth, Toxic, Ice, Desert, Terminal. Turn on one at a time. Each theme is a User Toggle (see `05`); if several are on, the last in this order wins: Retro, Synth, Desert, Terminal, Toxic, Ice.
+
+**What a theme recolors:** home screen (live temperature, SET label, resistance values, divider, battery bar, icons) and lock screen (time, date, GREMLIN label, battery bar, gremlin image); in menus, only the **title and its divider**. Menu rows stay white. Full menu coloring was dropped for memory.
+
+**Palettes:** Retro: neon green labels, hot-pink readouts, cyan values. Synth: hot pink, purple, cyan, sunset bar. Toxic: acid lime and purple. Ice: electric cyan, frost blue, white. Desert: sunset orange, turquoise, sand. Terminal: CRT greens. Desert and Terminal use the standard gremlin (memory); the others have recolored gremlins.
+
+**Other v2.x changes:** orange FIRING box over the status line while firing; LOW BATTERY red banner replaces the battery bar under 15%; white profile names with a profile-colored accent line (slots 1–4); PROFILE menu shows the name full-width; CLOCK "Mode"; large font trimmed to temperature characters; LED color sequences stripped.
+
+**Implementation:** `skins.py` (palettes, `SKINS`, `skinned()` / `skinned_img()` variant builders; a skin variant is a duplicate child element with `<Compare Operator="1" Field="<toggle>" RefValue="0" />`), `screens_skinned.py` (home and lock), `menus.py` (titles via `_sktitle`, THEMES screen ID 11).
+
+**Memory (DNA75C, beta15 = v2.1):** off-board 93.6%, on-board 56.0%. Images and fonts use off-board memory; controls and variants use on-board. Off-board is the limit, so any new theme needs image savings first.
+
+**High contrast** is a separate theme: `high-contrast/` (Gremlin High Contrast - Large Text v1.0).

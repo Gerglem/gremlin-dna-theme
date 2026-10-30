@@ -12,9 +12,25 @@ A Lost Vape Thelema Solo converted to an **Evolv DNA100C**, set up for Divine Tr
 - [`AI-GUIDE.md`](AI-GUIDE.md): how to use these docs with an AI assistant
 - [`reddit/01-dna100c-thelema-chip-swap.md`](reddit/01-dna100c-thelema-chip-swap.md): chip swap guide (parts, soldering, screen, power-up)
 - [`reddit/02-gremlin-theme-and-dt-profiles.md`](reddit/02-gremlin-theme-and-dt-profiles.md): loading the theme, materials, profiles, and calibration
-- [`release/`](release/): `gremlin_v1.0_theme.ecigtheme`, `gremlin_v1.0.ecig` (full device config), `profiles/*.ecigprofile`, `materials/*.csv`
+- [`release/`](release/): **`Gremlin-Color-Themes-v2.1.ecigtheme`** (current theme), `gremlin_v1.0_theme.ecigtheme` and `gremlin_v1.0.ecig` (v1.0 theme and full device config), `profiles/*.ecigprofile`, `materials/*.csv`
+- [`high-contrast/`](high-contrast/): **Gremlin High Contrast - Large Text v1.0**, a separate theme for low vision
 - [`kb/`](kb/): detailed technical notes (reverse-engineered theme format, DNA field IDs, design spec, gotchas)
 - [`images/`](images/): build photos
+
+## Gremlin - Color Themes v2.1
+The current Gremlin theme has seven looks. Pick one under **MENU → THEMES** (turn on one at a time; all off is Classic):
+
+- **Classic:** white and gray on black
+- **Retro:** 80s neon green, hot pink, and cyan
+- **Synth:** synthwave pink, purple, and a sunset battery bar
+- **Toxic:** acid lime and purple
+- **Ice:** electric cyan, frost blue, and white
+- **Desert:** sunset orange and turquoise
+- **Terminal:** green CRT
+
+Themes recolor the home and lock screens and each menu's title. Also new in v2.x: an orange FIRING box while heating, a red LOW BATTERY banner under 15%, and profile-colored accents.
+
+![Gremlin color themes](images/21-gremlin-v2.1-themes.png)
 
 ## Requirements
 Evolv DNA color chip (DNA75C / DNA100C / DNA250C) with **international firmware (SP55.1 INT+)** for Session Mode. Requires up/select/down buttons plus fire.

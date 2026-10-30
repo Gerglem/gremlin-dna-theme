@@ -15,4 +15,6 @@
 ## Possible improvements
 - An "at temperature" indicator via a math condition comparing live vs set temperature.
 - Warnings on the lock screen beyond the existing Status line.
-- Adding indicator-LED color sequences (the theme ships with none; irrelevant if the mod has no LED).
+- Adding indicator-LED color sequences (both themes ship with none; irrelevant if the mod has no LED).
+- More color themes: off-board memory is at 93.6% on the DNA75C. Free image space first (e.g., use the standard gremlin for more themes).
+- Full menu coloring for one or two themes would fit in on-board memory (56%).
