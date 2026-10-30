@@ -1,5 +1,71 @@
 # 09 – Open Items
 
+## Where this effort stands
+
+Written 2026-10-30 so the thread survives a context loss. **23 commits sit local and unpushed** - nothing
+in this stretch has gone to GitHub, by instruction.
+
+**Current builds:** Color Themes `v2.2.03`, High Contrast `v1.2.03`, both internal mini versions (`00`).
+Neither has been tested on hardware since the per-cup replace warning was rebuilt as a layered chain.
+
+**Three threads are open at once:**
+
+1. **The replace warning** works in principle but its layered implementation is a workaround for an AND we
+   could not encode. Item 1 of the checklist in `15` would replace it with a single condition.
+2. **Theme Designer mapping** (`15`) is part done - Appearance and Screens tabs, and the condition editor.
+   The checklist there says what is left.
+3. **Programmatic device access** (`16`) is scoped but not working. EScribe's .NET assemblies load and
+   reflect, and `CreateForDNAColor()` returns the live device link; what is missing is how the stream is
+   opened and which member reads settings out. The serial fallback has a listen-only probe written and
+   never run.
+
+**The most valuable single action** is item 1 of the `15` checklist: one save in the GUI settles how
+conditions are really encoded, and several things in this repo are built around not knowing that.
+
+## Tracked: the new-atomizer screen
+
+Reworked repeatedly on 2026-10-30 and **never tested as it now stands**. Both themes changed; load
+`gremlin_v2.2.03.ecig` and `gremlin_high_contrast_v1.2.03.ecig`, and remember a full `.ecig` load
+zeroes cold ohms, so a cup has to be re-locked before anything resistance-driven can show.
+
+What is unverified, in the order a single swap would exercise it:
+
+1. **The LOCK? row is hidden until there is something to lock.** Guarded on cold ohms being non-zero,
+   so on a fresh config it should be absent. Seen working once against the *earlier* guard, which
+   watched the pending reading instead (`07` #22).
+2. **Does the row appear after YES, and does the prompt stay open long enough to use it?** If
+   `NewCoilAccept` dismisses the screen, the first lock has to happen on the ohms page or PROFILE
+   instead, and the toggle on the prompt only helps on later swaps. This is the open question that
+   decides whether the control earns its place.
+3. **High Contrast shows the measured resistance** on that screen now, and MEASURE was removed to fit
+   it (`11`). Never seen on hardware.
+4. **The red replace warning** on the prompt and on the ohms page, rebuilt as a layered chain. The
+   chain's logic is worked through but the layering itself has not run on the mod.
+
+A cheap way to exercise 4 without aging a cup: Device Monitor can **write** cold ohms (`14`), so set it
+past a threshold and watch the screen. That tests the layering far faster than swapping cups.
+
+## Tracked: programmatic device access
+
+Scoped in `16`, not working yet. The goal is reading and writing the mod from a command line so a change
+can be uploaded and checked without the GUI in the loop.
+
+**HID is the target** - it is how every config this project has shipped reached the mod. Next steps, in
+order:
+
+1. Find how the device **stream** is opened and handed to the programmer object. Likely an enumeration
+   API in `DEScribe.Core` or `DimensionEngineering.Common`, neither of which reflects cleanly yet.
+2. Work out how to construct the `NHW` cache argument that `CreateForDNAColor()` wants.
+3. Identify the **read** path. `AX(IProgressMonitor, bool[])` is the candidate.
+4. Only then consider a write - dry-run flag first, with a known-good backup to hand.
+
+If obfuscation makes that too slow, **USB capture** of EScribe doing a real transfer gives the protocol
+exactly and cannot fail; it just needs USBPcap or similar installed.
+
+**The serial port is the fallback** (`13`, `16`). A listen-only probe is written and has never been run -
+it needs the mod plugged in, writes nothing, and would tell us whether that port is a text console at
+all. Cheap, and worth doing next time the mod is connected.
+
 ## Firmware limitations (not fixable in a theme)
 - No "at temperature" indicator: Heating Time Done (353173506) is rejected by the DNA100C firmware.
 - No live session countdown: Puff Time can't be displayed (Theme Designer crashes when it's set as a Field source).

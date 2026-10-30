@@ -202,6 +202,72 @@ an expression could compare the two directly.
 
 ---
 
-## Not yet mapped
+## Still to map
 
-Indicator Light · Language · Credits · the condition editor and its operator list · the action editor · control property panels · Space Used · all five menus.
+Worked from screenshots. Each item says **what to capture** and **what it would settle**, so this can be
+picked up cold. Tick them off here as they land.
+
+### 1. The `and` encoding - do this first
+
+Not mapping, an experiment, and it is worth more than the rest combined.
+
+**Capture:** in the GUI, add a condition to any control using two measurements joined by `and` - for
+example cold ohms above a number `and` profile equals 1. Save the theme to a file.
+
+**Settles:** how the tool compiles `and`. Our `<Compare Operator="64">` guess does not work on hardware
+(`09`), so every multi-term condition in this repo is currently written as a chain of single-term variants
+that emulate one (`07` #24). With the real encoding, the per-cup replace warning collapses from five
+layers to one condition. While doing it, also try an expression comparing **two measurements** to see
+whether field-to-field comparison compiles.
+
+### 2. Memo and Chart
+
+The two controls nobody here has used. They are in the palette but in neither the Add Condition nor the
+Change Control list, so they cannot be conditional variants.
+
+**Capture:** place one of each on a scratch screen, select it, and photograph the whole properties panel.
+
+**Settles:** what they are. A **Chart** on an 80x160 screen is the intriguing one - if it plots puff
+history it is a feature this project never knew it had. **Memo** the help describes only as a text block
+with a format.
+
+### 3. Field - the richest control
+
+**Capture:** the whole properties panel for a selected Field, and the **Format** box with its `+` menu open.
+
+**Settles:** GUI names for `Decimals`, `HideUnits`, `ReadOnly` and `StepSize` (`10`), and how format
+strings are entered. Format strings put the unit inside the value - `#W` renders `10.0W` - so a value can
+label itself without a second control. On screens that are full to the pixel, that is real space back.
+
+### 4. Gauge
+
+Ours is the battery bar, and everything about it was inferred from reading files.
+
+**Capture:** properties panel for a selected Gauge.
+
+**Settles:** `Full` / `Empty` images, `Direction`, `Orientation`.
+
+### 5. Label, Toggle, Picture, Status
+
+Mostly confirming. For **Label**, the `Text` box with its `+` tag menu open - inline color and font tags
+are documented in EScribe's help and unused here. For **Picture**, whatever `PictureEncoding` is called.
+
+### 6. Common properties, on any control
+
+**Capture:** visible in any of the panels above.
+
+**Settles:** the GUI names behind `Location`, `Size`, the `Status` help-text attribute that `07` #7 says to
+strip, `InitiallyHighlighted`, `UpdateLive`, and `ZOrder`. `ZOrder` appears in EScribe's own output but
+never in ours, and it is not known whether that matters.
+
+### 7. The action list
+
+**Capture:** the full list offered when attaching an action to a control.
+
+**Settles:** the last reverse-engineered table in `10`. Three entries there - `SiblingScreen`, `LockScreen`
+and the recording actions - are marked unverified.
+
+### 8. The remaining tabs and menus
+
+Indicator Light, Language, Credits; the File, Edit, Options, Tools and Help menus; and the **Space Used**
+dialog with a DNA75C selected, since that is the memory check every release depends on (`00`).
