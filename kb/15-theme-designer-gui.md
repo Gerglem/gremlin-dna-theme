@@ -262,6 +262,21 @@ A 64x64 chart fits comfortably on an 80x160 screen. The data behind it is the sa
 serial stream exposes at 64 Hz (`17`) - resistance and temperature through a heat cycle - so a theme
 could show on the mod what we have only ever looked at in a CSV.
 
+### Field adds a Source, and names two things we had guessed
+
+A Field's panel carries the common properties plus:
+
+| GUI | XML | Note |
+|---|---|---|
+| **Selectable** (checkbox) | `ReadOnly` **inverted** | Ticked means no `ReadOnly`; unticked writes `ReadOnly="1"` |
+| **Update while firing** (checkbox) | `UpdateLive="1"` | The GUI name is the useful part: it refreshes **during a puff**. Conditional variants that must re-evaluate live depend on this |
+| Source, shown as e.g. `Atomizer -> Power` | `<Source><Setting Field="..." /></Source>` | With two buttons, **Options** and **Type...** |
+
+**Source's two buttons are the next thing to open** - they are not yet mapped. `Options` is expected to
+hold `Decimals`, `HideUnits`, `StepSize` and the format string; `Type...` presumably chooses the
+measurement. They appear **only on a Field** - Label, Memo and Chart have no Source row - and sit
+between the Action row and the Status box, under the plain-text line naming the current source.
+
 ## Still to map
 
 Worked from screenshots. Each item says **what to capture** and **what it would settle**, so this can be
@@ -280,25 +295,20 @@ that emulate one (`07` #24). With the real encoding, the per-cup replace warning
 layers to one condition. While doing it, also try an expression comparing **two measurements** to see
 whether field-to-field comparison compiles.
 
-### 2. Memo and Chart
+### 2. ~~Memo and Chart~~ - DONE
 
-The two controls nobody here has used. They are in the palette but in neither the Add Condition nor the
-Change Control list, so they cannot be conditional variants.
+Memo is a multi-line Label. Chart plots the device's puff recording and takes one setting. Written up
+above; the Chart finding is logged as an idea in `09`.
 
-**Capture:** place one of each on a scratch screen, select it, and photograph the whole properties panel.
+### 3. Field - PART DONE, resume here
 
-**Settles:** what they are. A **Chart** on an 80x160 screen is the intriguing one - if it plots puff
-history it is a feature this project never knew it had. **Memo** the help describes only as a text block
-with a format.
+The panel is mapped and `Selectable` and `Update while firing` are resolved (above). **Outstanding:
+open Source -> `Options` and Source -> `Type...` on a selected Field** and capture both dialogs. If
+`Options` has a format box with a `+` menu, open that too - the help says the inline color and font
+tags live there.
 
-### 3. Field - the richest control
-
-**Capture:** the whole properties panel for a selected Field, and the **Format** box with its `+` menu open.
-
-**Settles:** GUI names for `Decimals`, `HideUnits`, `ReadOnly` and `StepSize` (`10`), and how format
-strings are entered. Format strings put the unit inside the value - `#W` renders `10.0W` - so a value can
-label itself without a second control. On screens that are full to the pixel, that is real space back.
-
+Why it matters: format strings put the unit inside the value (`#W` renders `250.0W`), so a number can
+label itself without a second control. On screens that are full to the pixel, that is space back.
 ### 4. Gauge
 
 Ours is the battery bar, and everything about it was inferred from reading files.

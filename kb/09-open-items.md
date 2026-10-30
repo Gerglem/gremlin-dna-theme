@@ -2,25 +2,28 @@
 
 ## Where this effort stands
 
-Written 2026-10-30 so the thread survives a context loss. **23 commits sit local and unpushed** - nothing
-in this stretch has gone to GitHub, by instruction.
+Updated 2026-10-30, late in a long session. **41 commits are local and unpushed**, by instruction.
+Nothing in this stretch has gone to GitHub.
 
-**Current builds:** Color Themes `v2.2.03`, High Contrast `v1.2.03`, both internal mini versions (`00`).
-Neither has been tested on hardware since the per-cup replace warning was rebuilt as a layered chain.
+**Builds:** Color Themes `v2.2.03`, High Contrast `v1.2.03`. **Neither has been tested on hardware**
+since the replace warning was rebuilt. That is the gate on pushing anything.
 
-**Three threads are open at once:**
+**Solved today, and large:** the mod is a plain-text command console over its USB serial port (`17`),
+with `tools/dna-query.ps1` and `tools/dna-stream.ps1` working. The TCR curve is now **verified against
+the hardware** to 0.04 F (`02`). Settings and themes are confirmed unreachable over serial - encrypted
+binary, EScribe only (`16`), so the HID effort is only worth resuming for *writing* a config.
 
-1. **The replace warning** works in principle but its layered implementation is a workaround for an AND we
-   could not encode. Item 1 of the checklist in `15` would replace it with a single condition.
-2. **Theme Designer mapping** (`15`) is part done - Appearance and Screens tabs, and the condition editor.
-   The checklist there says what is left.
-3. **Programmatic device access** (`16`) is scoped but not working. EScribe's .NET assemblies load and
-   reflect, and `CreateForDNAColor()` returns the live device link; what is missing is how the stream is
-   opened and which member reads settings out. The serial fallback has a listen-only probe written and
-   never run.
+**Device state:** on COM4. Serial Output Format was switched to CSV for the stream test and **switched
+back to Plain Text Serial**, so the query tool works as-is. The cup is locked at 0.464 ohm.
 
-**The most valuable single action** is item 1 of the `15` checklist: one save in the GUI settles how
-conditions are really encoded, and several things in this repo are built around not knowing that.
+**Theme Designer mapping** (`15`) is most of the way done: Appearance, Screens, the condition editor,
+Memo, Chart and most of Field. The checklist there says exactly where to resume - Field's Source
+`Options` and `Type...` dialogs.
+
+**The one correction worth remembering:** conditions are authored as expressions and compiled to the
+`<Compare>` XML we hand-write. Operator 64 *is* AND; the bug was using 129 for equality where the tool
+emits 4 (`07` #25). Several things in this repo are built around the wrong belief and are listed under
+deferred simplifications below.
 
 ## Tracked: the new-atomizer screen
 
