@@ -96,7 +96,7 @@ Vapor comes off much lower than people expect — terpenes and THC volatilize be
 - **While firing:** an orange **FIRING** box.
 - **Low battery:** a red **LOW BATTERY** banner below 15%.
 - **Edit in place:** use **up/down** to move between editable items (profile, set temp, watts, session time, ohm lock, brightness, menus). **Select** edits the highlighted item. Read-only values are skipped.
-- **New coil:** swap a heater with the ohm lock off and the mod asks **NEW COIL?**. Accepting stores the new cold resistance but does **not** lock it, so the screen also carries a **LOCK?** toggle. **Answer YES first, then lock** — the lock stores the resistance the mod has accepted, so locking before you accept would store nothing. The toggle stays hidden until the screen has a reading, so if you don't see it, press MEASURE.
+- **New coil:** swap a heater with the ohm lock off and the mod asks **NEW COIL?**. Accepting stores the new cold resistance but does **not** lock it, so the screen also carries a **LOCK?** toggle. **Always answer the prompt** — YES for a new heater, NO if it is the same one. Either order works: you can lock first and then answer, or answer and then lock. What does not work is locking and never answering, because the lock holds whatever the mod has accepted, and on a fresh setup that is 0. The toggle stays hidden until the screen has a reading, so if you don't see it, press MEASURE.
 - **Fire:** fires from the home screen. On menu pages, it's a **back button**.
 - **Menus:** Profile, Preheat, Display, Lock, Info, Clock, and a one-click **Stealth** toggle.
 - **Lock screen:** clock, date, a gremlin, and battery.

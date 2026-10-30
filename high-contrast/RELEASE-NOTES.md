@@ -17,7 +17,7 @@ The symbol *and* the word: **Ω** is what is printed on cups and quoted in specs
 
 Fitting it meant repacking the menu: the divider is gone and the five rows run edge to edge. At this text size 160 pixels holds exactly five rows and no more, which is why the ohm controls went to a screen of their own rather than taking a sixth.
 
-**A LOCK? toggle on the new-coil screen too.** Answering **YES** to **NEW COIL?** stores the new cold resistance but leaves the lock off, and the prompt only appears while the lock is off — so without this you would be asked again on every swap. Unlock, swap the heater, let it measure, lock again. **Answer YES before locking** — the lock stores the resistance the mod has accepted, so locking first would store nothing. The row stays hidden until the screen has a reading.
+**A LOCK? toggle on the new-coil screen too.** Answering **YES** to **NEW COIL?** stores the new cold resistance but leaves the lock off, and the prompt only appears while the lock is off — so without this you would be asked again on every swap. Unlock, swap the heater, let it measure, lock again. **Always answer the prompt** — YES for a new heater, NO if it is the same one. Either order works: you can lock first and then answer, or answer and then lock. What does not work is locking and never answering, because the lock holds whatever the mod has accepted, and on a fresh setup that is 0. The row stays hidden until the screen has a reading.
 
 **Both vaping profiles now start at 380°F.** XL was 420°F and QUEST was 385°F. Both now open at the bottom of the usable range so you work up to your own setting rather than down from someone else's.
 

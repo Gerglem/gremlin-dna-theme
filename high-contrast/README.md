@@ -171,7 +171,7 @@ This screen appears if you attach a different heater while the resistance lock i
 - **YES**: this is a new heater.
 - **NO**: this is the same heater. NO is selected by default, for safety.
 - **MEASURE**: reads the heater again.
-- **LOCK?**: the resistance lock. Answering YES stores the new reading but leaves the lock off, so this is here to turn it on without going to the menu. **Press YES first, then lock.** The lock stores the resistance the mod has accepted, so locking before you accept would store nothing. This row only appears once the screen has a reading — if it is missing, choose MEASURE.
+- **LOCK?**: the resistance lock. Answering YES stores the new reading but leaves the lock off, so this is here to turn it on without going to the menu. **Always answer the prompt** — YES for a new heater, NO if it is the same one. Either order works: you can lock first and then answer, or answer and then lock. What does not work is locking and never answering, because the lock holds whatever the mod has accepted, and on a fresh setup that is 0. This row only appears once the screen has a reading — if it is missing, choose MEASURE.
 
 If you leave the lock on, this screen does not appear at all when you change heaters. Unlock it first, swap the heater, then lock it again.
 
