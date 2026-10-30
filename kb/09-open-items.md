@@ -102,6 +102,17 @@ all. Cheap, and worth doing next time the mod is connected.
 
   **Read on the XL profile at 0.464:** the value went **red** (`ohms > 0.4`, flat) and MEASURE went **cyan** (`ohms < 0.9`, flat), but LOCKED stayed yellow (`AND(profile == 1, ohms > 0.4)`). So **operator 2 works, operator 3 works, and the field is readable in a `Compare`** — only the nested AND fails. **Rebuilt 2026-10-30** as five layered flat variants instead (`07` #24); the layering is now the untested part, though every operator in it is confirmed on-device. `10` corrected: operator 2 promoted to confirmed, operator 64 marked as not working on this firmware.
 
+## Follow-up: a board temperature warning?
+
+**Board Temperature** and **Room Temperature** are both readable measurements (`05`, and Device Monitor
+displays them side by side). Raised 2026-10-30: is a hot-board warning worth surfacing in a theme, or
+does the chip already protect itself?
+
+Unanswered either way. The DNA almost certainly has its own thermal limits and will throttle or refuse
+to fire, but **whether it tells the user anything** is the open question - and if it only shows a status
+line, a theme could make it unmissable. Worth checking what the chip does at temperature before building
+anything, so the theme is not warning about a condition the firmware has already handled silently.
+
 ## Ideas
 - **More color themes:** off-board memory is the limit (93.6% on the DNA75C). Free image space first, e.g. let more themes use the standard gremlin.
 - **Full menu coloring** for one or two themes would fit in on-board memory (56%).
