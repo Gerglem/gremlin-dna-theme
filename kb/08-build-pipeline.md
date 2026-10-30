@@ -9,7 +9,7 @@ The build kit (Python scripts) is kept private; it isn't included in this public
 ```bash
 cd /home/claude/build && python3 assemble.py   # writes /mnt/user-data/outputs/Gremlin-v1.0.ecigtheme
 ```
-Change the output filename in `assemble.py` (search for `Gremlin-v`) for each new version. The build writes `Gremlin-v<version>.ecigtheme`; the copy published in `../release/` is renamed to the version-free release name (`Gremlin-Color-Themes.ecigtheme`; the legacy v1.0 copy is `gremlin_v1.0_theme.ecigtheme`).
+Change the output filename in `assemble.py` (search for `Gremlin-v`) for each new version. The build writes `Gremlin-v<version>.ecigtheme`; the copy published in `../release/` is renamed to `gremlin_v<version>_theme.ecigtheme` to match the other release filenames.
 
 ## Files
 | Path | Role |

@@ -1,4 +1,4 @@
-# Gremlin High Contrast: Large Text Theme (v1.1)
+# Gremlin High Contrast: Large Text Theme (v1.2)
 
 A theme for Evolv DNA vape mods, made for people with low vision.
 
@@ -33,14 +33,14 @@ There are three kinds of files. You only need one of the first two.
 
 ### Option A: The full setup file (easiest)
 
-- File: [Gremlin-High-Contrast-Full-Setup-v1.1.ecig](files/Gremlin-High-Contrast-Full-Setup-v1.1.ecig)
+- File: [gremlin_high_contrast_v1.2.ecig](files/gremlin_high_contrast_v1.2.ecig)
 - What it contains: the theme **and** four ready-made profiles, all in one file.
 - Choose this if you use Divine Tribe V5 XL cups or the Lightning Quest, and you want everything set up at once.
 - Note: this replaces all the settings on your mod.
 
 ### Option B: The theme only
 
-- File: [Gremlin-High-Contrast-Large-Text-v1.1.ecigtheme](files/Gremlin-High-Contrast-Large-Text-v1.1.ecigtheme)
+- File: [gremlin_high_contrast_v1.2_theme.ecigtheme](files/gremlin_high_contrast_v1.2_theme.ecigtheme)
 - What it contains: only the screens, colors, and text size.
 - Choose this if you want to keep your own profiles and settings. Only the look of the screen changes.
 
@@ -51,11 +51,11 @@ A profile stores the settings for one heater: power, temperature, and session ti
 - [High-Contrast-Profile-V5XL-Cup.ecigprofile](files/profiles/High-Contrast-Profile-V5XL-Cup.ecigprofile)
   - Name on screen: **XL**
   - For: Divine Tribe V5 XL cups.
-  - Settings: temperature control, 420°F, 36 watts, 60-second sessions.
+  - Settings: temperature control, 380°F, 36 watts, 60-second sessions.
 - [High-Contrast-Profile-Lightning-Quest.ecigprofile](files/profiles/High-Contrast-Profile-Lightning-Quest.ecigprofile)
   - Name on screen: **QUEST**
   - For: the Divine Tribe Lightning Quest heater.
-  - Settings: temperature control, 385°F, 25 watts, 60-second sessions.
+  - Settings: temperature control, 380°F, 25 watts, 60-second sessions.
 - [High-Contrast-Profile-V5XL-Cleaning.ecigprofile](files/profiles/High-Contrast-Profile-V5XL-Cleaning.ecigprofile)
   - Name on screen: **XL CLEAN**
   - For: burning residue off a V5 XL cup.
@@ -85,14 +85,14 @@ Before you start, connect your mod to your computer with the USB cable and open 
 ### To install the full setup file
 
 1. In EScribe, open the **File** menu and choose **Open**.
-2. Choose **Gremlin-High-Contrast-Full-Setup-v1.1.ecig**.
+2. Choose **gremlin_high_contrast_v1.2.ecig**.
 3. Select **Upload Settings to Device**.
 4. Follow step 4 under "To add a single profile" to lock each cup's resistance.
 
 ### To install the theme only
 
 1. Select the **Theme** tab.
-2. Load **Gremlin-High-Contrast-Large-Text-v1.1.ecigtheme**.
+2. Load **gremlin_high_contrast_v1.2_theme.ecigtheme**.
 3. Select **Upload Settings to Device**.
 
 ### To add a single profile
@@ -137,11 +137,12 @@ When heating stops, the home screen returns.
 
 ### Menu
 
-![Menu screen. TEMP with 420 degrees, WATTS with 36 watts, LIGHT with 10, and BACK.](images/menu-screen.png)
+![Menu screen. TEMP with a temperature, WATTS with a power, LIGHT with a brightness, LOCK with a padlock, and BACK.](images/menu-screen.png)
 
 - **TEMP**: your set temperature.
 - **WATTS**: the power limit.
 - **LIGHT**: screen brightness, from 1 to 10. Set it to 10 for the brightest screen.
+- **LOCK**: the resistance lock for the heater on this profile. A **solid padlock** means locked, an **open padlock** means unlocked. Lock it once the heater has been measured cold.
 - **BACK**: returns to the home screen.
 
 ### Lock screen
@@ -152,13 +153,16 @@ When the mod is locked, the screen says **LOCKED** and tells you how to unlock i
 
 ### New coil screen
 
-![New coil screen. NEW COIL question, YES, NO, and MEASURE.](images/new-coil-screen.png)
+![New coil screen. NEW COIL question, YES, NO, MEASURE, and LOCK with a padlock.](images/new-coil-screen.png)
 
 This screen appears if you attach a different heater while the resistance lock is off.
 
 - **YES**: this is a new heater.
 - **NO**: this is the same heater. NO is selected by default, for safety.
 - **MEASURE**: reads the heater again.
+- **LOCK**: the resistance lock. Answering YES stores the new reading but leaves the lock off, so this is here to turn it on without going to the menu.
+
+If you leave the lock on, this screen does not appear at all when you change heaters. Unlock it first, swap the heater, then lock it again.
 
 ## 6. Using the buttons
 
@@ -215,6 +219,8 @@ The mod locks itself so it can't fire by accident.
 ## 10. Getting help
 
 For questions or problems, open an issue on this project's GitHub page.
+
+What changed in each version: [RELEASE-NOTES.md](RELEASE-NOTES.md).
 
 For setup, materials, and calibration details, see the main Gremlin guides: [chip swap](../guides/chip-swap-thelema-solo-dna100c.md) and [setup and calibration](../guides/setup-gremlin-theme-profiles-calibration.md).
 

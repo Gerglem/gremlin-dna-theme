@@ -5,12 +5,12 @@
 ## Current state (keep this section current)
 | Item | Version | Where |
 |---|---|---|
-| **Gremlin - Color Themes** (main theme) | **v2.2** | `../release/Gremlin-Color-Themes.ecigtheme`, full setup `../release/Gremlin-Color-Themes-Full-Setup.ecig` (version-free names; history in `../release/RELEASE-NOTES.md`) |
-| **Gremlin High Contrast - Large Text** (low vision) | **v1.1** | `../high-contrast/` (landing page `README.md`, files in `files/`) |
+| **Gremlin - Color Themes** (main theme) | **v2.2** | `../release/gremlin_v2.2_theme.ecigtheme`, full setup `../release/gremlin_v2.2.ecig` |
+| **Gremlin High Contrast - Large Text** (low vision) | **v1.2** | `../high-contrast/` (landing page `README.md`, files `files/gremlin_high_contrast_v1.2_theme.ecigtheme` and `files/gremlin_high_contrast_v1.2.ecig`) |
 | Gremlin v1.0 (legacy) | v1.0 | `../release/gremlin_v1.0_theme.ecigtheme`, `gremlin_v1.0.ecig` |
 | Guides | current | `../guides/chip-swap-thelema-solo-dna100c.md`, `../guides/setup-gremlin-theme-profiles-calibration.md` (old `../reddit/` paths are pointer files kept for a live Reddit link; don't delete) |
 
-Both themes are released and tested on a DNA100C. Memory on the DNA75C (the tightest chip): Color Themes v2.2 uses off-board 93.6% and on-board 56.0% (v2.2 is the v2.1 build with new metadata, so the figures carry over).
+Both themes are released and tested on a DNA100C. Memory on the DNA75C (the tightest chip): Color Themes v2.2 uses off-board 93.6% and on-board 56.0% (measured at v2.1; v2.2 reuses the main screen's padlock art, so it adds no images).
 
 ## Files
 | File | Contents |
@@ -29,13 +29,13 @@ Both themes are released and tested on a DNA100C. Memory on the DNA75C (the tigh
 | `12-release-and-privacy-checklist.md` | **How to publish safely**: naming, sanitizing `.ecig` exports, PII rules, commit identity |
 
 ## How work gets done
-- **Builds:** a theme change produces a new versioned file (e.g. `Gremlin-Color-Themes-v2.3-beta1.ecigtheme`). The maintainer loads it in EScribe, tests on the mod, and sends photos. Iterate, then publish under the version-free name and add a `RELEASE-NOTES.md` entry.
+- **Builds:** a theme change produces a new versioned file (e.g. `gremlin_v2.3-beta1_theme.ecigtheme`). The maintainer loads it in EScribe, tests on the mod, and sends photos. Iterate, then drop "-beta" for the release and add a `RELEASE-NOTES.md` entry.
 - **Memory check:** before any release, the maintainer runs Theme Designer → **Space Used** with the **DNA75C** selected. Both pools must be under 100%. See `07` for what uses which pool.
 - **Publishing:** done through Claude Code on the maintainer's machine, which commits with a no-reply identity. The assistant writes the files and a Claude Code prompt; see `12`.
 - **Privacy:** nothing that identifies the maintainer goes in the repo. Run the checks in `12` on every change.
 
 ## Project conventions
-- **File names describe the file, not the version:** `Gremlin-Color-Themes.ecigtheme`, `Gremlin-Color-Themes-Full-Setup.ecig`, `High-Contrast-Profile-<Heater>.ecigprofile`. Published Color Themes files carry no version, so links in the guides and on Reddit survive a release; the version lives in the theme's own description and in `../release/RELEASE-NOTES.md`. Test builds add `-vX.Y-betaN`. High Contrast still versions its filenames — it is released on its own track.
+- **File names carry the version, in the original v1.0 format:** `gremlin_vX.Y_theme.ecigtheme` (theme) and `gremlin_vX.Y.ecig` (full setup). High Contrast is a major departure from the original Gremlin UI, so it is named for itself and versioned on its own track: `gremlin_high_contrast_vX.Y_theme.ecigtheme`, `gremlin_high_contrast_vX.Y.ecig`. Profiles stay `High-Contrast-Profile-<Heater>.ecigprofile`. Test builds add `-betaN` to the version.
 - Theme Author field stays blank. No personal credit in theme descriptions.
 - Vaping profiles ship with **60s sessions** (Divine Tribe guidance). Cleaning: V5 XL 38W/120s, Lightning Quest 35W/45s.
 - Published full setups ship with **cold resistance cleared and unlocked** so users lock their own cup.

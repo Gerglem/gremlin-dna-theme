@@ -9,6 +9,8 @@
 
 ## Untested
 - New-coil screen **OLD** value (field 1048835). It only appears with ohm lock off.
+- **Ohm-lock toggle on the new-coil screen** (both themes, added in Color Themes v2.2 / High Contrast v1.2). Not yet exercised on hardware: unknown whether toggling the lock while the prompt is up latches the new reading or the old one, and whether `NewCoilAccept` dismisses the screen before the toggle can be reached. Check by swapping a cup and watching the cold-ohms value before and after.
+- **High Contrast screenshots are stale.** `../high-contrast/images/menu-screen.png` and `new-coil-screen.png` predate the LOCK row.
 - Whether every chip warning (e.g., "Temp Protected") appears in the status line.
 
 ## Ideas
