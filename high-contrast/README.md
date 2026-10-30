@@ -137,13 +137,24 @@ When heating stops, the home screen returns.
 
 ### Menu
 
-![Menu screen. TEMP with a temperature, WATTS with a power, LIGHT with a brightness, LOCK with a padlock, and BACK.](images/menu-screen.png)
+![Menu screen. TEMP with a temperature, WATTS with a power, LIGHT with a brightness, the ohm symbol, and BACK.](images/menu-screen.png)
 
 - **TEMP**: your set temperature.
 - **WATTS**: the power limit.
 - **LIGHT**: screen brightness, from 1 to 10. Set it to 10 for the brightest screen.
-- **LOCK**: the resistance lock for the heater on this profile. A **solid padlock** means locked, an **open padlock** means unlocked. Lock it once the heater has been measured cold.
+- **Ω**: opens the ohms screen, where you read and lock the heater's resistance.
 - **BACK**: returns to the home screen.
+
+### Ohms
+
+Choose **Ω** in the menu to open this screen. It is where you check that the mod has measured your heater correctly.
+
+- **LOCKED**: the resistance the mod has stored for this heater, in ohms. This is the number the temperature control works from, so it needs to be right.
+- **LOCK**: the resistance lock. A **solid padlock** means locked, an **open padlock** means unlocked. Lock it once the number above looks right.
+- **MEASURE**: reads the heater again and updates the number. Use it with the lock off, when the mod is cold.
+- **BACK**: returns to the menu.
+
+A cold reading for a Divine Tribe cup is usually between 0.3 and 0.5 ohms. If it reads 0, or something far from that, the heater is not making proper contact — unscrew it and put it back on before you lock anything.
 
 ### Lock screen
 

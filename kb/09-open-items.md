@@ -9,12 +9,13 @@
 
 ## Untested
 - New-coil screen **OLD** value (field 1048835). It only appears with ohm lock off.
-- **Ohm-lock toggle on the new-coil screen** (both themes, added in Color Themes v2.2 / High Contrast v1.2). Not yet exercised on hardware: unknown whether toggling the lock while the prompt is up latches the new reading or the old one, and whether `NewCoilAccept` dismisses the screen before the toggle can be reached. Check by swapping a cup and watching the cold-ohms value before and after.
-- **High Contrast screenshots are stale.** `../high-contrast/images/menu-screen.png` and `new-coil-screen.png` predate the LOCK row.
+- ~~**Ohm-lock toggle on the new-coil screen.**~~ **Confirmed on a DNA100C 2026-10-30 (Color Themes):** toggling the lock while the NEW COIL? prompt is up latches the **new** reading, and `NewCoilAccept` does not dismiss the screen before the toggle can be reached. High Contrast prompted correctly but could not be confirmed at the time — it had no resistance readout, which is what the OHMS screen below now adds.
+- **High Contrast Ω / OHMS screen** (v1.2). The menu's ohms row and the child screen behind it have not been exercised on hardware: whether the `Ω` label renders from codepoint 937 at FontStyle 0, whether `ChildScreen Screen="4"` reaches the new screen, and whether `ResampleOhms` works from a child screen (the color theme calls it from PROFILE, so it should).
+- **High Contrast screenshots are stale.** `../high-contrast/images/menu-screen.png` and `new-coil-screen.png` predate the ohms row; there is no screenshot of the OHMS screen yet.
 - Whether every chip warning (e.g., "Temp Protected") appears in the status line.
 
 ## Ideas
 - **More color themes:** off-board memory is the limit (93.6% on the DNA75C). Free image space first, e.g. let more themes use the standard gremlin.
 - **Full menu coloring** for one or two themes would fit in on-board memory (56%).
-- An "at temperature" indicator via a math condition comparing live vs set temperature.
+- ~~An "at temperature" indicator via a math condition comparing live vs set temperature.~~ **Not possible in a theme (settled 2026-10-30).** Three independent blocks: the setpoint and the live temperature are the *same* field (16778242 — live is that field with `UpdateLive` + `ReadOnly` while firing), so no condition can tell "how hot it is" from "what was asked for"; `<Compare>` only tests a field against a literal `RefValue` baked into the theme, so "live ≥ set" cannot be expressed; and the firmware's own flag, Heating Time Done (353173506), is rejected on upload (`07` #1). A hardcoded threshold is possible but lies as soon as the setpoint moves off it. Unexplored: the chip throttles power once it reaches temperature, so `profile == N` AND `watts < X` might approximate it, at the cost of per-profile constants.
 - Larger temperature in the High Contrast theme would need a bigger custom font and layout rework (`11`).
