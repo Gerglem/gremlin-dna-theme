@@ -80,7 +80,7 @@ v0.1 initial (Built font, main/lock/coil) · v0.2 inverted highlight, outlined i
 
 
 ## Gremlin - Color Themes v2.x
-Current internal build: `gremlin_v2.2.02_theme.ecigtheme` (theme title "Gremlin - Color Themes"); releases drop the mini version.
+Current internal build: `gremlin_v2.2.03_theme.ecigtheme` (theme title "Gremlin - Color Themes"); releases drop the mini version.
 
 **Themes:** Classic (all switches off) plus six color themes under **MENU → THEMES**: Retro, Synth, Toxic, Ice, Desert, Terminal. Turn on one at a time. Each theme is a User Toggle (see `05`); if several are on, the last in this order wins: Retro, Synth, Desert, Terminal, Toxic, Ice.
 
@@ -92,7 +92,7 @@ Current internal build: `gremlin_v2.2.02_theme.ecigtheme` (theme title "Gremlin 
 
 **Implementation:** `skins.py` (palettes, `SKINS`, `skinned()` / `skinned_img()` variant builders; a skin variant is a duplicate child element with `<Compare Operator="1" Field="<toggle>" RefValue="0" />`), `screens_skinned.py` (home and lock), `menus.py` (titles via `_sktitle`, THEMES screen ID 11).
 
-**Version history (v2.x):** v1.1 FIRING box, profile colors → v1.2 menu wrap fixes → v1.3 LOW BATTERY banner → v1.4 white profile names with colored accent line → v2.0 betas: themes via User Toggles (Contrast built in, then split into its own theme), memory trims → **v2.1**: Retro, Synth, Toxic, Ice, Desert, Terminal; menu titles themed; LED sequences stripped; title "Gremlin - Color Themes" · **v2.2**: ohm-lock toggle on the new-coil screen, labelled **LOCK?** to read as part of the prompt; QuestCup TCR 120 (swab-verified); both vaping profiles start at 380°F; **cold ohms on the main screen and the new-coil reading turn red `(1, 0.24, 0.16)` past the per-cup replace threshold** — two extra variants per control, `AND(profile == N, ohms > limit)`, appended last so they win over the theme colours (limits and derivation in `02`).
+**Version history (v2.x):** v1.1 FIRING box, profile colors → v1.2 menu wrap fixes → v1.3 LOW BATTERY banner → v1.4 white profile names with colored accent line → v2.0 betas: themes via User Toggles (Contrast built in, then split into its own theme), memory trims → **v2.1**: Retro, Synth, Toxic, Ice, Desert, Terminal; menu titles themed; LED sequences stripped; title "Gremlin - Color Themes" · **v2.2**: ohm-lock toggle on the new-coil screen, labeled **LOCK?** to read as part of the prompt; QuestCup TCR 120 (swab-verified); both vaping profiles start at 380°F; **cold ohms on the main screen and the new-coil reading turn red `(1, 0.24, 0.16)` past the per-cup replace threshold** — four extra variants per control appended last (default → red if `ohms > 0.41` → white if `profile == 1` → white if `profile == 3` → red if `ohms > 0.6`), because the nested AND this originally used does not work on the hardware (`07` #24, `10`). On the home screen the cancel layers leave the resistance white rather than its theme color while an XL is in its healthy range (limits and derivation in `02`).
 
 **Memory (DNA75C, beta15 = v2.1):** off-board 93.6%, on-board 56.0%. Images and fonts use off-board memory; controls and variants use on-board. Off-board is the limit, so any new theme needs image savings first.
 

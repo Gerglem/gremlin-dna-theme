@@ -33,14 +33,14 @@ There are three kinds of files. You only need one of the first two.
 
 ### Option A: The full setup file (easiest)
 
-- File: [gremlin_high_contrast_v1.2.02.ecig](files/gremlin_high_contrast_v1.2.02.ecig)
+- File: [gremlin_high_contrast_v1.2.03.ecig](files/gremlin_high_contrast_v1.2.03.ecig)
 - What it contains: the theme **and** four ready-made profiles, all in one file.
 - Choose this if you use Divine Tribe V5 XL cups or the Lightning Quest, and you want everything set up at once.
 - Note: this replaces all the settings on your mod.
 
 ### Option B: The theme only
 
-- File: [gremlin_high_contrast_v1.2.02_theme.ecigtheme](files/gremlin_high_contrast_v1.2.02_theme.ecigtheme)
+- File: [gremlin_high_contrast_v1.2.03_theme.ecigtheme](files/gremlin_high_contrast_v1.2.03_theme.ecigtheme)
 - What it contains: only the screens, colors, and text size.
 - Choose this if you want to keep your own profiles and settings. Only the look of the screen changes.
 
@@ -85,14 +85,14 @@ Before you start, connect your mod to your computer with the USB cable and open 
 ### To install the full setup file
 
 1. In EScribe, open the **File** menu and choose **Open**.
-2. Choose **gremlin_high_contrast_v1.2.02.ecig**.
+2. Choose **gremlin_high_contrast_v1.2.03.ecig**.
 3. Select **Upload Settings to Device**.
 4. Follow step 4 under "To add a single profile" to lock each cup's resistance.
 
 ### To install the theme only
 
 1. Select the **Theme** tab.
-2. Load **gremlin_high_contrast_v1.2.02_theme.ecigtheme**.
+2. Load **gremlin_high_contrast_v1.2.03_theme.ecigtheme**.
 3. Select **Upload Settings to Device**.
 
 ### To add a single profile

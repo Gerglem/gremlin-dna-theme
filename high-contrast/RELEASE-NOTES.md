@@ -13,7 +13,7 @@ The current release is **v1.2**. The color theme has its own notes in [`../relea
 
 **An ohms screen, reached from the menu.** Until now this theme had no resistance control or readout anywhere, so checking or locking a cup meant going back to EScribe. The menu's fourth row is now **Ω OHMS**, and it opens a screen showing the heater's locked resistance in large digits, with the lock toggle and a MEASURE action beside it.
 
-The symbol *and* the word: **Ω** is what is printed on cups and quoted in specs and reads at a glance, and the word is there for anyone who does not recognise it. Both fit the row at full text size.
+The symbol *and* the word: **Ω** is what is printed on cups and quoted in specs and reads at a glance, and the word is there for anyone who does not recognize it. Both fit the row at full text size.
 
 Fitting it meant repacking the menu: the divider is gone and the five rows run edge to edge. At this text size 160 pixels holds exactly five rows and no more, which is why the ohm controls went to a screen of their own rather than taking a sixth.
 

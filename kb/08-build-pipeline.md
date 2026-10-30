@@ -14,7 +14,7 @@ Change the output filename in `assemble.py` (search for `Gremlin-v`) for each ne
 ## Files
 | Path | Role |
 |---|---|
-| `theme/out.xml` | **Skeleton** theme XML — a copy of the released Gremlin theme, so the kit bootstraps from its own output. Supplies the wallpapers, the `<Normal>` colour pair, `<Fading>` and the (empty) LED block. `assemble.py` replaces the fonts, all designs, the highlight/selection/error colours, title, comments and localization. The battery-bar PNGs are read from its design 2. |
+| `theme/out.xml` | **Skeleton** theme XML — a copy of the released Gremlin theme, so the kit bootstraps from its own output. Supplies the wallpapers, the `<Normal>` color pair, `<Fading>` and the (empty) LED block. `assemble.py` replaces the fonts, all designs, the highlight/selection/error colors, title, comments and localization. The battery-bar PNGs are read from its design 2. |
 | `deftheme/deffont{0,1,2}.xml` | Evolv Built SemiBold font XML (Normal 18 / Big 24 / Small 13), extracted from the default `.ecig` |
 | `build/build.py` | XML helpers: `ctl()`, `field()`, `label()`, `picture()`, `toggle()`, `meter()`, `design()`, `b64img()`, `line()`. `color=None` omits the color. |
 | `build/screens.py` | Main, lock, and new-coil screens. Assets: battery bar plus a red-outline variant (`LOWBAR_XML`), `outline()`, gremlin image, icons |
