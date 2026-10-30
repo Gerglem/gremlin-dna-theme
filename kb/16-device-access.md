@@ -72,6 +72,54 @@ we already hold, that may be enough.
 grab someone else's line - a `S=GET ENERGY` came back `S=291.87F`, a temperature. **Close Device
 Monitor for clean reads.**
 
+## The settings transfer, captured 2026-10-30
+
+One real `Upload Settings to Device` was watched from a second HID handle while EScribe did the work.
+Sample kept at `tools/samples/hid-upload-capture.log` (device-to-PC only; telemetry stripped, scanned
+for identifying strings).
+
+**The transfer rides the same channel as the text protocol.** There is no separate endpoint and no
+second magic for the bulk data - which is why it was nearly missed.
+
+### Frame layout
+
+    01 | DE | outer_len | F8 2B | inner_len | <inner_len bytes> | 3 bytes
+     ^    ^                ^                                       ^
+     |    |                sub-protocol marker                     trailer, CRC-shaped
+     |    same magic as the text protocol
+     report id
+
+`outer_len = inner_len + 6`, with **no exceptions across 207 frames**. Text frames carry ASCII in the
+same `0xDE` envelope; transfer frames carry `F8 2B` and then binary. **A reader that keys only on the
+magic byte sees transfer frames as text and destroys them** - that mistake cost one capture.
+
+### The payload is 7-bit encoded
+
+Across 8,768 payload bytes and every trailer, **not one byte is >= 0x80**: 124 distinct values,
+maximum `0x7F`. That is the usual packing for tunnelling binary over a channel that reserves the high
+bit, so the real image has to be unpacked 8 bytes of 7 bits to 7 bytes before it will mean anything.
+
+### What the burst looks like
+
+| | |
+|---|---|
+| Control frame first | `01 01 00 00 00 67 ...` - magic `0x01`, not `0xDE`, and `0x67` = 103 |
+| Then | 207 transfer frames, 8,768 payload bytes |
+| Duration | 6.3 s, matching the ~7 s upload in EScribe's own debug log (`13`) |
+| Frame sizes | clustered 40-47 bytes, with four 1-byte frames and one 7-byte |
+
+Note this is **8.7 KB travelling device-to-PC during an upload**. That is consistent with the
+differential uploader found by reflection: the Programmer reads region hashes back to decide which
+chunks actually need writing. So much of this burst is likely hash material, not settings.
+
+### What is still missing
+
+- **The PC-to-device direction.** A passive HID handle sees input reports only. That half needs
+  USBPcap, and it is the half that carries the image being written.
+- **The command semantics.** Frame-leading bytes repeat heavily (`0x72` 82 times, then `0x5b`, `0x5e`,
+  `0x77`, `0x2f`), which looks like an opcode field worth mapping.
+- **What `0x67` counts.** 103 against 207 frames is suggestively close to half.
+
 ## What is and is not reachable - settled by Evolv, 2015
 
 From Evolv staff on the Researcher Forum, and it bounds this whole document:
