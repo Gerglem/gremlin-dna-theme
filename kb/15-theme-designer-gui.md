@@ -133,6 +133,10 @@ switching looks are the whole point.
 
 Neither has been tried. Both are worth a look before the next feature gets squeezed into an existing screen.
 
+**The dropdown in this build offers only three.** `en.po` carries exactly three `tdUsage` strings -
+Lock Screen, Main Screen, New Atomizer. `Power Lock` and `Theme Change` are real (shipped themes use
+them) but the GUI will not set them, so both have to be written into the XML by hand.
+
 ### The preview strip does not evaluate conditions
 
 The strip renders every screen with placeholder values - profile 1, 400F, 250W, cold ohms 0.250. In the
@@ -272,10 +276,83 @@ A Field's panel carries the common properties plus:
 | **Update while firing** (checkbox) | `UpdateLive="1"` | The GUI name is the useful part: it refreshes **during a puff**. Conditional variants that must re-evaluate live depend on this |
 | Source, shown as e.g. `Atomizer -> Power` | `<Source><Setting Field="..." /></Source>` | With two buttons, **Options** and **Type...** |
 
-**Source's two buttons are the next thing to open** - they are not yet mapped. `Options` is expected to
-hold `Decimals`, `HideUnits`, `StepSize` and the format string; `Type...` presumably chooses the
-measurement. They appear **only on a Field** - Label, Memo and Chart have no Source row - and sit
-between the Action row and the Status box, under the plain-text line naming the current source.
+The Source row appears **only on a Field** - Label, Memo and Chart have no Source - and sits between
+the Action row and the Status box, under a plain-text line naming the current source.
+
+### The Setting dialog - both Source buttons open the same thing
+
+`Options` and `Type...` open one dialog, titled **Setting**. It is the whole value-formatting model in
+one place, and it settles four attributes we had only inferred:
+
+| Dialog control | XML | Note |
+|---|---|---|
+| **Field** (dropdown) | `<Setting Field="N" />` | A flat list whose labels carry the hierarchy, e.g. `Atomizer -> Coil -> Cold Ohms` |
+| **Decimal Places** - `Automatic`, `0`-`4` | `Decimals="n"` | `Automatic` writes **no attribute** |
+| **Zeros** | zero padding | |
+| **Step Size** | `StepSize` | How far one click moves an editable value |
+| **Swap up/down** | - | Inverts which button raises the value |
+| **Don't show units** | `HideUnits="1"` | |
+| **Selectable** | `ReadOnly` inverted | The same flag as on the main panel |
+
+Under the dropdown sits a one-line description of the selected source - `Coil power` for
+`Atomizer -> Power`. Useful when a name is ambiguous.
+
+**There is no format-string box.** The guess that a Field could label itself with a `#W`-style format
+was wrong: `Don't show units` only suppresses the unit, it cannot add text. A number that needs a word
+beside it still needs its own Label, so that is not space we can win back.
+
+Our HC ohms readout (`Decimals="3" HideUnits="1" ReadOnly="1"`) is exactly Decimal Places `3`,
+*Don't show units* ticked, *Selectable* unticked. Nothing in it was hand-rolled.
+
+### The source catalog - 90-odd fields, of which we use eleven
+
+The Field dropdown is the full list of what a theme can show. The **labels** come out of the install
+without touching the GUI:
+
+    %APPDATA%\Evolv\EScribe Suite\Translations\en.po
+
+It is a gettext catalog. Theme Designer's source names carry `msgctxt "tdSetting"`, and `#` comments
+mark each group. Reconstructed:
+
+- **General** - Firing, Theme, Highlighted, Profile, Brightness, Fahrenheit/Celsius, Flip, Stealth (+ Level)
+- **Display** - Clock, 12-Hour/24-Hour, Lock (Auto, Auto Time, Clicks)
+- **Atomizer** - Power, Temperature, Replay -> Warmth, Temp Protect, Temp Sensing Detect, Temp Sensing
+  Material, Preheat / Preheat-Boost / Boost (Enable, Punch, Power, Temperature), Can Boost, Can Preheat
+- **Atomizer -> Coil** - Cold Ohms, Cold Temperature, Material, Ohm Lock; repeated under **New Coil** and **Old Coil**
+- **Statistics** - Since Reset / Total -> Puff Count, Reset Count; Last Puff -> Energy, Peak Temp; Date (Month, Day), Time (Hour, Minute)
+- **Recordings** - Puff Number, Puff, Settings, Chart Present
+- **Research** - Note, Sealed
+- **Battery** - Pack Voltage, Cell N Voltage, Level, Charging, Discharging (Power Bank)
+- **Miscellaneous** - Current, Voltage, Live Ohms, Board Temperature, Room Temperature
+- **Firmware** - Version, Service Pack, Edition, US-only, Serial Number
+- **Debug** - Keep Screen On, Random, Daily
+- **Safety** - Max Puff Time
+- **USB** - Connected (To a PC, As a Power Bank), Power Bank (Automatic, Capable)
+- **User** - Toggle N
+
+Three of these change what is possible, and are logged as ideas in `09`:
+
+- **`User -> Toggle N`** - user-defined on/off flags. The Language tab carries a `Toggles` section with
+  `On:` / `Off:` text, so their labels are themeable. A flag the user can set and a condition can test
+  is something we had assumed the format did not have.
+- **`Coil -> Cold Ohms @ 70F`** - cold ohms normalized to room temperature. A better input for the
+  replace warning than raw cold ohms, which drifts with how cold the room is.
+- **`Board Temperature`** / **`Room Temperature`** - the board-temperature warning stops being speculative.
+
+And one to never put on a screen: **`Firmware -> Serial Number`**. A published theme that displayed it
+would print the maintainer's device serial into every screenshot. Recorded in `12`.
+
+**The catalog is labels only. The numeric IDs are not in the install.**
+
+- `en.po` says so itself - *"At this point this is only a partial list of translatable text."*
+  `Session Mode`, `Heating Time`, `Cold Ohms @ 70F` and every description line are in the GUI but
+  not in the file.
+- `DEScribe.Core.dll` is **obfuscated**: 1468 types named ``A.DMF`2``, ``A.GLF`1`` and the like, with
+  string encryption. No enum in it holds a known ID such as `16843778`, and the literal `Cold Ohms`
+  appears in no encoding. Reflection over the assembly is a dead end - do not spend time on it again.
+
+So IDs stay empirical: set a Field's source in the GUI, save, read the XML. **Batch it** - one Field per
+wanted source on a throwaway screen, and a single save yields them all.
 
 ## Still to map
 
@@ -300,15 +377,28 @@ whether field-to-field comparison compiles.
 Memo is a multi-line Label. Chart plots the device's puff recording and takes one setting. Written up
 above; the Chart finding is logged as an idea in `09`.
 
-### 3. Field - PART DONE, resume here
+### 3. ~~Field~~ - DONE
 
-The panel is mapped and `Selectable` and `Update while firing` are resolved (above). **Outstanding:
-open Source -> `Options` and Source -> `Type...` on a selected Field** and capture both dialogs. If
-`Options` has a format box with a `+` menu, open that too - the help says the inline color and font
-tags live there.
+Panel, Setting dialog and the source catalog are all written up above. The format-string idea died
+with it: there is no format box, so a number still needs a Label beside it.
 
-Why it matters: format strings put the unit inside the value (`#W` renders `250.0W`), so a number can
-label itself without a second control. On screens that are full to the pixel, that is space back.
+What it opened instead is the **ID capture**, below.
+
+### 3b. Capture the IDs for the fields that matter - do this second
+
+**Capture:** on a throwaway screen, drop one Field per source below, set each one's Source, save the
+theme, and read the `Field="..."` values out of `ECigTheme.xml` in one pass.
+
+| Source | Why |
+|---|---|
+| `User -> Toggle 1` and `Toggle 2` | A user-settable flag a condition can read |
+| `Atomizer -> Coil -> Cold Ohms @ 70F` | Room-temperature-normalized replace warning |
+| `Miscellaneous -> Board Temperature` | Board-temperature warning |
+| `Statistics -> Total -> Puff Count` | Puff count on screen, and threshold evidence |
+| `Atomizer -> Temp Sensing Detect` | Whether the board thinks TC is working |
+
+**Settles:** whether the three ideas in `09` are buildable. Nothing else gets us these numbers - see
+the obfuscation note above.
 ### 4. Gauge
 
 Ours is the battery bar, and everything about it was inferred from reading files.

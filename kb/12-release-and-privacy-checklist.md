@@ -12,6 +12,9 @@ Never commit with a real name or personal email. If history ever exposes somethi
 2. Check images for metadata: no EXIF or GPS (resaving through PIL strips it). Files delivered by Claude carry a C2PA "Claude provided this file" tag, which contains no personal data.
 3. Verify every relative link resolves, including links from live Reddit posts (`reddit/` pointer files).
 4. Keep the private build kit and private notes out of the repo.
+5. **No theme we publish may display `Firmware -> Serial Number`.** It is an offered source in Theme
+   Designer (`15`), and a screen carrying it would print the maintainer's device serial into every
+   screenshot and every photo of the mod. Check this when reviewing a new screen, not just the text.
 
 ## Sanitizing an EScribe `.ecig` export
 Exports contain the maintainer's real device state. Always fix these before publishing (`DEScribe.xml` inside the zip; text values are base64 UTF-8):

@@ -111,6 +111,14 @@ Things we know are now unnecessarily complicated, held back deliberately so they
 pass rather than one reload at a time. Expect this list to grow as the UI, the docs and the HID work
 turn up more.
 
+### A better input than raw cold ohms
+
+The source list has **`Atomizer -> Coil -> Cold Ohms @ 70F`** (`15`) - cold ohms normalized to room
+temperature. Our thresholds compare raw cold ohms, which moves with how cold the room is, so a cup
+measured on a cold morning reads higher and drifts toward the warning for no reason. Worth switching
+the replace warning to the normalized field once its ID is captured (`15` item 3b), and re-deriving the
+two thresholds against it.
+
 ### Collapse the replace warning from five layers to two
 
 The per-cup warning is currently a chain of five flat variants per control that emulates an AND
@@ -139,7 +147,8 @@ accumulated.
 ## Follow-up: a board temperature warning?
 
 **Board Temperature** and **Room Temperature** are both readable measurements (`05`, and Device Monitor
-displays them side by side). Raised 2026-10-30: is a hot-board warning worth surfacing in a theme, or
+displays them side by side), and both appear by name under `Miscellaneous` in Theme Designer's source
+list (`15`) - so a theme can certainly display them. Only the numeric IDs are missing. Raised 2026-10-30: is a hot-board warning worth surfacing in a theme, or
 does the chip already protect itself?
 
 Unanswered either way. The DNA almost certainly has its own thermal limits and will throttle or refuse
@@ -148,6 +157,11 @@ line, a theme could make it unmissable. Worth checking what the chip does at tem
 anything, so the theme is not warning about a condition the firmware has already handled silently.
 
 ## Ideas
+- **User toggles.** The source catalog has a `User -> Toggle N` group, and the Language tab has a
+  `Toggles` section setting their `On:` / `Off:` text (`15`). That is a **user-settable flag a condition
+  can test** - we had assumed the format had nothing of the kind. If it behaves as it reads, it is the
+  missing half of several things we gave up on, because it lets the user choose a mode and the theme
+  react. Needs the ID first (`15` item 3b) and then one experiment to confirm it survives an upload.
 - **A puff graph on the mod.** The `Chart` control draws the device's own puff recording and takes one
   setting, `Time Bars` (`15`). `Recordings -> Chart Present` (`05`) is the condition for hiding it when
   empty. 64x64 fits an 80x160 screen. Nothing in either theme uses this, and it would put the heat
