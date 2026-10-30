@@ -88,6 +88,23 @@ Cheaper and safer than writing raw bytes: connect the Serial Terminal to **Greml
 also has its own **Scripting** menu, unmapped, which may already be the structured interface this whole
 effort is looking for.
 
+### COM4 tested 2026-10-30: silent
+
+Opened at 9600 8-N-1 with DTR and RTS asserted, mod connected and powered:
+
+| Sent | Reply |
+|---|---|
+| nothing, six seconds of listening | 0 bytes |
+| `?` + CRLF | 0 bytes |
+| `help` + CRLF | 0 bytes |
+
+The port opens and accepts writes without error, and the device never answers. Not a text console, at
+least not on these terms.
+
+**Not exhausted, but not worth more effort before the HID route:** untried are other baud rates (CDC
+often ignores the setting anyway), bare LF or no terminator, and the possibility of a binary protocol
+that would never answer a text probe. Record any further attempts here so they are not repeated.
+
 ### What COM4 probably is
 
 Given the *Wiring Information* link and that the DNA exposes UART pins, COM4 is more likely a path to
