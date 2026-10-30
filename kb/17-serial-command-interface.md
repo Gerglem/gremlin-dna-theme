@@ -115,14 +115,51 @@ that is the knob.
 **EScribe can be connected at the same time.** It talks over HID and leaves the CDC serial port free,
 which is why the query tool works with EScribe open.
 
-### A 50 Hz firehose exists
+### The CSV stream — tested, and it is a MODE SWITCH
 
-**Research tab -> Serial Output -> CSV (Excel)** makes the board stream all the important values at
-**50 Hz**, no polling at all. Evolv measured it costing the device a few percent of performance.
+**EScribe -> Research tab -> Serial Output Format** has exactly two values:
 
-For logging - the cold-ohms-against-puff-count dataset the replace thresholds need (`02`) - this is a
-better instrument than a query loop, and it is a setting rather than code. **Untried here.**
+| Setting | What the port does |
+|---|---|
+| **Plain Text Serial** | The command console everything above describes. The default |
+| **CSV (Excel)** | A continuous data stream. **Commands get no reply at all** |
 
+They are **mutually exclusive** - verified by sending `R=GET COLD` while streaming and receiving only
+more stream. Choose one. Changing it requires **Upload Settings to Device**, which also clears cold
+ohms, so expect to re-lock the cup.
+
+#### What the stream looks like
+
+```
+t,Voltage,Current,Power,Ohms,Temp,Battery
+0.01562,,,,,,4.15137
+0.03125,,,,,,4.15204
+```
+
+Seven columns, and the **header is re-emitted periodically** rather than only once, so a parser should
+expect it mid-stream. Idle, only `t` and `Battery` carry values; the other five fill during a puff.
+
+**The rate is 64 Hz, not 50.** Timestamps advance by exactly 0.015625 s, which is 1/64. Evolv's forum
+post says 50 Hz, and the Research tab's own **Recording Rate** read 16 Hz during this capture - so that
+field governs the internal recording for charts, not the serial stream. Measured 515 lines in 8
+seconds.
+
+#### The rest of the Research tab
+
+- **Data Acquisition:** Recording Rate (Hz), Initial Recording Rate (Hz, for a given number of
+  seconds), Recording Probability (%), Serial Output Format.
+- **Experimental Setup:** Puff Limit, Energy Limit, Time Limit, Return By - all Disabled here. These
+  look like automatic cut-offs for unattended test runs.
+- **Research Seal:** Apply / Break / Check, plus Reset Statistics. The seal is the `Research -> Sealed`
+  measurement in `05` - a tamper indicator for a device under study.
+
+#### Still to do
+
+**Capture a puff.** Idle, the stream carries almost nothing. One fire would show what Voltage, Current,
+Power, Ohms and Temp look like at 64 Hz - and `Ohms` sampled through a puff is the clearest view of
+coil behaviour available anywhere in this project, worth far more than the cold reading alone.
+
+`tools/dna-stream.ps1` captures and reports the rate, column count and a sample.
 ### What the feature keys mean
 
 From Evolv: `PC` power commands, `TC` temperature commands, `St` long-term statistics, `FG` fuel
