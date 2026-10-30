@@ -17,11 +17,20 @@
 
 - **Replace-the-cup colour warning** (both themes, 2026-10-30). Two things unverified: `<Compare Operator="2">` (greater-than) is listed **H**, not confirmed, and this is its first use in either theme — if it does not resolve, the number simply never turns red; and the thresholds rest on a **single** observed failure (0.43 → 0.61Ω), scaled to the Quest by ratio rather than measured. Limits and derivation in `02`.
 
-  **Registered test design, 2026-10-30 (result pending).** Throwaway test themes were built with deliberately wrong limits — profile 1 (XL) **0.40**, profile 2 (QUEST) **0.90** — against known-good locked readings of XL 0.4637Ω and Quest 0.3141Ω. **Revised method:** neither cup was locked on the mod and the loose `.ecigprofile` files all carry `ColdResistance2 = 0`, so a theme-only test could not fire at all. The test configs instead **pre-lock both cups** (`EvolvWDColdOhms` 256/257 set to the readings above, `EvolvWDOhmLock` 1) so the test is self-contained and independent of device state. They lock a resistance that may not match the fitted cup, so they are bench tests: do not fire, and reload the real config afterwards. Published configs keep cold ohms 0 per `12`. Three outcomes, decided before running:
+  **Registered test design, 2026-10-30 — RESULT: neither went red.** Throwaway test themes were built with deliberately wrong limits — profile 1 (XL) **0.40**, profile 2 (QUEST) **0.90** — against known-good locked readings of XL 0.4637Ω and Quest 0.3141Ω. **Revised method:** neither cup was locked on the mod and the loose `.ecigprofile` files all carry `ColdResistance2 = 0`, so a theme-only test could not fire at all. The test configs instead **pre-lock both cups** (`EvolvWDColdOhms` 256/257 set to the readings above, `EvolvWDOhmLock` 1) so the test is self-contained and independent of device state. They lock a resistance that may not match the fitted cup, so they are bench tests: do not fire, and reload the real config afterwards. Published configs keep cold ohms 0 per `12`. Three outcomes, decided before running:
   - XL red, Quest white → operator 2 **and** the AND gating both work, as designed.
   - Both red → operator 2 works but the profile condition is not gating; the AND or the profile numbering is wrong.
   - Neither red → operator 2 does not resolve on this firmware; fall back to a different comparison or drop the warning.
   Requires a locked reading on the XL profile; with cold ohms 0 the test is inconclusive rather than negative.
+
+  **Result, 2026-10-30:** on the XL profile the OHMS page read **0.464 in white**, not red, against a 0.40 limit; QUEST read 0.314 white as expected. So the warning does not fire. **But "neither red" does not isolate the cause:** operators **2** (`>`) and **64** (AND) are both used *only* by this new code. The original v1.0 theme used exactly one operator, **3** (`<`), for the low-battery red, and that is the only comparison ever proven on this hardware. kb/10 lists 64 as confirmed, but not from a working theme here.
+
+  **Probe build registered (result pending).** One theme puts three independent probes on the OHMS page in three colours, so a single photo decides it:
+  - value **red** if `ohms > 0.4` (flat, no AND) — tests operator 2 alone.
+  - LOCKED **magenta** if `AND(profile == 1, ohms > 0.4)` — tests operator 64.
+  - MEASURE **cyan** if `ohms < 0.9` (flat, operator 3) — tests whether cold ohms can be compared at all, using the one operator known to work.
+
+  Readings: MEASURE cyan but value white → operator 2 is the problem, and the warning should be rebuilt inverted on operator 3 (default red, white below the limit). Value red but LOCKED white → the AND is the problem. Nothing coloured → cold ohms cannot be used in a `Compare`, and the warning needs a different source field or has to be dropped.
 
 ## Ideas
 - **More color themes:** off-board memory is the limit (93.6% on the DNA75C). Free image space first, e.g. let more themes use the standard gremlin.
