@@ -229,6 +229,44 @@ to fire, but **whether it tells the user anything** is the open question - and i
 line, a theme could make it unmissable. Worth checking what the chip does at temperature before building
 anything, so the theme is not warning about a condition the firmware has already handled silently.
 
+## Tracked: bring the device up to 2026 standards
+
+Jake's stated goal for the whole device-access effort, recorded 2026-10-30 so the pieces are not
+mistaken for ends in themselves.
+
+### 1. A phone app that designs the UI on a touchscreen
+
+**The most tractable piece, and it needs no device work at all.** A theme is XML this repo has fully
+mapped - screens, controls, conditions, fonts, field IDs (`04`, `10`, `15`). An app that drags
+controls on a phone-sized canvas and emits a `.ecigtheme` can be built and tested against EScribe's
+own Theme Installer long before any new transport exists. Pushing the result is a separate problem,
+solved by whichever transport is ready first.
+
+### 2. Programmatic push
+
+In progress, `16`. Read and control are solved over HID; writing a config is not.
+
+### 3. Bluetooth - a bridge, not a dongle
+
+**A USB-C Bluetooth dongle plugged into the mod will not work.** The DNA's USB is a *device* port; its
+OTG support is for power-bank output, not for acting as a USB host, so the board cannot enumerate a
+dongle and nothing in firmware would see it.
+
+What works is a **bridge**: a small board that is a USB host on one side and BLE on the other -
+ESP32-S3 or nRF52840 both qualify - which plugs into the mod, speaks the HID framing from `16`, and
+exposes BLE to a phone.
+
+Most of the hard part is already done: the framing (`01 | DE | len | payload`), the command table
+(`17`) and the report geometry (63 in, 63 out) are all known. The bridge is largely transcription.
+
+**Scope it properly before buying anything.** Open questions: whether the mod supplies enough current
+to run the bridge or the bridge must carry its own power; whether a bridge can hold the link while the
+mod is in use; and whether the settings-transfer protocol (`16`, unsolved) matters for a first version
+or whether read-and-control is enough to be useful on its own. Likely it is - a phone that shows live
+ohms, puff count and board temperature needs nothing further.
+
+Do this one last. It is the only piece needing hardware that is not already on the bench.
+
 ## Ideas
 - **User toggles.** The source catalog has a `User -> Toggle N` group, and the Language tab has a
   `Toggles` section setting their `On:` / `Off:` text (`15`). That is a **user-settable flag a condition
