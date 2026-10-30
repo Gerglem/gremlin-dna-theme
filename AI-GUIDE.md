@@ -14,8 +14,8 @@ Everything in this repo was built with an AI assistant, and the docs are written
 6. **Load the file in EScribe, upload it to the mod, and test.** Send photos of the screen back to the assistant and describe what's wrong. Expect a few rounds. That's how Gremlin was built.
 
 ## Two themes
-- **Gremlin - Color Themes v2.2** (`release/`): seven switchable looks.
-- **Gremlin High Contrast - Large Text v1.2** (`high-contrast/`): built for low vision.
+- **Gremlin - Color Themes v2.1** (`release/`): seven switchable looks.
+- **Gremlin High Contrast - Large Text v1.1** (`high-contrast/`): built for low vision.
 Tell the assistant which one you're changing.
 
 ## Tips

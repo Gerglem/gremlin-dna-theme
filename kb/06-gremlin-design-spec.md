@@ -53,7 +53,7 @@ Render: `../images/20-gremlin-screens-render.png`. Release: `../release/gremlin_
 Battery bar (+ red variant), time (65551, Normal), date (15, Small, gray), **gremlin pixel art** (original design, 60×44: bat ears, green slit eyes, toothy grin) at (10,54), "GREMLIN" label, pack voltage (1, dec 2), battery % (65537; red variant < 15%), Status line at the bottom.
 
 ## New coil screen
-"NEW COIL?", NEW 1048579 / OLD 1048835 (dec 3), YES, NEW (NewCoilAccept), **NO, OLD (initially highlighted, NewCoilReject)**, MEASURE (NewCoilResample, gray), **LOCK + ohm-lock Toggle 85196802 (14×14, the same art as the main screen)**, Status. Not shown when ohms are locked, so the toggle is also the way back out: unlock, swap, lock again.
+"NEW COIL?", NEW 1048579 / OLD 1048835 (dec 3), YES, NEW (NewCoilAccept), **NO, OLD (initially highlighted, NewCoilReject)**, MEASURE (NewCoilResample, gray), Status. Not shown when ohms are locked.
 
 ## Menu pages (title Normal at y 2, divider y 19, rows 15px from y 21, label white left x 3, value gray right)
 - **MENU:** PROFILE, PREHEAT, DISPLAY, LOCK, INFO, CLOCK (links); STEALTH toggle (65543); BACK (MainScreen).
@@ -80,7 +80,7 @@ v0.1 initial (Built font, main/lock/coil) · v0.2 inverted highlight, outlined i
 
 
 ## Gremlin - Color Themes v2.x
-Released file: `Gremlin-Color-Themes-v2.2.ecigtheme` (theme title "Gremlin - Color Themes").
+Released file: `Gremlin-Color-Themes-v2.1.ecigtheme` (theme title "Gremlin - Color Themes").
 
 **Themes:** Classic (all switches off) plus six color themes under **MENU → THEMES**: Retro, Synth, Toxic, Ice, Desert, Terminal. Turn on one at a time. Each theme is a User Toggle (see `05`); if several are on, the last in this order wins: Retro, Synth, Desert, Terminal, Toxic, Ice.
 
@@ -92,7 +92,7 @@ Released file: `Gremlin-Color-Themes-v2.2.ecigtheme` (theme title "Gremlin - Col
 
 **Implementation:** `skins.py` (palettes, `SKINS`, `skinned()` / `skinned_img()` variant builders; a skin variant is a duplicate child element with `<Compare Operator="1" Field="<toggle>" RefValue="0" />`), `screens_skinned.py` (home and lock), `menus.py` (titles via `_sktitle`, THEMES screen ID 11).
 
-**Version history (v2.x):** v1.1 FIRING box, profile colors → v1.2 menu wrap fixes → v1.3 LOW BATTERY banner → v1.4 white profile names with colored accent line → v2.0 betas: themes via User Toggles (Contrast built in, then split into its own theme), memory trims → **v2.1**: Retro, Synth, Toxic, Ice, Desert, Terminal; menu titles themed; LED sequences stripped; title "Gremlin - Color Themes" · **v2.2**: ohm-lock toggle added to the new-coil screen.
+**Version history (v2.x):** v1.1 FIRING box, profile colors → v1.2 menu wrap fixes → v1.3 LOW BATTERY banner → v1.4 white profile names with colored accent line → v2.0 betas: themes via User Toggles (Contrast built in, then split into its own theme), memory trims → **v2.1**: Retro, Synth, Toxic, Ice, Desert, Terminal; menu titles themed; LED sequences stripped; title "Gremlin - Color Themes".
 
 **Memory (DNA75C, beta15 = v2.1):** off-board 93.6%, on-board 56.0%. Images and fonts use off-board memory; controls and variants use on-board. Off-board is the limit, so any new theme needs image savings first.
 
