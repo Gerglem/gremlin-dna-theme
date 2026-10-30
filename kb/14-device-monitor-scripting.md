@@ -12,6 +12,10 @@ Source: EScribe's own help, `%APPDATA%\Evolv\EScribe Suite\Help\dm_*.html`. See 
 
 Set **Options → User Interface → Researcher** (or Manufacturer) and `Run Script` moves onto the Diagnostics menu directly, without the warning prompt each time. Worth doing on the first run.
 
+**The script runs on a background thread while Device Monitor is running** (Evolv, 2016), so the window stays live and a long loop does not freeze the UI — which is what makes a polling or logging script practical.
+
+The API has been **stable for about nine years**: the function list Evolv posted in March 2016 matches the shipped help in the 2026 build almost exactly. Worth knowing before treating any of it as likely to change.
+
 The interpreter is **IronPython 2** — Evolv's own examples use `xrange` and `.format()`, not f-strings.
 
 ---

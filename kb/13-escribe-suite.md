@@ -15,7 +15,7 @@ The copy this document was written from: **EScribe INT, build 2026-05-14** (`Edi
 | `Backups/{GUID}/` | **Automatic config snapshots**, one per upload or download | **Yes — see below** |
 | `Help/*.html` | The full help system, 18 real pages | Yes — `14` is written from it |
 | `Firmware/<board>/*.sw-service` | Firmware images per board | Yes, for reflashing |
-| `EScribe.pdf` | The manual | Not yet mined |
+| `EScribe.pdf` | **The Device Monitor scripting manual**, with samples — not a general manual. Shipped with EScribe since 1.2 SP5 | Partly, via `14` |
 | `Resources/EScribe.ThemeDesigner/Defaults/*.ecigthemex` | Theme Designer's starting themes | **No — encrypted**, not readable |
 | `Resources/`, `Translations/`, `Sounds/`, `Pictures/` | App resources, skins, localization | No |
 | `Drivers/USB Serial/` | The USB driver | Only if the mod won't connect |
