@@ -60,6 +60,43 @@ The format is a header plus `°F,relative resistance` points, linear α in °F t
 - To generate a new TCR `t`: α=t/100000; points (-100,R(-100)), (68,1), (200,1.002), (219.8738170347,R(219.87)), (800,R(800)).
 
 ## Cup health
+## The curve, verified against the hardware (2026-10-30)
+
+Two puffs captured off the serial stream at 64 Hz (`17`), 762 live samples, and the temperature the
+**firmware reports matches our own material curve interpolated by hand to within 0.04 F**, mean error
+0.012 F. Sample data: `../tools/samples/puff-dtv5xl-36w.csv`.
+
+That verifies several things this project had only ever assumed:
+
+- **The CSV curve is what the chip actually uses.** Feed `R=GET COLD` and the curve's breakpoints into
+  a linear interpolation and you reproduce the device's own temperature reading almost exactly.
+- **The 200-220 F display fix behaves as designed.** The flattened segment and the steep one above it
+  were both exercised in one puff - the cup crossed 219.84 F - and the readings track the curve
+  through the break with no discontinuity.
+- **Cold resistance is the reference the whole thing hangs on.** The match only holds using the full
+  precision value, 0.4637451171875; rounding to 0.464 shifts the computed temperature by about 0.6 F.
+
+### What a V5 XL puff actually looks like at 36 W
+
+| | |
+|---|---|
+| Duration | 7.34 s |
+| Resistance | 0.471 -> 0.566 ohm |
+| Temperature | 202 -> 267 F, **setpoint 385 F never reached** |
+| Heating rate | ~8.9 F/s |
+| Power | 35.98 W mean against a 36 W setpoint, range 34.8-36.2 |
+| Current | 8.50 -> 7.97 A, falling as resistance rises |
+| Battery | 3.98 -> 3.90 V under load, from 4.16 V idle |
+
+**The power never throttled**, which means temperature protection never engaged - in seven seconds,
+from an already-warm 202 F, the cup only reached 267 F. Extrapolating the observed rate, reaching 385 F
+from room temperature would take on the order of twenty seconds at 36 W.
+
+That reframes the reference settings below. The XL is a large thermal mass and 36 W is a gentle heat
+for it; the 60 s session is not generous, it is roughly what the cup needs. It also explains why the
+starting temperature matters less than expected on this cup - much of a short session is spent on the
+way up rather than at the limit.
+
 - A failing cup shows up as **cold resistance drifting upward**. One V5 XL cup went from 0.43 → 0.61Ω within two weeks and had to be replaced; the base was fine.
 - **Measured cold resistance on this mod** (from locked configs, same meter, same method): **V5 XL 0.4637Ω**, **Lightning Quest 0.3141Ω**. Device Monitor read the same XL cup at **0.460Ω** on 2026-10-30, so the figure is stable across measurements and tools. These are the baselines the replace warning is derived from.
 - **Replace thresholds (2026-10-30):** **V5 XL above 0.60Ω**, **Lightning Quest above 0.41Ω**. Both are the same proportional rise, **×1.294**, over the measured baseline above — 0.6 ÷ 0.4637 for the XL, and 0.3141 × 1.294 = 0.4064 rounded to 0.41 for the Quest. The one failure on record rose ×1.419 (0.43 → 0.61), so the warning fires before that. Both themes color the resistance **red** past the threshold (`06`, `11`), built as layered flat variants rather than a nested AND, which does not work on this hardware (`07` #24). **Caveat: one failure data point.** If used-but-healthy cups turn out to sit near the line, raise it.
