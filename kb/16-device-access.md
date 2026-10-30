@@ -61,6 +61,40 @@ So:
 
 ---
 
+## The Serial Terminal talks to the mod, not to COM4
+
+A correction to the assumption in `13`. The Serial Terminal's **Connect** dialog lists three devices:
+
+- **Gremlin** - the mod itself, named for its loaded theme
+- Communications Port (COM1)
+- USB Serial Device (COM4)
+
+So it is not only a COM-port terminal: it connects to the **DNA directly**, and that is what the window
+titled *Serial Terminal - Gremlin* with "Connected." was attached to. Which also explains why a
+listen-only probe of COM4 heard nothing - the mod's command channel is not that port.
+
+The dialog also offers **Rename...** and **Identify**, plus a *Wiring Information* link. **Identify
+toggles the mod's display on and off** - a device command with an unmistakable effect, issued from
+EScribe over its own link.
+
+That matters more than it looks. It is a **known command with an observable result**, which is the
+ideal thing to hunt for when working out a protocol: trigger it repeatedly and whatever changes in the
+traffic is the command. If the HID route needs a USB capture, Identify is the signal to capture.
+
+### What to try next, in EScribe's own UI
+
+Cheaper and safer than writing raw bytes: connect the Serial Terminal to **Gremlin** and use its
+**Command** box. A bare `?` or `help` costs nothing and may print the command set outright. The window
+also has its own **Scripting** menu, unmapped, which may already be the structured interface this whole
+effort is looking for.
+
+### What COM4 probably is
+
+Given the *Wiring Information* link and that the DNA exposes UART pins, COM4 is more likely a path to
+**external** serial hardware wired to the board than a console on the mod. Unconfirmed, but it would
+explain the silence, and it downgrades the serial route from "backup plan" to "probably not the
+thing at all".
+
 ## The serial fallback
 
 COM4 is a standard CDC port (9600 8-N-1, Microsoft's `usbser`), so `System.IO.Ports.SerialPort` reaches it from PowerShell with no extra tooling — confirmed available on this machine. A listen-only probe is written and waiting on the mod being plugged in; it asserts DTR and RTS, which CDC devices often require before they say anything, and writes nothing.
