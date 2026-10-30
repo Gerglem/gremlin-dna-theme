@@ -15,7 +15,13 @@
 - **High Contrast screenshots are stale.** `../high-contrast/images/menu-screen.png` and `new-coil-screen.png` predate the ohms row; there is no screenshot of the OHMS screen yet.
 - Whether every chip warning (e.g., "Temp Protected") appears in the status line.
 
-- **Replace-the-cup colour warning** (both themes, 2026-10-30). Two things unverified: `<Compare Operator="2">` (greater-than) is listed **H**, not confirmed, and this is its first use in either theme — if it does not resolve, the number simply never turns red; and the thresholds rest on a **single** observed failure (0.43 → 0.61Ω), scaled to the Quest by ratio rather than measured. Check by temporarily setting a limit below a known-good cup's reading and confirming the number goes red on the right profile only. Limits and derivation in `02`.
+- **Replace-the-cup colour warning** (both themes, 2026-10-30). Two things unverified: `<Compare Operator="2">` (greater-than) is listed **H**, not confirmed, and this is its first use in either theme — if it does not resolve, the number simply never turns red; and the thresholds rest on a **single** observed failure (0.43 → 0.61Ω), scaled to the Quest by ratio rather than measured. Limits and derivation in `02`.
+
+  **Registered test design, 2026-10-30 (result pending).** Throwaway test themes were built with deliberately wrong limits — profile 1 (XL) **0.40**, profile 2 (QUEST) **0.90** — against known-good locked readings of XL 0.4637Ω and Quest 0.3141Ω. **Theme files only:** loading a full `.ecig` resets cold ohms to 0 on every slot and 0 trips no threshold, which would destroy the reading the test depends on. Three outcomes, decided before running:
+  - XL red, Quest white → operator 2 **and** the AND gating both work, as designed.
+  - Both red → operator 2 works but the profile condition is not gating; the AND or the profile numbering is wrong.
+  - Neither red → operator 2 does not resolve on this firmware; fall back to a different comparison or drop the warning.
+  Requires a locked reading on the XL profile; with cold ohms 0 the test is inconclusive rather than negative.
 
 ## Ideas
 - **More color themes:** off-board memory is the limit (93.6% on the DNA75C). Free image space first, e.g. let more themes use the standard gremlin.
