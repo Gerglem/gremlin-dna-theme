@@ -145,6 +145,10 @@ line, a theme could make it unmissable. Worth checking what the chip does at tem
 anything, so the theme is not warning about a condition the firmware has already handled silently.
 
 ## Ideas
+- **A puff graph on the mod.** The `Chart` control draws the device's own puff recording and takes one
+  setting, `Time Bars` (`15`). `Recordings -> Chart Present` (`05`) is the condition for hiding it when
+  empty. 64x64 fits an 80x160 screen. Nothing in either theme uses this, and it would put the heat
+  curve we verified over serial (`02`) on the device itself.
 - **More color themes:** off-board memory is the limit (93.6% on the DNA75C). Free image space first, e.g. let more themes use the standard gremlin.
 - **Full menu coloring** for one or two themes would fit in on-board memory (56%).
 - ~~An "at temperature" indicator via a math condition comparing live vs set temperature.~~ **Not possible in a theme. Settled twice over, 2026-10-30.** I withdrew the second block below on seeing that conditions are authored as expressions, then tested it: Theme Designer **rejects** `Atomizer -> Temperature > Miscellaneous -> Board Temperature` with *"Invalid Value - Must be a number!"*. The right-hand side of a comparison must be a literal, so the original finding was right and the withdrawal was wrong. Both blocks stand, and the measurement list confirms the first independently - there is one atomizer temperature and no separate live reading. The three blocks, as recorded: the setpoint and the live temperature are the *same* field (16778242 — live is that field with `UpdateLive` + `ReadOnly` while firing), so no condition can tell "how hot it is" from "what was asked for"; `<Compare>` only tests a field against a literal `RefValue` baked into the theme, so "live ≥ set" cannot be expressed; and the firmware's own flag, Heating Time Done (353173506), is rejected on upload (`07` #1). A hardcoded threshold is possible but lies as soon as the setpoint moves off it. Unexplored: the chip throttles power once it reaches temperature, so `profile == N` AND `watts < X` might approximate it, at the cost of per-profile constants.

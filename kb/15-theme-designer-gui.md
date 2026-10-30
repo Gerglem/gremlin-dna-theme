@@ -216,6 +216,52 @@ an expression could compare the two directly.
 
 ---
 
+## Control properties
+
+### Common to every control
+
+| GUI | XML |
+|---|---|
+| Alignment, a 3x3 grid | `HAlign` and `VAlign` together - nine combinations, one click |
+| Color -> Set... | `Color="(r, g, b, a)"` |
+| Font: Big / Normal / Small | `FontStyle` 1 / 0 / 2 |
+| Padding, four boxes | `<Padding Left Top Right Bottom />` |
+| Action -> Set... | `<Action>` |
+| Status | the help-text attribute `07` #7 says to strip |
+| Location, Size | `Location="(x, y)"`, `Size="(w, h)"` |
+| **Z Order** | `ZOrder` - **a first-class field in the GUI.** EScribe writes it on every control;
+  our hand-written designs omit it entirely and work, so it is optional, with document order as the
+  implicit default |
+| Initially highlighted | `InitiallyHighlighted="1"` |
+
+Below those sit six alignment and distribution buttons, and **Add Condition... / Change Control... /
+Delete Control**.
+
+### Memo is a multi-line Label
+
+That is the whole difference. Its **Text** box is multi-line where a Label's is a single field, and it
+wraps within the control - a Memo at 80x40 rendered "Testing" and "1 2 3..." on two lines. Every other
+property matches Label exactly.
+
+Useful where a sentence has to fit a narrow screen without hand-splitting it across two Labels, which
+is what the High Contrast lock screen currently does (`11`). Note it **cannot be a conditional
+variant**, so it is no use for anything that appears and disappears.
+
+### Chart plots the recorded puff, and we never knew
+
+The surprise of the mapping. A Chart has **one property of its own: `Time Bars`** - and no data source
+to choose. It is not a general plotting control; it draws the device's own puff recording, and the
+only thing you configure is how many time divisions it shows. The designer previews it with a sine
+wave placeholder.
+
+That ties to a field already in the dictionary and never used: **`Recordings -> Chart Present`**
+(`05`), which is exactly the condition for "hide this control when there is nothing recorded". The
+pieces for a working puff graph are all present.
+
+A 64x64 chart fits comfortably on an 80x160 screen. The data behind it is the same recording the
+serial stream exposes at 64 Hz (`17`) - resistance and temperature through a heat cycle - so a theme
+could show on the mod what we have only ever looked at in a CSV.
+
 ## Still to map
 
 Worked from screenshots. Each item says **what to capture** and **what it would settle**, so this can be
