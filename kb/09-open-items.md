@@ -102,6 +102,37 @@ all. Cheap, and worth doing next time the mod is connected.
 
   **Read on the XL profile at 0.464:** the value went **red** (`ohms > 0.4`, flat) and MEASURE went **cyan** (`ohms < 0.9`, flat), but LOCKED stayed yellow (`AND(profile == 1, ohms > 0.4)`). So **operator 2 works, operator 3 works, and the field is readable in a `Compare`** — only the nested AND fails. **Rebuilt 2026-10-30** as five layered flat variants instead (`07` #24); the layering is now the untested part, though every operator in it is confirmed on-device. `10` corrected: operator 2 promoted to confirmed, operator 64 marked as not working on this firmware.
 
+## Deferred: known simplifications
+
+Things we know are now unnecessarily complicated, held back deliberately so they can be applied in one
+pass rather than one reload at a time. Expect this list to grow as the UI, the docs and the HID work
+turn up more.
+
+### Collapse the replace warning from five layers to two
+
+The per-cup warning is currently a chain of five flat variants per control that emulates an AND
+(`07` #24), built when a real AND appeared not to work. It does work - the failure was operator `129`
+for equality where the tool emits `4` (`07` #25). So each of the four resistance displays can become:
+
+```xml
+<Compare Operator="64">
+  <Compare Operator="2" Field="<ohms field>" RefValue="0.6" />
+  <Compare Operator="4" Field="262151" RefValue="1" />
+</Compare>
+```
+
+plus the same with `0.41` and profile `2`. Two variants, not five.
+
+Three things fall out of it. The **cancel layers disappear**, so the Color Themes home screen keeps its
+theme color instead of going white across an XL's healthy range - the compromise accepted on 2026-10-30
+stops being necessary. The **cleaning-profile special case disappears** too: profile 3 needed its own
+cancel only because the chain could not express "profile 1 **or** 3 **and** over the limit", and `or`
+is available. And the intent becomes readable, which the chain never was.
+
+**Do not apply this piecemeal.** It touches all four displays in both themes and needs a hardware test
+to confirm operator 4 behaves as the generated file implies - worth doing once, with whatever else has
+accumulated.
+
 ## Follow-up: a board temperature warning?
 
 **Board Temperature** and **Room Temperature** are both readable measurements (`05`, and Device Monitor
