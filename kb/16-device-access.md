@@ -72,6 +72,67 @@ we already hold, that may be enough.
 grab someone else's line - a `S=GET ENERGY` came back `S=291.87F`, a temperature. **Close Device
 Monitor for clean reads.**
 
+## Calling Evolv's own uploader - the chosen route, 2026-10-30
+
+**Decision:** push configs by calling EScribe's own upload code rather than by reimplementing the
+protocol from the capture. The requirement is parity with EScribe's safety gates, and their code keeps
+every gate by construction. Reimplementing means rebuilding each gate by hand and discovering the
+missed one on live hardware.
+
+### The gates to preserve
+
+Inventory, so a hand-rolled path can be measured against it. Confirmed items are observed; the rest
+are inferred from the API shape and need checking before anything is trusted.
+
+| Gate | Evidence |
+|---|---|
+| **Automatic pre-upload backup** | **Confirmed.** `Backups\{GUID}6-10-30 14_43 - U - DNA 100 Color.ecig` was written by the upload run on 2026-10-30. The `U` marks an upload |
+| **Device identity check** | **Confirmed in the log:** `device code 109.1, device Evolv DNA 100 Color` is resolved before the stream opens |
+| **Firmware / user-mode version handshake** | **Confirmed in the log:** `Sending 'get version'` then `User mode version is 311105588`, before any transfer |
+| **Per-frame CRC** | The 3-byte trailer on every transfer frame (above). Not yet verified as a CRC |
+| **Differential hashing** | `CreateForDNAColor(sha1Cache)` and the 8.7 KB read back during an upload |
+| **Write transaction** | `UpdateBegin(writable)` / `UpdateCommit()` / `UpdateEnd(writable)` |
+| **Dry run** | `PerformUpload(ctx, progress, dontUpload)` - the third argument |
+
+### What works now
+
+Run **in process**, from Device Monitor's Run Script:
+
+    FE(port, 9867, 1075, 0)   ->  A.POT          # the link opens
+    Programmer.CreateForDNAColor(None)  ->  A.ECC
+    ECC.Stream = pot                              # assigned, no error
+    ECC.Initialize()                              # returns cleanly
+
+The port string is `HID:` + base64 of `"<vid_decimal>'<pid_decimal>'<serial>"`, rebuilt from a live
+device read and byte-identical to the one in EScribe's debug log. The third integer is the product
+version and `0` is accepted.
+
+**Out of process this still fails.** `FE` throws `NullReferenceException` before touching its
+arguments - its IL calls `DOT.get_GE` first, a static EScribe populates at startup. Passing a real
+`CSH` (HidSharp's `OpenConfiguration`, public parameterless constructor) does not help. Reconstructing
+that startup graph through obfuscated types is not worth it while the in-process route works.
+
+### Why `UserModeVersion` stays null, and what it means
+
+After `Initialize()` the version is still `None`. Reading the IL explains it:
+
+- `get_UserModeVersion` is 7 bytes - it only reads the field `OCC.KE`.
+- `Initialize()` is 36 bytes of wiring (`LWC.EE`, `OCC.get_SM`, `VTC.XE`, `new DDY`, `TCC.set_RM`). It
+  does **not** perform a handshake.
+- **Nothing in `DEScribe.Upload` writes that field** - only the four `set_UserModeVersion` overloads
+  exist, and no caller.
+
+So the Programmer is a transport object, and **`DEScribe.Core` is the orchestrator**: it sends
+`get version`, sets `UserModeVersion` on the Programmer, takes the backup and brackets the transfer
+with the `*** START UPLOADING SETTINGS ***` markers. That orchestration *is* where the gates live,
+which is exactly the layer we want to call.
+
+**Next target: `VYB.PerformUpload` in `DEScribe.Core`** - the one method found whose name survived
+obfuscation at that layer. Map its parameters, then drive it with `dontUpload` set.
+
+> Note when scanning: `AX` is a very common obfuscated method name, so an IL scan for callers of the
+> Programmer's `AX` returns two dozen false positives. Match on the distinctive names instead.
+
 ## The settings transfer, captured 2026-10-30
 
 One real `Upload Settings to Device` was watched from a second HID handle while EScribe did the work.
