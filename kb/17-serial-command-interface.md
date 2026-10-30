@@ -125,8 +125,17 @@ which is why the query tool works with EScribe open.
 | **CSV (Excel)** | A continuous data stream. **Commands get no reply at all** |
 
 They are **mutually exclusive** - verified by sending `R=GET COLD` while streaming and receiving only
-more stream. Choose one. Changing it requires **Upload Settings to Device**, which also clears cold
-ohms, so expect to re-lock the cup.
+more stream. Choose one. Changing it requires **Upload Settings to Device**.
+
+> **That upload does *not* clear cold ohms**, contrary to what this file first claimed. Verified by
+> round-tripping the setting and re-reading: the cup stayed locked at 0.464 throughout. What clears
+> cold ohms is uploading one of **our published `.ecig` files**, because those ship
+> `EvolvWDColdOhms = 0` deliberately (`12`). Changing a setting in EScribe uploads the config EScribe
+> already holds, which carries the device's own measured values. Same button, two different
+> operations.
+>
+> The last-puff buffer *is* cleared: `S=GET LAST TIME` and `S=GET LAST PEAK TEMP` returned values
+> before the upload and `?` after, while the stored resistance survived.
 
 #### What the stream looks like
 
