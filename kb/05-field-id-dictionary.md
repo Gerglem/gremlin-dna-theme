@@ -62,7 +62,7 @@ Confidence: **C** = confirmed (labeled test or on-device), **H** = high (consist
 
 ## User toggles (theme-defined on/off switches)
 These are free switches a theme can use for its own options. They persist on the device. Gremlin v2.x uses them for the color themes.
-| ID | Meaning | Gremlin v2.1 use | Conf |
+| ID | Meaning | Gremlin v2.2 use | Conf |
 |---|---|---|---|
 | 10 | User Toggle 1 | Retro | C |
 | 266 | User Toggle 2 | Synth | C |

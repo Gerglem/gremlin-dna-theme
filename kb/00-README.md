@@ -5,12 +5,12 @@
 ## Current state (keep this section current)
 | Item | Version | Where |
 |---|---|---|
-| **Gremlin - Color Themes** (main theme) | **v2.1** | `../release/Gremlin-Color-Themes-v2.1.ecigtheme`, full setup `../release/Gremlin-Color-Themes-Full-Setup-v2.1.ecig` |
-| **Gremlin High Contrast - Large Text** (low vision) | **v1.1** | `../high-contrast/` (landing page `README.md`, files in `files/`) |
+| **Gremlin - Color Themes** (main theme) | **v2.2** | `../release/Gremlin-Color-Themes-v2.2.ecigtheme`, full setup `../release/Gremlin-Color-Themes-Full-Setup-v2.2.ecig` |
+| **Gremlin High Contrast - Large Text** (low vision) | **v1.2** | `../high-contrast/` (landing page `README.md`, files in `files/`) |
 | Gremlin v1.0 (legacy) | v1.0 | `../release/gremlin_v1.0_theme.ecigtheme`, `gremlin_v1.0.ecig` |
 | Guides | current | `../guides/chip-swap-thelema-solo-dna100c.md`, `../guides/setup-gremlin-theme-profiles-calibration.md` (old `../reddit/` paths are pointer files kept for a live Reddit link; don't delete) |
 
-Both themes are released and tested on a DNA100C. Memory on the DNA75C (the tightest chip): Color Themes v2.1 uses off-board 93.6% and on-board 56.0%.
+Both themes are released and tested on a DNA100C. Memory on the DNA75C (the tightest chip): Color Themes v2.2 uses off-board 93.6% and on-board 56.0% (measured at v2.1; v2.2 reuses the main screen's padlock art, so it adds no images).
 
 ## Files
 | File | Contents |
