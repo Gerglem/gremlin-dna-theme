@@ -21,6 +21,8 @@ The usual sequence with a locked coil: unlock, swap the heater, let it measure, 
 
 **Lightning Quest runs TCR 120, not 125.** Swab-tested on a DNA100C at 470°F for 10 seconds: TCR 125 scorched the swab tan, TCR 120 left the light gold that means the chip and the cup agree. Divine Tribe publishes 125, which is right for their own board — on a DNA it reads about 5% hot. `materials/questcup-tcr120.csv` replaces the old TCR 125 curve.
 
+**The resistance turns red when a cup is worn out.** Cold resistance on the home screen, and the reading on the new-coil prompt, go red above **0.60Ω** on the V5 XL profile and **0.41Ω** on the QuestCup profile — the same proportional rise over each cup's measured fresh value. A cup's cold resistance creeping up is the main warning before it fails: the one we lost went from 0.43 to 0.61Ω in a fortnight. The cup still fires while the number is red; it just means order another.
+
 Unchanged: all seven looks, every other screen, and the memory footprint — the padlock art is the one already on the home screen, so nothing new went into off-board memory. Cold resistance still ships cleared to 0 and unlocked on all eight slots, so the mod measures your own coil the first time you fire it.
 
 **If you are upgrading,** reload the two vaping profiles (or the full setup) to pick up 380°F and the new Quest curve. Loading the theme alone changes the screens, not the temperatures.

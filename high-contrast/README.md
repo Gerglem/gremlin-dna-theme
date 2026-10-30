@@ -33,14 +33,14 @@ There are three kinds of files. You only need one of the first two.
 
 ### Option A: The full setup file (easiest)
 
-- File: [gremlin_high_contrast_v1.2.01.ecig](files/gremlin_high_contrast_v1.2.01.ecig)
+- File: [gremlin_high_contrast_v1.2.02.ecig](files/gremlin_high_contrast_v1.2.02.ecig)
 - What it contains: the theme **and** four ready-made profiles, all in one file.
 - Choose this if you use Divine Tribe V5 XL cups or the Lightning Quest, and you want everything set up at once.
 - Note: this replaces all the settings on your mod.
 
 ### Option B: The theme only
 
-- File: [gremlin_high_contrast_v1.2.01_theme.ecigtheme](files/gremlin_high_contrast_v1.2.01_theme.ecigtheme)
+- File: [gremlin_high_contrast_v1.2.02_theme.ecigtheme](files/gremlin_high_contrast_v1.2.02_theme.ecigtheme)
 - What it contains: only the screens, colors, and text size.
 - Choose this if you want to keep your own profiles and settings. Only the look of the screen changes.
 
@@ -85,14 +85,14 @@ Before you start, connect your mod to your computer with the USB cable and open 
 ### To install the full setup file
 
 1. In EScribe, open the **File** menu and choose **Open**.
-2. Choose **gremlin_high_contrast_v1.2.01.ecig**.
+2. Choose **gremlin_high_contrast_v1.2.02.ecig**.
 3. Select **Upload Settings to Device**.
 4. Follow step 4 under "To add a single profile" to lock each cup's resistance.
 
 ### To install the theme only
 
 1. Select the **Theme** tab.
-2. Load **gremlin_high_contrast_v1.2.01_theme.ecigtheme**.
+2. Load **gremlin_high_contrast_v1.2.02_theme.ecigtheme**.
 3. Select **Upload Settings to Device**.
 
 ### To add a single profile
@@ -157,6 +157,8 @@ Choose **Ω OHMS** in the menu to open this screen. It is where you check that t
 A fresh Divine Tribe **V5 XL** cup reads **0.44 to 0.49 ohms** cold. The Lightning Quest has not been measured here, so there is no published figure for it yet. If a cup reads 0, or far outside its usual range, the heater is not making proper contact — unscrew it and put it back on before you lock anything.
 
 **Watch this number over the life of the cup.** A cup on its way out reads higher than it used to: one V5 XL went from 0.43 to 0.61 ohms over two weeks and had to be replaced, with nothing wrong with the base. A steady climb well above the fresh range means order a replacement.
+
+**The number turns red when the cup is due for replacement** — above **0.60 ohms** for the V5 XL, above **0.41 ohms** for the Lightning Quest. Red on the new coil screen means the cup you just fitted is already worn; red on this screen means the one you are using is on its way out. It still works while it is red, so finish the cup if you like, but order another.
 
 ### Lock screen
 

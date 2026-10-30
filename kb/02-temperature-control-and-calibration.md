@@ -61,8 +61,10 @@ The format is a header plus `°F,relative resistance` points, linear α in °F t
 
 ## Cup health
 - A failing cup shows up as **cold resistance drifting upward**. One V5 XL cup went from 0.43 → 0.61Ω within two weeks and had to be replaced; the base was fine.
+- **Measured cold resistance on this mod** (from locked configs, same meter, same method): **V5 XL 0.4637Ω**, **Lightning Quest 0.3141Ω**. These are the baselines the replace warning is derived from.
+- **Replace thresholds (2026-10-30):** **V5 XL above 0.60Ω**, **Lightning Quest above 0.41Ω**. Both are the same proportional rise, **×1.294**, over the measured baseline above — 0.6 ÷ 0.4637 for the XL, and 0.3141 × 1.294 = 0.4064 rounded to 0.41 for the Quest. The one failure on record rose ×1.419 (0.43 → 0.61), so the warning fires before that. Both themes colour the resistance **red** past the threshold (`06`, `11`). **Caveat: one failure data point.** If used-but-healthy cups turn out to sit near the line, raise it.
 - Wear drivers: sustained heat (>~500°F), thermal shock, frequent burn-offs.
-- Fresh V5 XL cup: DT spec 0.44–0.49Ω. Live idle readings slightly above the locked value right after firing are normal (still warm).
+- Fresh V5 XL cup: DT spec 0.44–0.49Ω — the measured 0.4637Ω above sits mid-spec. No published spec for the Lightning Quest; 0.3141Ω is the only measurement here. Live idle readings slightly above the locked value right after firing are normal (still warm).
 - Multimeters give inconsistent sub-ohm readings (and the 2000k range reads 0). Mod readings are more reliable.
 
 ## Terp pearls

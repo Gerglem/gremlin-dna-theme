@@ -15,6 +15,8 @@
 - **High Contrast screenshots are stale.** `../high-contrast/images/menu-screen.png` and `new-coil-screen.png` predate the ohms row; there is no screenshot of the OHMS screen yet.
 - Whether every chip warning (e.g., "Temp Protected") appears in the status line.
 
+- **Replace-the-cup colour warning** (both themes, 2026-10-30). Two things unverified: `<Compare Operator="2">` (greater-than) is listed **H**, not confirmed, and this is its first use in either theme — if it does not resolve, the number simply never turns red; and the thresholds rest on a **single** observed failure (0.43 → 0.61Ω), scaled to the Quest by ratio rather than measured. Check by temporarily setting a limit below a known-good cup's reading and confirming the number goes red on the right profile only. Limits and derivation in `02`.
+
 ## Ideas
 - **More color themes:** off-board memory is the limit (93.6% on the DNA75C). Free image space first, e.g. let more themes use the standard gremlin.
 - **Full menu coloring** for one or two themes would fit in on-board memory (56%).

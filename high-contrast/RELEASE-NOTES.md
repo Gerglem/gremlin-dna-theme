@@ -17,6 +17,8 @@ The symbol *and* the word: **Ω** is what is printed on cups and quoted in specs
 
 Fitting it meant repacking the menu: the divider is gone and the five rows run edge to edge. At this text size 160 pixels holds exactly five rows and no more, which is why the ohm controls went to a screen of their own rather than taking a sixth.
 
+**The resistance turns red when a cup is worn out.** Above **0.60 ohms** on the XL profile and **0.41 ohms** on the QUEST profile, on both the new-coil screen and the ohms screen — the same proportional rise over each cup's measured fresh value. The cup still fires; it means order another.
+
 **The new-coil screen shows the measured resistance.** The number the mod just read is now under the question, at full text size with its Ω unit, so you can see what you are accepting. It is also the main warning you get before a cup fails: a cup on its way out reads higher than it used to — one V5 XL went from 0.43 to 0.61 ohms in a fortnight. A fresh V5 XL reads 0.44 to 0.49.
 
 MEASURE came off that screen to make room. It had no visible effect there anyway, because nothing on the screen displayed the value it changed; it is still on the ohms screen, beside the stored number.
