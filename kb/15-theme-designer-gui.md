@@ -412,13 +412,15 @@ Ours is the battery bar, and everything about it was inferred from reading files
 Mostly confirming. For **Label**, the `Text` box with its `+` tag menu open - inline color and font tags
 are documented in EScribe's help and unused here. For **Picture**, whatever `PictureEncoding` is called.
 
-### 6. Common properties, on any control
+### 6. ~~Common properties, on any control~~ - DONE
 
-**Capture:** visible in any of the panels above.
+All of them are visible on the Field panel and are written up under *Common to every control* above:
+Alignment, Color, Font, Padding, Action, Status, Location, Size, Z Order, Initially highlighted and
+Update while firing.
 
-**Settles:** the GUI names behind `Location`, `Size`, the `Status` help-text attribute that `07` #7 says to
-strip, `InitiallyHighlighted`, `UpdateLive`, and `ZOrder`. `ZOrder` appears in EScribe's own output but
-never in ours, and it is not known whether that matters.
+One question outlives the mapping: `ZOrder` is a first-class GUI field and EScribe writes it on every
+control, while our hand-written designs omit it and work. So it is optional with document order as the
+default - but that is an inference from our own files, not something the GUI states.
 
 ### 7. The action list
 
