@@ -1,106 +1,135 @@
 # 17 – The plain-text serial command interface
 
-**The mod is a command console.** It answers plain-text commands over its USB CDC serial port, with no EScribe involved. This is the direct, scriptable control of the device that `16` set out to find.
+**The mod is a command console.** It answers plain-text commands over its USB serial port, with no EScribe involved — read resistance, temperatures, statistics and the active material, and drive the device directly. This is the scriptable control `16` set out to find, and it needs no reverse engineering: Evolv documented it.
 
-Verified on this DNA 100 Color, firmware SP55.1 INT, 2026-10-30.
+Everything in the **Verified** table was run against this DNA 100 Color, firmware SP55.1 INT, on 2026-10-30.
 
 ---
 
 ## Connecting
 
-The mod enumerates as a USB composite device (`13`); the second interface is a standard CDC serial port (COM4 on this machine, Microsoft's stock `usbser` driver). **9600 8-N-1**, assert DTR and RTS, terminate commands with **CRLF**. Replies come back terminated the same way.
+The mod is a USB composite device (`13`); its second interface is a standard CDC serial port — COM4 here, on Microsoft's stock `usbser` driver. **9600 8-N-1**, assert **DTR and RTS**, terminate with **CRLF**. Replies come back CRLF-terminated.
 
-No driver install on Linux — the port is standards-compliant CDC. On Windows the EScribe install provides it.
-
-From PowerShell, no extra tooling needed:
+No driver needed on Linux or a Raspberry Pi; the port is standards-compliant CDC. Evolv ships a custom Windows driver with EScribe and says Microsoft's is "of poor quality" — **this machine is using Microsoft's and it works**, but if the link ever misbehaves, that is the first thing to change.
 
 ```powershell
 $sp = New-Object System.IO.Ports.SerialPort 'COM4',9600,'None',8,'One'
 $sp.DtrEnable = $true; $sp.RtsEnable = $true; $sp.ReadTimeout = 400
-$sp.Open()
-$sp.Write("R=GET COLD`r`n")
-Start-Sleep -Milliseconds 350
+$sp.Open(); $sp.Write("R=GET COLD`r`n"); Start-Sleep -Milliseconds 350
 $sp.ReadExisting()          # -> R=0.464OHM
 $sp.Close()
 ```
 
-`tools/dna-query.ps1` in this repo wraps that.
+`tools/dna-query.ps1` wraps this, sends a standard read-out by default, and refuses anything that is not `LETTER=GET` unless `-AllowWrites` is passed.
 
-## Syntax
+## Syntax and two traps
 
-`LETTER=ACTION`, and the reply echoes the same letter: `R=GET COLD` → `R=0.464OHM`.
+`LETTER=ACTION`; the reply echoes the letter. `#` is a decimal number with a period separator.
 
-**`LETTER=?` means the board has no value for that query** — not an error, and not an unknown command. `P=GET` returns `P=?` when idle because there is no live power to report.
+**`LETTER=?` in a reply means the board has no value** — not an error. `P=GET` returns `P=?` when idle because there is no live power.
 
-**An unrecognised command gets no reply at all.** This is the trap that cost an afternoon: `?`, `help`, `dir` and friends were sent to this port and returned *nothing*, which read as a dead channel. The port was fine; the words were not commands (`07` #26).
+> **Trap 1: an unrecognised command gets no reply at all.** `?`, `help` and `dir` were sent to this port and returned nothing, which read as a dead channel for most of a day. The port was fine; those are not commands (`07` #26).
+
+> **Trap 2: `T=?` is not a query — it turns temperature protection OFF.** The one command that looks like a question and is actually a write. `tools/dna-query.ps1` refuses it, since it does not match `LETTER=GET`.
 
 ---
 
 ## Verified on this board
 
-Queries only. Everything below was run and its reply recorded.
+### Identity and capabilities
 
-| Command | Reply | Notes |
+| Command | Reply |
+|---|---|
+| `E=GET MFR` | `E=Evolv` |
+| `E=GET PRODUCT` | `E=DNA 100 Color` |
+| `E=GET VERSION` | `E=311105588` — the user-mode version EScribe's debug log prints |
+| `E=GET SERIAL` | *(device serial — keep out of this repo, `12`)* |
+
+`E=GET FEATURE <n>`, counting up until `E=?`, enumerates what the board supports. This one answers **14**:
+
+```
+1 PC      power control          8  TC:M     temperature control, materials
+2 St      long-term statistics   9  TC:M:H   ... with heating
+3 L                              10 St:TP    temp-protected puff stats
+4 NS                             11 PH       preheat
+5 TM                             12 EC:V
+6 DN                             13 W        clock
+7 TC      temperature control    14 M        profiles
+```
+
+`L`, `NS`, `TM`, `DN` and `EC:V` are undocumented by the community list; meanings unknown.
+
+### The ones that matter here
+
+| Command | Reply | Why it matters |
 |---|---|---|
-| `E=GET PRODUCT` | `E=DNA 100 Color` | |
-| `E=GET VERSION` | `E=311105588` | The same number EScribe's debug log calls the user-mode version |
-| `E=GET SERIAL` | *(the device serial)* | **Keep out of the repo** (`12`) |
-| `E=GET MANUFACTURER` | `E=?` | Not populated |
-| `B=GET` | `B=4.158V` | Pack voltage |
-| `B=GET CELLS` | `B=1` | Cell count |
-| `B=GET CELL 1` | `B=4.158V` | |
-| `C=GET%` | `C=98%` | Charge percentage |
-| **`R=GET`** / `R=GET COLD` | `R=0.464OHM` | **The locked cold resistance** |
+| **`R=GET`** / `R=GET COLD` | `R=0.464OHM` | **The locked cold resistance** — the value the replace warning keys on (`02`) |
+| **`T=GET MATERIAL`** | `T=DTv5XL` | **The active material by name.** Confirms which TCR curve is live, which nothing else exposes without reading the config |
+| **`T=GET COLD`** | `T=69.28F` | The temperature cold ohms was measured at — matches `ColdResistance2 Fahrenheit` in the saved profile exactly |
+| **`M=GET`** | `M=1` | Active profile, **1-based** — independently confirms the numbering every per-cup condition relies on (`05`) |
 | `R=GET STATIC` | `R=0.004OHM` | Fixed contact resistance |
-| `R=GET LIVE` | `R=?` | Only meaningful while firing |
-| `R=GET TYPE` | `R=1` | |
-| **`T=GET COLD`** | `T=69.28F` | **The temperature cold ohms was measured at** — matches `ColdResistance2 Fahrenheit` in the saved profile exactly |
-| `T=GET SP` | `T=385.00F` | Temperature setpoint |
-| `T=GET BOARD` | `T=82.99F` | Board temperature |
-| `T=GET ROOM` | `T=74.80F` | Room temperature |
-| `T=GET` | `T=?` | Live temperature, idle |
-| `P=GET SP` | `P=36.00W` | Power setpoint |
-| `P=GET`, `V=GET`, `I=GET` | `?` | Live values, idle |
-| `U=GET V` | `U=5.119V` | USB voltage |
-| **`M=GET`** | `M=1` | **Active profile, 1-based** — independently confirms the numbering the theme conditions rely on (`05`) |
-| `S=GET PUFFS` | `S=176` | |
-| `S=GET TIME` | `S=4202.73S` | Total fire time |
-| `S=GET ENERGY` | `S=23111.27MWH` | |
-| `S=GET LASTPOWER` | `S=18.60W` | |
-| `S=GET LASTTEMP` | `S=375.73F` | |
-| `X=GET BUTTONS` | `X=0` | Button state bitmap |
-| `X=GET MODE` | `X=0` | |
-| `X=GET SCREEN` | `X=0.000` | |
-| `X=GET TIMER` | `X=4870.68S` | Uptime |
-| `W=GET` | `W=2026-10-30,21:31:53,2026-10-30,14:31:53,00010,UP` | Clock: UTC, local, then flags |
+| `R=GET GROUND` | `R=0.000OHM` | |
+| `T=GET SP` / `P=GET SP` | `T=385.00F` / `P=36.00W` | Setpoints |
+| `T=GET BOARD` / `T=GET ROOM` | `T=82.93F` / `T=74.76F` | Answers the readability half of the board-temperature question (`09`) |
+| `V=GET SP` / `I=GET SP` | `V=9.000V` / `I=30.000A` | Limits |
+| `B=GET` / `B=GET CELLS` / `C=GET%` | `B=4.157V` / `B=1` / `C=98%` | Battery |
+| `U=GETV` / `U=GETI` / `U=GETP` | `U=5.122V` / `U=0.009A` / `U=0.042W` | USB. **No space** after `GET` |
+| `I=GET OFFSET` | `I=0.104A` | |
+| `X=GET SCRNDISC` | `X=80` | Screen width in pixels |
+| `X=GET TIMER` | `X=4979.88S` | Uptime |
+| `W=GET` | `W=2026-10-30,21:31:53,2026-10-30,14:31:53,00010,UP` | UTC, local, flags |
 
-No reply at all, so unsupported on this board: `E=GET HARDWARE`, `R=GET NOMINAL`, `T=GET AIR`, `U=GET`, `U=GET A`, `X=GET BANDGAP`, `C=GET`.
+Live-only, so `?` while idle: `P=GET`, `T=GET`, `V=GET`, `I=GET`, `R=GET LIVE`, `C=GET`, `X=GET METER`, `V=GET DEVICE`.
 
-## Not tested here — these change the device
+No reply at all on this board: `E=GET HARDWARE`, `R=GET RAW`, `R=GET NOMINAL`, `R=GET NOMINAL TEMP`, `R=GET SAMPLE TIME`, `T=GET AIR`, `T=GET NOMINAL ROOM`, `P=GET SAMPLE`, `X=GET BANDGAP`.
 
-Documented by the community and **not run**, because they write rather than read:
+### Statistics have a grammar
 
-- `F=#S` — **fires the device** for # seconds
-- `P=#W`, `T=#C` / `T=#F`, `T=OFF`, `T=MONITOR`
-- `M=#` — switch profile (1–8)
-- `U=#A` — USB current limit, 0 disables charging
-- `V=#V`, `I=#A` — limits, **not retained across a power cycle**
-- `S=RESET`, `X=RESET`
+`S=GET [when] [what] THING`, where **when** is `DEVICE` (lifetime), `LAST` (previous puff) or blank (since reset), and **what** is `MEAN`, `SD` or blank (total). `MEAN` and `SD` cannot combine with `LAST`. Things: `ENERGY`, `POWER`, `TEMP`, `PEAK TEMP`, `TIME`, `PUFFS`, `TEMP PUFFS`, plus `S=GET RESETS`.
 
-Treat all of these as live controls on a battery device. `F=` in particular fires the coil.
+On DNA Color the standard deviation divides by N; on earlier boards by N−1.
+
+| Command | Reply |
+|---|---|
+| `S=GET PUFFS` / `S=GET DEVICE PUFFS` | `S=176` / `S=183` |
+| `S=GET TEMP PUFFS` | `S=176` — every puff hit temperature protection |
+| `S=GET MEAN POWER` / `S=GET SD POWER` | `S=27.33W` / `S=8.55W` |
+| `S=GET MEAN TEMP` | `S=290.64F` |
+| `S=GET LAST POWER` / `S=GET LAST TIME` | `S=18.60W` / `S=50.34S` |
+| `S=GET LAST PEAK TEMP` | `S=391.26F` |
+| `S=GET DEVICE ENERGY` | `S=23144.58MWH` |
+| `S=GET RESETS` | `S=1` |
+
+## Writes — documented, not run here
+
+These change the device. **`F=` fires the coil.**
+
+| Command | Effect |
+|---|---|
+| `F=#S` | **Fires** for # seconds |
+| `P=#W` | Power setpoint |
+| `T=#F` / `T=#C` | Temperature limit |
+| `T=?` | **Turns temperature protection off** |
+| `T=MONITOR` | No control, but temperature still measured and readable |
+| `M=#` | Switch profile, 1–8 |
+| `U=#A` | USB current limit; `0` disables charging |
+| `V=#V` / `I=#A` | Voltage and current limits — **not retained across a power cycle** |
+| `S=RESET` / `X=RESET` | Reset statistics / device |
 
 ---
 
 ## What this unlocks
 
-**Threshold testing without hardware gymnastics.** `R=GET COLD` reads the value the replace warning keys on, so the whole warning can be checked by reading the real number instead of inferring from the screen. If a write command can set it, the thresholds can be swept outright (`09`).
+**The data the replace thresholds lack.** They rest on a single observed failure (`02`). `R=GET COLD` with `S=GET PUFFS` is the pair to log — wear tracks use, not calendar time — and `tools/dna-query.ps1 -Csv` appends exactly that.
 
-**The data the replace thresholds lack.** They rest on one observed failure (`02`). `R=GET COLD` plus `S=GET PUFFS` is exactly the pair worth logging — wear tracks use, not calendar time — and both come from one script with no GUI.
+**Checking a theme against ground truth.** `T=GET MATERIAL`, `M=GET` and `R=GET COLD` report what the firmware believes, independently of what a screen draws. When a conditional variant misbehaves, this distinguishes "the condition is wrong" from "the value is not what I assumed" — which is precisely the ambiguity that cost a day on the replace warning (`07` #25).
 
-**A board temperature answer.** `T=GET BOARD` and `T=GET ROOM` both read, which settles the readability half of the question raised in `09`. Whether the chip warns on its own is still open.
-
-**Cross-checks on what the theme sees.** `M=GET` confirms profiles are 1-based, and `T=GET COLD` matches the saved profile's measurement temperature — so this interface can verify the values a theme is reading, independently of the screen.
+**Scripted test loops.** `M=#` to switch profile and `T=#F` to move a setpoint make it possible to sweep states and watch the screen, without rebuilding a theme per case.
 
 ## Sources
 
-The command set is community-documented, not official: <https://github.com/hobbyquaker/dna-commands> and the Evolv forum thread *Plain Text Serial commands*. The table above is what **this** board actually answered, which is the part to trust.
+- Evolv's own list, Researcher Forum, *Plain Text Serial commands* (James, 2017) — the authority for the grammar and the statistics rules.
+- <https://github.com/hobbyquaker/dna-commands> — community list, broader but partly unverified; several of its entries get no reply here.
+- <https://github.com/eucalyhome/dnainfo> — a Raspberry Pi project reading a DNA over this interface in Python, confirming it works outside Windows.
+
+The verified table above is what **this** board answered, which is the part to trust.

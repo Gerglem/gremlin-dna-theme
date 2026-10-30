@@ -120,6 +120,10 @@ Recorder.StopRecording()
 
 Their Example 2 drives a Sabertooth motor controller over serial around a puff, then reads `Last Puff Energy` back — the pattern to copy if a test ever needs external hardware in the loop.
 
+> **That example does not run as written.** It calls `motor.WriteLine(...)`, and the object `Serial.Open()` returns has **no `WriteLine`** — only `Write`, which wants a .NET `Array[Byte]` rather than a string (reported on Evolv's Researcher Forum, 2020, and never corrected in the shipped help). Build the byte array explicitly, or avoid the serial route entirely.
+
+> And for the specific case that thread was chasing — **`ECig['USB Current'] = 0.0` disables charging** on boards with a built-in charger, with no serial port involved. A reminder that the `ECig` indexer writes as well as reads, and is usually the simpler path.
+
 ---
 
 ## What this is for here
