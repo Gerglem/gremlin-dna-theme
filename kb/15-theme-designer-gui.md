@@ -143,6 +143,63 @@ above 0.41 (`02`). The red is the last variant on that control, so the preview a
 So the preview is good for layout and useless for conditional color. `07` is amended accordingly: use it
 to check that things fit, and never to check that a condition works.
 
+## The condition editor - an expression language
+
+This is the most consequential thing in the tool, and it is not what the XML suggested.
+
+**Add Condition** has two inputs:
+
+- **Control** - which element the variant uses: Label, Field, Gauge, Toggle, Picture, Status, Hidden. This is the variant's element type, the thing `04` describes as "a duplicate child element". The same seven appear in the **Change Control** dialog, which swaps a control's type in place. **Memo and Chart are in the palette but not in either list**, so they can be placed but apparently cannot be a conditional variant.
+- **Condition** - a **free-text expression box**, with four inserter menus beside it.
+
+### What the inserters offer
+
+| Menu | Contents |
+|---|---|
+| **measurement** | The full device field list, grouped - the same inventory as `05` |
+| **comparison** | `<` &nbsp; `<=` &nbsp; `=` &nbsp; `!=` &nbsp; `>=` &nbsp; `>` |
+| **math** | `+ - * / ^ mod`, `pi`, and the functions below |
+| **and** / **or** / **not** | Inserted as literal words into the expression |
+
+Functions in the math menu:
+
+| Function | Does |
+|---|---|
+| `abs(v)` `ceil(v)` `floor(v)` `int(v)` | Absolute value; round up, down, toward zero |
+| **`if(test, true result, false result)`** | Picks one of two values |
+| `min(a, b)` `max(a, b)` `sqrt(v)` | |
+| `sin(deg)` `cos(deg)` `tan(deg)` | Degrees, not radians |
+| `discretize(v, step)` | Snaps to steps, rounding down |
+| **`known(v)` / `unknown(v)`** | True when the value **is** / **is not** set |
+
+`known()` is interesting on its own: it is a direct test for "has this been measured yet", which is
+exactly what the new-coil lock guard approximates by comparing cold ohms against zero (`07` #22).
+
+### What this corrects
+
+**`and` is offered by the tool, so AND is supported.** Our `<Compare Operator="64">` nesting failed on
+hardware (`09`), and the conclusion drawn was that the firmware does not support AND. That was too strong.
+The right conclusion is that **our encoding of AND was wrong** - operator 64 is our guess at how the tool
+encodes the word `and`, and it is evidently not right.
+
+**The `<Compare>` XML is a compiled form, not the authoring language.** Everything in this project has been
+written by hand-authoring `<Compare>` elements inferred from existing themes. The tool authors expressions
+and compiles them. That explains why our reverse-engineered operator table has odd gaps - `2` and `3` used
+by us but by no one else, `130` and `131` used by Copyman - and it means a hand-written condition is only
+as good as our guess at the compiler's output.
+
+**The decisive experiment is cheap:** build a condition in the GUI using `and`, save the theme, and read
+the XML. One save settles the encoding, and the per-cup replace warning could then be written as the single
+condition it should be rather than the five-layer chain that emulates it (`07` #24).
+
+### What it does not change
+
+The at-temperature indicator is still blocked, but **for a different reason than recorded** (`09`). The
+measurement list has exactly one temperature for the atomizer, `Atomizer -> Temperature`, with no separate
+live reading - matching the finding that the setpoint and the live value are the same field. So the
+obstacle is the **field inventory**, not the comparison mechanism. If a live temperature were exposed,
+an expression could compare the two directly.
+
 ---
 
 ## Not yet mapped

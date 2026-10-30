@@ -161,6 +161,13 @@ Children: `Source/Setting` (editable if not ReadOnly, e.g., brightness), `Compar
 **`LiveViewReadout`**: appears with `Field`/`ReadOnly` (fields 1, 2, 6, 65538, 65542, 131074, 196610, 655361, 1048578). Selects what the Device Monitor live view records (M).
 
 ### 1.6 `Compare`: conditions
+
+> **`<Compare>` is a compiled form.** Theme Designer authors conditions as **expressions** - a text
+> box with `and`, `or`, `not`, six comparisons and a math library including `if()` and `known()`
+> (`15`). The elements below are what that compiles to, inferred from reading themes. Treat the
+> operator numbers as our best reconstruction of a compiler's output, not as the format's own
+> vocabulary - which is why the table has gaps and disagreements.
+
 ```xml
 <Compare Operator="1" Field="17825798" RefValue="0" />
 <Compare Operator="64"> <Compare …/> <Compare …/> </Compare>
