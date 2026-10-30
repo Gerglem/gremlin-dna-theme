@@ -73,6 +73,15 @@ From EScribe's debug log, which is worth knowing if a connection ever misbehaves
 
 The log also carries the device **serial number**. Keep logs out of this repo (`12`).
 
+### It is a composite device, and the serial port is a second way in
+
+Windows enumerates the mod as **two** interfaces under `USB\VID_268B&PID_0433`:
+
+- **`MI_00`** — the HID interface. This is what EScribe uses for settings transfer, the one the debug log opens. Vendor `0x268B` = 9867 and product `0x0433` = 1075, the decimal values the log prints.
+- **`MI_01`** — a **USB CDC serial port**, driven by Microsoft's stock `usbser`. It appears as an ordinary COM port (COM4 on this machine), 9600 8-N-1, no flow control. EScribe's **Serial Terminal** (Tools menu, with its own Scripting menu) connects to this.
+
+The second interface is the interesting one. It is a standard serial port, so it is reachable by **anything** — PuTTY, `pyserial`, or Device Monitor's own `Serial.Open('COM4')` (`14`). Whatever command set it speaks is undocumented: the install's help never mentions the Serial Terminal, and the only trace of it in the files is the UI string in `Translations/en.po`. **Unexplored.** The obvious first move is to open the terminal and try `help` or `?`.
+
 ---
 
 ## Reading these files
