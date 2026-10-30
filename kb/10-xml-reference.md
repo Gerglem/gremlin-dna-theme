@@ -120,6 +120,8 @@ Colors are **unsigned 32-bit ARGB integers in decimal**, for example `4294967295
 **`Memo`**: text block (seen once: `Text="Resample"` with an Action). Same attributes as Label.
 
 **`Field`**: live or editable value. Children: `Source/Setting`, `Action`, `Compare`, `Padding`.
+- **Format strings (from EScribe's own help, not yet used here):** a Field can carry a format in which `#` marks where the number goes — `#W` renders `10.0W`, `#V` renders `4.20V`, `You have taken # puffs` renders the count inline. That is a cleaner way to label a value than a separate Label control, and it costs no extra control.
+- **Inline color and font tags:** a Label's text and a Field's format can both carry tags that switch color or font partway through, so one control can mix them — e.g. a number in white with its unit in gray. The palette slots are the "Extra Color" entries in Theme Designer's Appearance tab. Also unused here.
 ```xml
 <Field FontStyle="1" HAlign="1" VAlign="1">
   <Source><Setting Field="16778242" Decimals="0" HideUnits="1" ReadOnly="1" StepSize="2" /></Source>
@@ -167,12 +169,12 @@ Children: `Source/Setting` (editable if not ReadOnly, e.g., brightness), `Compar
 |---|---|---|
 | `0` | (seen; likely "always" or "==") | M |
 | `1` | value ≠ RefValue | C |
-| `2` | value > RefValue | **C** (on-device 2026-10-30) |
+| `2` | value > RefValue | **C** (on-device 2026-10-30). Evolv's own themes never use `2` or `3`; they express the same thing with `130` / `131`, which may be why these were the shakier entries |
 | `3` | value < RefValue | C |
 | `4` | value ≥ RefValue (or ≤) | M |
-| `128 + n` | negated form of n (`129` = equals, **confirmed** with profile slots; `130` ≤, `131` ≥) | H/C |
-| `64` | AND of the nested Compares. **Does not work on the DNA100C — tested 2026-10-30:** a variant whose `Compare` was `AND(profile == 1, ohms > 0.4)` never applied, while the same `ohms > 0.4` on its own did. Emulate it by layering flat variants (`07` #24). | **X** |
-| `65` | OR of the nested Compares | H |
+| `128 + n` | negated form of n (`129` = equals; `130` ≤; `131` ≥) | **C** — all three appear in Evolv's stock files; `131` 14 times and `130` twice, used together on one field to bracket a range |
+| `64` | AND of the nested Compares. **Not supported.** Appears in **none** of the 77 stock `.ecig` / `.ecigtheme` files shipped with EScribe, and **tested 2026-10-30:** a variant whose `Compare` was `AND(profile == 1, ohms > 0.4)` never applied, while the same `ohms > 0.4` on its own did. Emulate it by layering flat variants (`07` #24). | **X** |
+| `65` | OR of the nested Compares | **C** — Evolv's own themes use it, e.g. `<Compare Operator="65"><Compare Operator="1" Field="419954690" RefValue="0" /><Compare Operator="1" Field="419889154" RefValue="0" /></Compare>` on a preheat field. **So nesting itself works** — operator 64 failing is about that value, not the structure. |
 `RefValue` is numeric and compared in the field's units (%, °F, seconds…).
 
 ### 1.7 `Action`

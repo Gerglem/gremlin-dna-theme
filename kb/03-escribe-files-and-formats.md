@@ -38,6 +38,18 @@
 `<DESabertooth Device="109" …>` with many `<Feature Name="…" Index="n">value</Feature>` entries. Text values are base64, and some are XML-escaped plain text. Theme parts live here too: EvolvFont (XML-escaped font XML), EvolvUIDesign, EvolvWallpaper (PNG), EvolvThemeTitle/Author, EvolvColorScheme, EvolvLEDTrack, EvolvBatteryDischargeCurve, EvolvCVMaterialTemperatureProfile.
 - **Default Evolv theme fonts were extracted from the default `.ecig`:** "Built SemiBold" at sizes 18 (Normal), 24 (Big), and 13 (Small), with `<Metrics Ascender/Descender>`. Gremlin uses these exact bitmaps.
 
+## The EScribe install tree (reference material)
+A copy of EScribe's installed files lives at `G:\My Drive\Equipment\Thelema\EScribe Suite`, and it is the best authority available on this format short of the firmware:
+- **73 stock `.ecig` configs and 4 stock `.ecigtheme` files**, covering every DNA board. These are Evolv's own work in exactly our format, so they settle questions that otherwise cost a build-and-test cycle — which `Compare` operators are real, how `EvolvUIDesign` is laid out, which fields a given board exposes. Scanning all 77 is what established that operator 64 is unsupported (`10`).
+- **Help pages** at `Help/*.html` — `td_triggers.html`, `td_tagsandformatting.html`, `td_themedesigner.html`, plus the Device Monitor and Python scripting pages. Thin on the theme XML itself, but `td_tagsandformatting.html` documents field format strings and inline color tags (`10`).
+- **Device Monitor runs IronPython scripts** (`dm_pythonscripting.html` and the `dm_commands*` pages), and this is the most useful thing in the tree. `ECig['Cold Ohms']` is both a getter **and a setter**, alongside `Live Ohms`, `Temperature`, `Puffs`, `Last Puff *` and the battery and USB rails. `ECig.Puff(seconds)` fires the device, `CSV.Create(path)` / `csv.Write([...])` and `Recorder.Record(file)` log to disk, and `Script.Sleep` / `Script.SetStatus` drive the loop. Two things that matters for:
+  - **Testing a theme condition without hardware gymnastics.** Set cold ohms to a value past a threshold and watch the screen, instead of building a theme with deliberately wrong limits and pre-locked cups, which is how the 2026-10-30 replace-warning tests had to be run (`09`).
+  - **Building the dataset the replace thresholds lack.** They currently rest on a single observed failure (`02`). A script that logs cold ohms per profile over time would put them on real evidence.
+  To get `Run Script` without the warning prompt each time, set Options → User Interface to Researcher or Manufacturer mode.
+- **`EScribe.pdf`** — the full manual, not yet mined.
+- **Firmware images** per board under `Firmware/`, and `Backups/` holding the configs EScribe saved before each upload — useful for recovering a known-good state.
+- **`.ecigthemex` files are encrypted** (Theme Designer's own project format), not readable, so the `.ecigtheme` backups are the ones worth reading.
+
 ## Reference setups (as published)
 **Gremlin - Color Themes v2.2** (`../release/gremlin_v2.2.03.ecig`, also as single profiles in `../release/profiles/`):
 - Slot 1 **DTv5XL** (material DTv5XL/TCR 200, 36W, 380°F, session 60s)
