@@ -14,12 +14,63 @@ Confirmed in Windows device enumeration, 2026-10-30:
 
 | | Interface | Status |
 |---|---|---|
-| **Primary** | **HID** (`MI_00`) — what EScribe uses for settings transfer | In progress, see below |
+| **Primary** | **HID** (`MI_00`) — what EScribe uses for settings transfer | **SOLVED for read and control, 2026-10-30.** See below |
 | Backup | **CDC serial** (`MI_01`, a COM port) — what the Serial Terminal talks to | Unexplored; command set unknown |
 
 HID is the goal because it is demonstrably capable of the whole job: it is how every config this project has ever shipped reached the mod. The serial port is the fallback precisely because we do not yet know what it can do.
 
 ---
+
+## SOLVED 2026-10-30: the HID channel is open, and it is the text protocol
+
+`tools/dna-hid.py` reads and drives the board over HID with **no EScribe, no COM port and no driver
+install** - only `pip install hidapi`. Verified against the serial baseline on the same board, same
+minute:
+
+    E=GET PRODUCT  ->  E=DNA 100 Color      R=GET COLD  ->  R=0.464OHM
+    E=GET VERSION  ->  E=311105588          T=GET SP    ->  T=385.00F
+                                            S=GET PUFFS ->  S=186
+
+**Evolv's 2015 claim is literally true**: HID is serial tunneled over HID, so every command in `17`
+works here unchanged.
+
+### The framing
+
+    report id 0x01 | magic 0xDE | length | payload | zero pad to 63 bytes
+
+The payload is the plain-text line including its `
+`, and `length` counts it: `0x0A` for
+`B=4.122V
+`. Reports are 63 bytes in and out with no feature reports, which matches what EScribe's
+own debug log prints on every open.
+
+Two things cost time and are worth knowing:
+
+- **The report ID is `0x01`, not `0x00`.** A write with `0x00` is rejected by Windows and hidapi
+  returns `-1` with no further explanation.
+- **The board streams unsolicited reports** in the same framing - battery volts, power, temperature,
+  on a loop. A read can easily return a line nobody asked for, so always match on the expected prefix.
+
+### It also works where serial does not
+
+`13` notes the CDC port is unusable on macOS, because the composite device needs an Interface
+Association Descriptor that macOS does not support. HID has no such problem, so this is the portable
+path as well as the fast one.
+
+### Passive observation, which is the way in to the upload protocol
+
+Windows delivers HID input reports to **every open handle**. Opening our own handle while Device
+Monitor polls shows Device Monitor's replies arriving live - `W=` clock lines, `U=` USB volts and
+watts, `B=-1.659A`, `C=96%`, `X=` flags. So **EScribe's session can be watched without USBPcap**, at
+least in the device-to-PC direction.
+
+That is the lever on the one unsolved piece. During an upload the device's side of the conversation is
+visible for free; only the PC-to-device direction needs a real capture. Combined with a settings image
+we already hold, that may be enough.
+
+**Caveat, learned immediately:** with Device Monitor running, replies interleave and a prefix match can
+grab someone else's line - a `S=GET ENERGY` came back `S=291.87F`, a temperature. **Close Device
+Monitor for clean reads.**
 
 ## What is and is not reachable - settled by Evolv, 2015
 

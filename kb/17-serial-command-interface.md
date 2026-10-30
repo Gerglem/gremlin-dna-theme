@@ -1,5 +1,11 @@
 # 17 – The plain-text serial command interface
 
+> **The same command table works over HID.** As of 2026-10-30 the vendor HID interface (`MI_00`) is
+> open and speaks exactly this protocol, framed as `01 DE <len> <payload>`. `tools/dna-hid.py` is the
+> client; `16` has the framing and the gotchas. HID needs no COM port and works on macOS, where the
+> CDC port does not, so prefer it. Everything below applies unchanged to both transports.
+
+
 **The mod is a command console.** It answers plain-text commands over its USB serial port, with no EScribe involved — read resistance, temperatures, statistics and the active material, and drive the device directly. This is the scriptable control `16` set out to find, and it needs no reverse engineering: Evolv documented it.
 
 Everything in the **Verified** table was run against this DNA 100 Color, firmware SP55.1 INT, on 2026-10-30.
