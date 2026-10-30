@@ -90,9 +90,9 @@ Serial Terminal connected to **Gremlin**, status "Connected." Sent `?`, `help`, 
 EScribe echoing. The mod sent nothing at all - not even an error - and that test said nothing about
 the device.
 
-**And the test was run through the wrong lens.** View -> Display offers **Text, Decimal, Hexadecimal**
-**and CSV**, and it was set to **CSV** - the Send button even reads "View CSV". Anything the mod
-emitted that was not valid CSV may simply never have been shown. Before concluding this channel is
+**The display mode is worth knowing about.** View -> Display offers **Text, Decimal, Hexadecimal**
+**and CSV**; when seen set to CSV the Send button reads "View CSV". That was the operator experimenting rather than the state during the test, so it does **not** explain the silence - but anything the mod
+emits that is not plain text would still be invisible in Text mode. Before concluding this channel is
 dead: **turn Local Echo off, set Display to Hexadecimal**, and watch while the mod is idle, while
 buttons are pressed, and while it fires.
 
