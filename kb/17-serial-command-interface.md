@@ -151,6 +151,16 @@ These change the device. **`F=` fires the coil.**
 
 ---
 
+## What serial cannot reach
+
+- **Per-profile settings.** Asked directly on the Researcher Forum in 2018 - material, preheat power,
+  punch and time, per profile - and **Evolv never answered**, across two prompts over three months.
+  Taken with their statement that settings bake to an encrypted binary (`16`), treat it as absent.
+  `M=#` switches which profile is active; nothing edits what a profile contains.
+- **Relative adjustment.** Setpoints are absolute only. There is no "current watts + 10" or "+10%";
+  read with `P=GET SP`, compute, then set the new absolute value.
+- **Themes and configs.** Encrypted binary upload, EScribe only (`16`).
+
 ## What this unlocks
 
 **The data the replace thresholds lack.** They rest on a single observed failure (`02`). `R=GET COLD` with `S=GET PUFFS` is the pair to log — wear tracks use, not calendar time — and `tools/dna-query.ps1 -Csv` appends exactly that.
@@ -163,6 +173,7 @@ These change the device. **`F=` fires the coil.**
 
 - Evolv's own list, Researcher Forum, *Plain Text Serial commands* (James, 2017) — the authority for the grammar and the statistics rules.
 - <https://github.com/hobbyquaker/dna-commands> — community list, broader but partly unverified; several of its entries get no reply here.
+- **ECigStats** is why the `E` and `S` command sets exist: Evolv's cloud puff-statistics service speaks them, and EScribe's "Internet Sync" feeds it. James published a C# client library for its API in 2017. Not useful here, but it explains why device identity and lifetime statistics are first-class commands while profile contents are not.
 - <https://github.com/eucalyhome/dnainfo> — a Raspberry Pi project reading a DNA over this interface in Python, confirming it works outside Windows.
 
 The verified table above is what **this** board answered, which is the part to trust.
