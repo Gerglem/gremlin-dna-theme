@@ -12,7 +12,7 @@ A Lost Vape Thelema Solo converted to an **Evolv DNA100C**, set up for Divine Tr
 - [`AI-GUIDE.md`](AI-GUIDE.md): how to use these docs with an AI assistant
 - [`reddit/01-dna100c-thelema-chip-swap.md`](reddit/01-dna100c-thelema-chip-swap.md): chip swap guide (parts, soldering, screen, power-up)
 - [`reddit/02-gremlin-theme-and-dt-profiles.md`](reddit/02-gremlin-theme-and-dt-profiles.md): loading the theme, materials, profiles, and calibration
-- [`release/`](release/): **`Gremlin-Color-Themes-v2.1.ecigtheme`** (current theme), `gremlin_v1.0_theme.ecigtheme` and `gremlin_v1.0.ecig` (v1.0 theme and full device config), `profiles/*.ecigprofile`, `materials/*.csv`
+- [`release/`](release/): **`Gremlin-Color-Themes-v2.1.ecigtheme`** (current theme) and **`Gremlin-Color-Themes-Full-Setup-v2.1.ecig`** (v2.1 full device config: the theme plus the four Divine Tribe profiles), `gremlin_v1.0_theme.ecigtheme` and `gremlin_v1.0.ecig` (v1.0 theme and full device config), `profiles/*.ecigprofile`, `materials/*.csv`
 - [`high-contrast/`](high-contrast/): **Gremlin High Contrast - Large Text v1.0**, a separate theme for low vision
 - [`kb/`](kb/): detailed technical notes (reverse-engineered theme format, DNA field IDs, design spec, gotchas)
 - [`images/`](images/): build photos
