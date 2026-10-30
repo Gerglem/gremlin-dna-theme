@@ -86,11 +86,15 @@ traffic is the command. If the HID route needs a USB capture, Identify is the si
 Serial Terminal connected to **Gremlin**, status "Connected." Sent `?`, `help`, `hello`, `dir`, `ls`,
 `/`, `/help`, `/?` and an empty line. Every one appeared in the Data pane; **none produced a reply**.
 
-So the mod is not a text console on this channel. Whether the echo comes from the mod or from EScribe
-is **unresolved** - and it is the one thing still worth checking here, because it decides whether this
-channel carries anything at all. **Disconnect the mod and type again:** text still appearing means
-EScribe echoes locally and this proves nothing about the device; text stopping means the mod echoes,
-which would prove a live two-way link that simply does not know these words.
+**Resolved:** the View menu has **Local Echo** and it was **on**, so every one of those lines was
+EScribe echoing. The mod sent nothing at all - not even an error - and that test said nothing about
+the device.
+
+**And the test was run through the wrong lens.** View -> Display offers **Text, Decimal, Hexadecimal**
+**and CSV**, and it was set to **CSV** - the Send button even reads "View CSV". Anything the mod
+emitted that was not valid CSV may simply never have been shown. Before concluding this channel is
+dead: **turn Local Echo off, set Display to Hexadecimal**, and watch while the mod is idle, while
+buttons are pressed, and while it fires.
 
 Either way the text-console idea is finished, for both COM4 and this connection. **The HID protocol is
 the remaining road**, and `Identify` - which visibly toggles the mod's display - is the command to
