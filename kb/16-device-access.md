@@ -133,6 +133,66 @@ obfuscation at that layer. Map its parameters, then drive it with `dontUpload` s
 > Note when scanning: `AX` is a very common obfuscated method name, so an IL scan for callers of the
 > Programmer's `AX` returns two dozen false positives. Match on the distinctive names instead.
 
+## The upload architecture, mapped 2026-10-30
+
+Four probe runs in Device Monitor plus IL reading. The shape is now clear, and it says why the direct
+route failed.
+
+### What fails, and why
+
+`AX()` - the read side - throws `NullReferenceException` for every combination of arguments tried:
+null progress monitor, each of Evolv's three concrete monitors (`A.FMQ`, `A.BTQ`, `A.PMW+RXW`, all
+with parameterless constructors), and three shapes of the `bool[]`. The stack frame is `at (Object )`,
+obfuscated, but it confirms the throw is **inside** `AX`, not in argument marshalling.
+
+The cause is almost certainly **the Programmer has no layout**:
+
+- `OCC` carries a field `IE : LogicalLayout`, exposed as the settable property `NM`.
+- `Programmer.CreateForDNAColor` never sets it - its IL builds a `WOC` holding the `NHW` cache, three
+  delegates, and hands off to an external constructor.
+- `ECC..ctor(Int32, ZOC, JOC, ROC)` stores four fields and no layout.
+
+So a Programmer built the way we were building it is **not usable** - it has a transport but no map of
+the flash it is talking about. That is exactly the piece that must not be guessed.
+
+### The missing layer: `A.PYB` in `DEScribe.Core`
+
+This is the settings-document-and-device model, and it owns everything we were missing:
+
+| Member | Reading |
+|---|---|
+| `PE()` -> `LogicalLayout` / `NE(LogicalLayout)` | get and set the flash map |
+| `NE(PagingMethod, Int32, Int32, Int32, Boolean)` | **builds a region** - the layout is assembled here |
+| `KE()` -> `Dictionary` / `SE(Dictionary)` | the settings values |
+| **`UE(Func<>, Int32)` -> `OCC`** | **returns a fully configured Programmer** |
+| `ctor(GGQ, Object, Nullable<T>)` | needs a `GGQ`, not yet identified |
+
+**`PYB.UE(...)` is the correct factory**, not `Programmer.CreateForDNAColor`. Going through it means
+the layout comes from Evolv's own code for this board, which was the whole point of choosing this
+route over reimplementing the protocol.
+
+### Corrections to earlier entries
+
+- `VYB` is **not** an orchestrator. It derives from `ECC`, so it is a Programmer subclass. Useful only
+  because parameter names survived there: `PerformUpload(Object context, IProgressMonitor progress,
+  Boolean dontUpload)`, `UpdateBegin(Boolean writable)`.
+- `ZSO.SGE` / `ZSO.PGE` in `DEScribe.UI` are 36-byte factories, not the upload and download entry
+  points they looked like.
+- `QMQ` from `HLF.XK()` does **not** implement `NHW`, so it is not the SHA-1 cache argument. The only
+  implementor is `A.DHW`, which does have a parameterless constructor.
+
+### Where this leaves a push
+
+**Further away than it looked, and deliberately not attempted.** Driving `PerformUpload` with a
+hand-built `LogicalLayout` would mean inventing region sizes, device offsets and paging for live
+flash. `dontUpload` does not protect against that: it validates the plan it is given, not whether the
+plan is right for this board. And it would bypass the gates rather than keep them, which is the
+opposite of the requirement.
+
+The honest next step is to obtain a live `PYB` - either from EScribe's object graph inside Device
+Monitor, or by constructing one once `GGQ` is identified - and take the Programmer from `UE()`. Then
+`AX()` should work, and a real read validates the whole chain before any write is considered.
+
 ## The settings transfer, captured 2026-10-30
 
 One real `Upload Settings to Device` was watched from a second HID handle while EScribe did the work.
