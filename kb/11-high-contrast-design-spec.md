@@ -1,6 +1,6 @@
 # 11 – Gremlin High Contrast - Large Text v1.2: Design Spec
 
-Released file: `../high-contrast/files/gremlin_high_contrast_v1.2_theme.ecigtheme` (theme title "Gremlin High Contrast - Large Text"). User landing page: `../high-contrast/README.md`.
+Current internal build: `../high-contrast/files/gremlin_high_contrast_v1.2.01_theme.ecigtheme` (theme title "Gremlin High Contrast - Large Text"). User landing page: `../high-contrast/README.md`.
 
 ## Goals
 Built for low vision. Large text, maximum contrast, only what's needed on each screen. Everything else stays at defaults and is changed in EScribe.
@@ -32,7 +32,7 @@ Black background. White text; yellow `(1, 0.92, 0)` for labels and the live temp
 
 **Lock (Usage 1):** LOCKED (yellow), FIRE 5X, TO UNLOCK, divider, BATTERY + % (red under 15%), status line.
 
-**New coil (Usage 3):** NEW COIL? (Small, yellow), YES, NO (initially highlighted, for safety), MEASURE, **LOCK? + ohm-lock Toggle 85196802 (28×28)**, status. Accepting a new coil stores its cold resistance but does not lock it, which is why the toggle is here. The LOCK? label and its toggle are a variant pair (default `<Hidden/>` with the real element carrying `<Compare Operator="1" Field="1048579" RefValue="0" />` on an `UpdateLive` control): they appear only once cold ohms (17825794) is non-zero, so the lock can only ever be set on a resistance the mod has actually stored, never on the 0 a fresh config ships (`07` #22).
+**New coil (Usage 3):** NEW COIL? (Small, yellow, y0–22), **new-coil ohms 1048579 (Normal, `Decimals="3" ReadOnly="1"`, units left on so the firmware draws the Ω — "0.430Ω" is 61px of the 80px row, y22–54)**, YES (y54–81), NO (initially highlighted for safety, y81–108), **LOCK? + ohm-lock Toggle 85196802 (28×28, y106–134)**, status (y134–160). Fills 160 px exactly. **MEASURE was removed to fit the readout:** at 24 px a Normal row needs ~26 px and keeping both came to 168 px, and on this screen MEASURE gave no visible feedback at all because nothing displayed the value it changed. `ResampleOhms` is still on the OHMS screen, next to the stored number. Accepting a new coil stores its cold resistance but does not lock it, which is why the toggle is here. The LOCK? label and its toggle are a variant pair (default `<Hidden/>` with the real element carrying `<Compare Operator="1" Field="1048579" RefValue="0" />` on an `UpdateLive` control): they appear only once cold ohms (17825794) is non-zero, so the lock can only ever be set on a resistance the mod has actually stored, never on the 0 a fresh config ships (`07` #22).
 
 ## Version history
 v0.1 first build · v0.2 stop SET/watts wrapping, MENU moved to top · v0.3 firing takeover via hide-all · v0.4–v0.5 two-line profile name, simplified menu · v0.6 status line back in its own row, watts moved to menu · **v1.0 release** · **v1.1** lock screen shows unlock instructions; full setup ships auto-lock off; LED sequences stripped · **v1.2** ohm-lock toggle on the new-coil screen; the menu's fourth row became an `Ω OHMS` link to a new OHMS child screen carrying the locked resistance, the lock toggle and MEASURE; the new-coil lock label reads **LOCK?**; menu re-packed to fit; both vaping profiles start at 380°F.

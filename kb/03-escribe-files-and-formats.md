@@ -39,13 +39,13 @@
 - **Default Evolv theme fonts were extracted from the default `.ecig`:** "Built SemiBold" at sizes 18 (Normal), 24 (Big), and 13 (Small), with `<Metrics Ascender/Descender>`. Gremlin uses these exact bitmaps.
 
 ## Reference setups (as published)
-**Gremlin - Color Themes v2.2** (`../release/gremlin_v2.2.ecig`, also as single profiles in `../release/profiles/`):
+**Gremlin - Color Themes v2.2** (`../release/gremlin_v2.2.01.ecig`, also as single profiles in `../release/profiles/`):
 - Slot 1 **DTv5XL** (material DTv5XL/TCR 200, 36W, 380°F, session 60s)
 - Slot 2 **QuestCup** (material QuestCup/TCR 120, 25W, 380°F)
 - Slot 3 **DTv5XL-Clean** (Watts, 38W, 120s), slot 4 **QuestCup-Clean** (Watts, 35W, 45s)
 - Slots 5–8 hidden. Cold resistance 0 and unlocked on all slots. Battery soft cutoff 3.0V. Color theme switches off (Classic).
 
-**Gremlin High Contrast v1.2** (`../high-contrast/files/gremlin_high_contrast_v1.2.ecig`):
+**Gremlin High Contrast v1.2** (`../high-contrast/files/gremlin_high_contrast_v1.2.01.ecig`):
 - Same settings with short names **XL / QUEST / XL CLEAN / Q CLEAN**, both vaping profiles at 380°F, and **auto-lock off** (`EvolvXAutoLock=0`).
 
 Notes:

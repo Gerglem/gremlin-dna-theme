@@ -33,14 +33,14 @@ There are three kinds of files. You only need one of the first two.
 
 ### Option A: The full setup file (easiest)
 
-- File: [gremlin_high_contrast_v1.2.ecig](files/gremlin_high_contrast_v1.2.ecig)
+- File: [gremlin_high_contrast_v1.2.01.ecig](files/gremlin_high_contrast_v1.2.01.ecig)
 - What it contains: the theme **and** four ready-made profiles, all in one file.
 - Choose this if you use Divine Tribe V5 XL cups or the Lightning Quest, and you want everything set up at once.
 - Note: this replaces all the settings on your mod.
 
 ### Option B: The theme only
 
-- File: [gremlin_high_contrast_v1.2_theme.ecigtheme](files/gremlin_high_contrast_v1.2_theme.ecigtheme)
+- File: [gremlin_high_contrast_v1.2.01_theme.ecigtheme](files/gremlin_high_contrast_v1.2.01_theme.ecigtheme)
 - What it contains: only the screens, colors, and text size.
 - Choose this if you want to keep your own profiles and settings. Only the look of the screen changes.
 
@@ -85,14 +85,14 @@ Before you start, connect your mod to your computer with the USB cable and open 
 ### To install the full setup file
 
 1. In EScribe, open the **File** menu and choose **Open**.
-2. Choose **gremlin_high_contrast_v1.2.ecig**.
+2. Choose **gremlin_high_contrast_v1.2.01.ecig**.
 3. Select **Upload Settings to Device**.
 4. Follow step 4 under "To add a single profile" to lock each cup's resistance.
 
 ### To install the theme only
 
 1. Select the **Theme** tab.
-2. Load **gremlin_high_contrast_v1.2_theme.ecigtheme**.
+2. Load **gremlin_high_contrast_v1.2.01_theme.ecigtheme**.
 3. Select **Upload Settings to Device**.
 
 ### To add a single profile
@@ -154,7 +154,9 @@ Choose **Ω OHMS** in the menu to open this screen. It is where you check that t
 - **MEASURE**: reads the heater again and updates the number. Use it with the lock off, when the mod is cold.
 - **BACK**: returns to the menu.
 
-A cold reading for a Divine Tribe cup is usually between 0.3 and 0.5 ohms. If it reads 0, or something far from that, the heater is not making proper contact — unscrew it and put it back on before you lock anything.
+A fresh Divine Tribe **V5 XL** cup reads **0.44 to 0.49 ohms** cold. The Lightning Quest has not been measured here, so there is no published figure for it yet. If a cup reads 0, or far outside its usual range, the heater is not making proper contact — unscrew it and put it back on before you lock anything.
+
+**Watch this number over the life of the cup.** A cup on its way out reads higher than it used to: one V5 XL went from 0.43 to 0.61 ohms over two weeks and had to be replaced, with nothing wrong with the base. A steady climb well above the fresh range means order a replacement.
 
 ### Lock screen
 
@@ -164,13 +166,13 @@ When the mod is locked, the screen says **LOCKED** and tells you how to unlock i
 
 ### New coil screen
 
-![New coil screen. NEW COIL question, YES, NO, MEASURE, and LOCK question with a padlock.](images/new-coil-screen.png)
+![New coil screen. NEW COIL question, the measured resistance in ohms, YES, NO, and LOCK question with a padlock.](images/new-coil-screen.png)
 
 This screen appears if you attach a different heater while the resistance lock is off.
 
 - **YES**: this is a new heater.
 - **NO**: this is the same heater. NO is selected by default, for safety.
-- **MEASURE**: reads the heater again.
+- The **number under the question** is the resistance the mod just measured, in ohms. Check it looks right before you answer — see the ohms screen below for what to expect.
 - **LOCK?**: the resistance lock. Answering YES stores the new reading but leaves the lock off, so this is here to turn it on without going to the menu. **Answer the question first** — YES for a new heater, NO to keep the one you had. This row only appears once the mod has a resistance stored for the heater, so the first time you set a mod up it will not be there until you answer. That is on purpose: the lock holds the stored resistance, and before you answer there is nothing to hold. If the screen closes when you answer, lock it from **MENU → Ω OHMS** instead.
 
 If you leave the lock on, this screen does not appear at all when you change heaters. Unlock it first, swap the heater, then lock it again.
