@@ -241,6 +241,39 @@ an expression could compare the two directly.
 Below those sit six alignment and distribution buttons, and **Add Condition... / Change Control... /
 Delete Control**.
 
+### Toggle carries its own images, and a Source
+
+A Toggle's panel is unlike the others:
+
+| GUI | XML |
+|---|---|
+| **Off:** swatch + `Load...` / `Save...` / `Actions` | `Empty="<base64>"` |
+| **On:** swatch + `Load...` / `Save...` / `Actions` | `Full="<base64>"` |
+| Action -> `Set...` | `<Action>` |
+| Source, with `Options` / `Type...` | `<Source><Setting Field="..." /></Source>` |
+
+So the two state images are per-control, loadable from file, and each has its own `Actions` button -
+which is not the same as the control's single `Action`. Our lock padlock uses `Full` / `Empty` exactly
+this way. A Toggle has **no Color, Font or Padding** - it is images, not text.
+
+The example captured had Source `Display -> Stealth`, confirming a Toggle can drive any boolean
+setting, not just the ohm lock.
+
+### Status and Hidden
+
+**Status** is a text control: Alignment, Color, Font, Padding, Action, Location, Size, Z Order,
+`Initially highlighted`. It has **no Source** - the firmware decides what it says. The captured one
+rendered `DNA`, which is the chip's own status line, so this is the control that surfaces warnings
+like *Temp Protected* (`09`).
+
+**Hidden** is the smallest control in the format: `Location`, `Size`, `Z Order`,
+`Initially highlighted`, and nothing else. Beside its `Add Condition...` button the GUI prints
+
+> *"Add a condition by which this control will be visible."*
+
+which is the vendor stating the default-Hidden pattern outright. Our new-coil lock guard is built on
+exactly that: a `Hidden` default variant with the real control carried on a condition (`07` #22).
+
 ### Memo is a multi-line Label
 
 That is the whole difference. Its **Text** box is multi-line where a Label's is a single field, and it
@@ -407,10 +440,12 @@ Ours is the battery bar, and everything about it was inferred from reading files
 
 **Settles:** `Full` / `Empty` images, `Direction`, `Orientation`.
 
-### 5. Label, Toggle, Picture, Status
+### 5. Label, Toggle, Picture, Status - PART DONE
 
-Mostly confirming. For **Label**, the `Text` box with its `+` tag menu open - inline color and font tags
-are documented in EScribe's help and unused here. For **Picture**, whatever `PictureEncoding` is called.
+**Toggle, Status and Hidden are captured** and written up under *Control properties* above.
+
+Outstanding: **Label**'s `Text` box with its `+` tag menu open - inline color and font tags are
+documented in EScribe's help and unused here - and **Picture**, for whatever `PictureEncoding` is called.
 
 ### 6. ~~Common properties, on any control~~ - DONE
 

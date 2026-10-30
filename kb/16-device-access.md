@@ -2,7 +2,15 @@
 
 **Goal:** read and write the device from a command line, without EScribe's GUI in the loop — so a change can be uploaded and checked in seconds instead of by hand.
 
-Two interfaces, and the mod exposes both at once as a USB composite device (`13`):
+Confirmed in Windows device enumeration, 2026-10-30:
+
+| InstanceId | What |
+|---|---|
+| `USB\VID_268B&PID_0433\<serial>` | USB Composite Device. **The instance ID is the board serial** - never paste one into this repo (`12`) |
+| `...&MI_00` | **HID-compliant vendor-defined device** |
+| `...&MI_01` | USB Serial Device (COM4) |
+
+`268B` is Evolv, `0433` this board. Two interfaces, exposed at once as a USB composite device (`13`):
 
 | | Interface | Status |
 |---|---|---|
@@ -59,12 +67,74 @@ The returned object carries the device link. Most of the assembly is obfuscated 
 | `PerformUpload(context, IProgressMonitor, bool dontUpload)` | Executes it — **note the `dontUpload` dry-run flag** |
 | `AX(IProgressMonitor, bool[])` → `TOC` | Unidentified; the shape suggests the download/read side |
 
-### What is still unknown
+### Resolved 2026-10-30 by reflection - three of the four
 
-- How to obtain the `NHW` cache the factories want.
-- How the device stream is opened and handed over — presumably an enumeration API in `DEScribe.Core` or `DimensionEngineering.Common`, neither of which reflects cleanly yet.
-- Which member reads settings *out*. `AX` is the candidate.
-- Whether any of this works outside EScribe's own process and licensing.
+Still inert: nothing below has been executed, only enumerated.
+
+**1. `NHW` is an interface, so we supply it.** `A.NHW` in `DimensionEngineering.Common.dll` has a null
+base type and no constructors, and exactly two members:
+
+    byte[] AE(byte[], Nullable<T>)
+    void   FE(byte[], int, int, out byte[])
+
+That is a SHA-1 cache contract - the uploader hashes each region so it can skip chunks that have not
+changed. We do not need to find an instance: implement the interface, or try `null`. The parameter is
+even named `sha1Cache` in `CreateForDNAColor`, which is the one name the obfuscator left alone.
+
+**2. The device link is `OCC.Stream`, type `A.POT`, and it is settable** (`CanWrite = True`). So the
+programmer does not have to discover the device - we can open one and assign it.
+
+**3. The opener is `A.BGQ.FE(String, Int32, Int32, Int32, CSH, Int32, IGI) -> POT`** in
+`DimensionEngineering.Common.dll`. A string path followed by VID/PID-shaped integers: a HID open by
+device path. The path is the one Windows reports, `HID\VID_268B&PID_0433&MI_00\...`.
+
+**4. Reading is `AX(IProgressMonitor, bool[]) -> TOC`,** and `TOC` takes `ctor(byte[])` / `ctor(int)`,
+so it wraps a settings image. `OX(int)` and `WX(int, int)` also return `byte[]` and look like
+region/range reads.
+
+**Still unknown:** whether any of it runs outside EScribe's process and licensing. That is now the
+single open question, and the read path answers it without risking a write.
+
+### The memory model, which came out unobfuscated
+
+`DEScribe.Upload` has exactly four public, unobfuscated types - the intended API:
+
+| Type | Shape |
+|---|---|
+| `Programmer` | The two factories |
+| `Layout.LogicalLayout(IEnumerable<LogicalRegion>)` | `Regions`, **`PCSize`**, **`PCSizeUsed`** |
+| `Layout.LogicalRegion(method, size, deviceOffset, pcOffset, noCache, hashWholeRegion, hashChunkSize, tag, readOnly)` | One flash region |
+| `Layout.PagingMethod(isPaged, pageSize, minipageSize, sectorSize)` | With named presets: `ReadOnly`, `EEPROM`, `AtmelSAMD21`, **`NuvotonM480`**, `STM32F3`, `STM32H5` |
+
+Two things fall out of this.
+
+**`PCSize` / `PCSizeUsed` is what the Space Used dialog reports** - the memory percentage every release
+is checked against (`00`). If the read path works, that number becomes a scriptable check instead of a
+dialog someone has to open.
+
+**The board is a Nuvoton M480 family part**, on the evidence of the preset list and the DNA Color
+generation - worth confirming, not yet confirmed.
+
+And the design is a **differential uploader**: regions are hashed, and only changed chunks go over the
+wire. That explains the SHA-1 cache, and it means an upload is not a blind whole-image write.
+
+### The next experiment: read, not write
+
+The read path exercises the entire chain - open HID, attach the stream, `Initialize()`, pull an
+image - with nothing written to the device. Order:
+
+1. `BGQ.FE(hidPath, ...)` -> `POT`
+2. `Programmer.CreateForDNAColor(sha1Cache)` -> `OCC`
+3. assign `OCC.Stream`
+4. `OCC.Initialize()`, then read `UserModeVersion` - if it matches the `User mode version is ...` line
+   in EScribe's debug log, the link is genuinely up
+5. `OCC.AX(progress, flags)` -> `TOC`, and compare its bytes against a `.ecig` downloaded by EScribe
+
+A successful read answers the licensing question, proves the HID path, and costs nothing if it fails.
+Only then is `PerformUpload(ctx, progress, dontUpload: true)` worth trying.
+
+**The device must be plugged in.** Checked 2026-10-30: all four Evolv interfaces read `Present: False`
+with the mod unplugged, so step 1 has nothing to open.
 
 ---
 
