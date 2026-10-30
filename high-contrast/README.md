@@ -216,6 +216,6 @@ The mod locks itself so it can't fire by accident.
 
 For questions or problems, open an issue on this project's GitHub page.
 
-For setup, materials, and calibration details, see the main Gremlin guides in this repository.
+For setup, materials, and calibration details, see the main Gremlin guides: [chip swap](../guides/chip-swap-thelema-solo-dna100c.md) and [setup and calibration](../guides/setup-gremlin-theme-profiles-calibration.md).
 
 The theme is free to use and share.

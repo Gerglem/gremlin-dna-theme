@@ -10,8 +10,8 @@ A Lost Vape Thelema Solo converted to an **Evolv DNA100C**, set up for Divine Tr
 
 ## Contents
 - [`AI-GUIDE.md`](AI-GUIDE.md): how to use these docs with an AI assistant
-- [`reddit/01-dna100c-thelema-chip-swap.md`](reddit/01-dna100c-thelema-chip-swap.md): chip swap guide (parts, soldering, screen, power-up)
-- [`reddit/02-gremlin-theme-and-dt-profiles.md`](reddit/02-gremlin-theme-and-dt-profiles.md): loading the theme, materials, profiles, and calibration
+- [`guides/chip-swap-thelema-solo-dna100c.md`](guides/chip-swap-thelema-solo-dna100c.md): chip swap guide (parts, soldering, screen, power-up)
+- [`guides/setup-gremlin-theme-profiles-calibration.md`](guides/setup-gremlin-theme-profiles-calibration.md): setup guide — loading the theme, materials, profiles, and calibration
 - [`release/`](release/): **`Gremlin-Color-Themes-v2.1.ecigtheme`** (current theme) and **`Gremlin-Color-Themes-Full-Setup-v2.1.ecig`** (v2.1 full device config: the theme plus the four Divine Tribe profiles), `gremlin_v1.0_theme.ecigtheme` and `gremlin_v1.0.ecig` (v1.0 theme and full device config), `profiles/*.ecigprofile`, `materials/*.csv`
 - [`high-contrast/`](high-contrast/): **Gremlin High Contrast - Large Text v1.0**, a separate theme for low vision
 - [`kb/`](kb/): detailed technical notes (reverse-engineered theme format, DNA field IDs, design spec, gotchas)
@@ -38,7 +38,7 @@ Evolv DNA color chip (DNA75C / DNA100C / DNA250C) with **international firmware 
 **EScribe**, Evolv's free configuration software, is what loads all of this. Download it from Evolv: <https://www.evolvapor.com/escribe>. Install it, connect the mod, and let it update to the **international edition** — pick international, not US. The US edition does not expose Session Mode, and the theme will not upload without it.
 
 ## Calibrate before you rely on it
-A TCR value is a starting point, not a setting: every mod and every cup reads a little differently. Run the swab test in [`reddit/02`](reddit/02-gremlin-theme-and-dt-profiles.md) before you trust the number on the screen, then **set your working temperature at the low end and climb**. Starting cool costs you one mild session; starting hot scorches the load and shortens cup life.
+A TCR value is a starting point, not a setting: every mod and every cup reads a little differently. Run the swab test in [the setup guide](guides/setup-gremlin-theme-profiles-calibration.md) before you trust the number on the screen, then **set your working temperature at the low end and climb**. Starting cool costs you one mild session; starting hot scorches the load and shortens cup life.
 
 ## Disclaimer
 Opening your mod and soldering lithium-battery circuits is at your own risk and voids warranties. Verify polarity and continuity before powering up.
