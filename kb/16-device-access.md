@@ -81,6 +81,23 @@ That matters more than it looks. It is a **known command with an observable resu
 ideal thing to hunt for when working out a protocol: trigger it repeatedly and whatever changes in the
 traffic is the command. If the HID route needs a USB capture, Identify is the signal to capture.
 
+### Tested 2026-10-30: the Gremlin connection answers nothing either
+
+Serial Terminal connected to **Gremlin**, status "Connected." Sent `?`, `help`, `hello`, `dir`, `ls`,
+`/`, `/help`, `/?` and an empty line. Every one appeared in the Data pane; **none produced a reply**.
+
+So the mod is not a text console on this channel. Whether the echo comes from the mod or from EScribe
+is **unresolved** - and it is the one thing still worth checking here, because it decides whether this
+channel carries anything at all. **Disconnect the mod and type again:** text still appearing means
+EScribe echoes locally and this proves nothing about the device; text stopping means the mod echoes,
+which would prove a live two-way link that simply does not know these words.
+
+Either way the text-console idea is finished, for both COM4 and this connection. **The HID protocol is
+the remaining road**, and `Identify` - which visibly toggles the mod's display - is the command to
+trigger while capturing.
+
+The Serial Terminal's **Scripting** menu is still unopened and is the last cheap thing in this corner.
+
 ### What to try next, in EScribe's own UI
 
 Cheaper and safer than writing raw bytes: connect the Serial Terminal to **Gremlin** and use its
