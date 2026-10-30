@@ -41,7 +41,7 @@ Confidence: **C** = confirmed (labeled test or on-device), **H** = high (consist
 | **17825798** | **General → Firing (UI)**: true during a session/fire | C |
 | 0 | What Theme Designer saved for General → Firing → **Puff Time**. **Invalid** (shows blank); setting it as a Field source crashes Theme Designer | C |
 | 1048582 | General → Theme → Status Displayed. True at boot and for about 1s after firing, **even with empty text** | C |
-| 262151 | Selected profile (editable: switches profile). **Numbered from 1** (confirmed: `Compare Operator="129" RefValue="1"` matches profile slot 1) | C |
+| 262151 | Selected profile (editable: switches profile). **Numbered from 1** (Device Monitor's status bar reads `Profile: 1` for the first slot, matching) (confirmed: `Compare Operator="129" RefValue="1"` matches profile slot 1) | C |
 
 ## Display / device settings
 | ID | Meaning | Conf |
@@ -89,7 +89,7 @@ Pattern: ID = 10 + 256 × (n − 1). Source: ProVapers' "User Toggle" screen. **
 ## Misc / stats
 | ID | Meaning | Conf |
 |---|---|---|
-| 6 | Board temperature | H |
+| 6 | Board temperature | **C** — Device Monitor shows Board Temp and Room Temp side by side |
 | 65542 | Room temperature | H |
 | 2097158 / 2162694 / 2228230 / 4194310 | Serial / firmware / service pack / edition | H |
 | 16777736 | Puff count | H |

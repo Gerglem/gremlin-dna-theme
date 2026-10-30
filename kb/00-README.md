@@ -27,6 +27,8 @@ Both themes are released and tested on a DNA100C. Memory on the DNA75C (the tigh
 | `10-xml-reference.md` | Field-by-field XML reference for every file type |
 | `11-high-contrast-design-spec.md` | High Contrast theme: screens, fonts, layout rules |
 | `12-release-and-privacy-checklist.md` | **How to publish safely**: naming, sanitizing `.ecig` exports, PII rules, commit identity |
+| `13-escribe-suite.md` | What EScribe's install directory holds: firmware, the automatic config backups, third-party themes to learn from, how the mod connects |
+| `14-device-monitor-scripting.md` | Device Monitor's Python API. **Cold ohms is settable**, so theme conditions can be tested in seconds instead of by rebuilding |
 
 ## How work gets done
 - **Builds:** every internal build gets a **mini version** — a third number, `vX.Y.NN`, incremented on each change (`gremlin_v2.2.03_theme.ecigtheme`, then `.02`, `.03`). The maintainer loads it in EScribe, tests on the mod, and sends photos. **Bump the mini version on every build you hand over, even a one-line change:** several different `v1.2` builds were loaded on 2026-10-30 and could not be told apart, which cost a round of debugging. At release, drop the mini version (`v1.2.01` → `v1.2`) and add a `RELEASE-NOTES.md` entry.

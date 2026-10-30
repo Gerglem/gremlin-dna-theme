@@ -7,8 +7,19 @@ A Lost Vape Thelema Solo converted to an **Evolv DNA100C**, set up for Divine Tr
 ![Gremlin screens](images/20-gremlin-screens-render.png)
 
 > **Using AI to customize or troubleshoot?** Start with **[AI-GUIDE.md](AI-GUIDE.md)**: step-by-step instructions for using these docs with Claude, ChatGPT, or similar.
->
-> **AI assistant continuing this project?** Read **[kb/00-README.md](kb/00-README.md)** first. It has the current state, conventions, and the file index, and the rest of `kb/` holds the details.
+
+### If you are an AI assistant, read these in this order
+
+1. **[kb/00-README.md](kb/00-README.md)** — current versions, conventions, and the index to everything else. Start here, always.
+2. **[kb/07-gotchas-and-lessons.md](kb/07-gotchas-and-lessons.md)** — 24 numbered traps found the hard way. Several will cost you a build-and-test cycle each if you meet them fresh. Read before changing a theme.
+3. **[kb/04](kb/04-theme-file-format.md)** and **[kb/10](kb/10-xml-reference.md)** — the file format and a field-by-field XML reference. `10` carries a confidence column; respect it.
+4. **[kb/05-field-id-dictionary.md](kb/05-field-id-dictionary.md)** — numeric field IDs. Anything marked **M** is inferred, not verified.
+5. **[kb/14-device-monitor-scripting.md](kb/14-device-monitor-scripting.md)** — how to test a change against the live mod in seconds rather than by rebuilding and photographing a screen.
+6. **[kb/12-release-and-privacy-checklist.md](kb/12-release-and-privacy-checklist.md)** — before anything is published.
+
+Then the design spec for whichever theme you are touching: **[kb/06](kb/06-gremlin-design-spec.md)** for Color Themes, **[kb/11](kb/11-high-contrast-design-spec.md)** for High Contrast.
+
+**Two things to know before you start.** Screens are a fixed 80×160 canvas with absolutely positioned controls — there is no scrolling and no layout engine, so everything is a space budget. And conditions compare a field against a **literal**, never against another field, which rules out whole categories of feature; `kb/09` records the ones already ruled out, so you do not spend a day rediscovering them.
 
 ## Contents
 - [`AI-GUIDE.md`](AI-GUIDE.md): how to use these docs with an AI assistant
@@ -16,7 +27,7 @@ A Lost Vape Thelema Solo converted to an **Evolv DNA100C**, set up for Divine Tr
 - [`guides/setup-gremlin-theme-profiles-calibration.md`](guides/setup-gremlin-theme-profiles-calibration.md): setup guide — loading the theme, materials, profiles, and calibration
 - [`release/`](release/): **`gremlin_v2.2.03_theme.ecigtheme`** (current theme) and **`gremlin_v2.2.03.ecig`** (v2.2 full device config: the theme plus the four Divine Tribe profiles), [`release/RELEASE-NOTES.md`](release/RELEASE-NOTES.md) (what changed in each version), `gremlin_v1.0_theme.ecigtheme` and `gremlin_v1.0.ecig` (v1.0 theme and full device config), `profiles/*.ecigprofile`, `materials/*.csv`
 - [`high-contrast/`](high-contrast/): **Gremlin High Contrast - Large Text v1.2**, a separate theme for low vision
-- [`kb/`](kb/): detailed technical notes (reverse-engineered theme format, DNA field IDs, design spec, gotchas)
+- [`kb/`](kb/): detailed technical notes — reverse-engineered theme format, DNA field IDs, design spec, gotchas, EScribe's install tree and its Python scripting API
 - [`images/`](images/): build photos
 
 ## Gremlin - Color Themes v2.2

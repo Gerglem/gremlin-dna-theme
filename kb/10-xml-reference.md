@@ -169,12 +169,12 @@ Children: `Source/Setting` (editable if not ReadOnly, e.g., brightness), `Compar
 |---|---|---|
 | `0` | (seen; likely "always" or "==") | M |
 | `1` | value ≠ RefValue | C |
-| `2` | value > RefValue | **C** (on-device 2026-10-30). Evolv's own themes never use `2` or `3`; they express the same thing with `130` / `131`, which may be why these were the shakier entries |
+| `2` | value > RefValue | **C** (on-device 2026-10-30, the probe build). No other theme seen uses `2` or `3`; Copyman's expresses comparisons with `130` / `131` instead |
 | `3` | value < RefValue | C |
 | `4` | value ≥ RefValue (or ≤) | M |
-| `128 + n` | negated form of n (`129` = equals; `130` ≤; `131` ≥) | **C** — all three appear in Evolv's stock files; `131` 14 times and `130` twice, used together on one field to bracket a range |
-| `64` | AND of the nested Compares. **Not supported.** Appears in **none** of the 77 stock `.ecig` / `.ecigtheme` files shipped with EScribe, and **tested 2026-10-30:** a variant whose `Compare` was `AND(profile == 1, ohms > 0.4)` never applied, while the same `ohms > 0.4` on its own did. Emulate it by layering flat variants (`07` #24). | **X** |
-| `65` | OR of the nested Compares | **C** — Evolv's own themes use it, e.g. `<Compare Operator="65"><Compare Operator="1" Field="419954690" RefValue="0" /><Compare Operator="1" Field="419889154" RefValue="0" /></Compare>` on a preheat field. **So nesting itself works** — operator 64 failing is about that value, not the structure. |
+| `128 + n` | negated form of n (`129` = equals; `130` ≤; `131` ≥) | `129` **C** (ours, on-device). `130` / `131` **H+** — Copyman's theme uses them 1 and 7 times, together on field `1179649` to bracket a range, which is consistent with ≤ and ≥ but does not prove which is which |
+| `64` | AND of the nested Compares. **Not supported.** Appears in **none** of the 77 configs in EScribe's backup folder — ours, Evolv's default, and a third party's — and **tested 2026-10-30:** a variant whose `Compare` was `AND(profile == 1, ohms > 0.4)` never applied, while the same `ohms > 0.4` on its own did. Emulate it by layering flat variants (`07` #24). | **X** |
+| `65` | OR of the nested Compares | **H+** — used by **Copyman's** third-party theme (`13`), e.g. `<Compare Operator="65"><Compare Operator="1" Field="419954690" RefValue="0" /><Compare Operator="1" Field="419889154" RefValue="0" /></Compare>` on a preheat field. That theme runs, so **nesting itself works** and operator 64 failing is about that value, not the structure. Not vendor-confirmed: Evolv's own Default Theme contains no conditions at all. |
 `RefValue` is numeric and compared in the field's units (%, °F, seconds…).
 
 ### 1.7 `Action`
