@@ -1,4 +1,4 @@
-# Gremlin High Contrast: Large Text Theme
+# Gremlin High Contrast: Large Text Theme (v1.1)
 
 A theme for Evolv DNA vape mods, made for people with low vision.
 
@@ -15,8 +15,9 @@ This page explains what each file does, how to install it, and how to use the th
 5. What each screen shows
 6. Using the buttons
 7. Changing your settings
-8. Tips
-9. Getting help
+8. If the screen says LOCKED
+9. Tips
+10. Getting help
 
 ## 1. What you need
 
@@ -32,14 +33,14 @@ There are three kinds of files. You only need one of the first two.
 
 ### Option A: The full setup file (easiest)
 
-- File: [Gremlin-High-Contrast-Full-Setup-v1.0.ecig](files/Gremlin-High-Contrast-Full-Setup-v1.0.ecig)
+- File: [Gremlin-High-Contrast-Full-Setup-v1.1.ecig](files/Gremlin-High-Contrast-Full-Setup-v1.1.ecig)
 - What it contains: the theme **and** four ready-made profiles, all in one file.
 - Choose this if you use Divine Tribe V5 XL cups or the Lightning Quest, and you want everything set up at once.
 - Note: this replaces all the settings on your mod.
 
 ### Option B: The theme only
 
-- File: [Gremlin-High-Contrast-Large-Text-v1.0.ecigtheme](files/Gremlin-High-Contrast-Large-Text-v1.0.ecigtheme)
+- File: [Gremlin-High-Contrast-Large-Text-v1.1.ecigtheme](files/Gremlin-High-Contrast-Large-Text-v1.1.ecigtheme)
 - What it contains: only the screens, colors, and text size.
 - Choose this if you want to keep your own profiles and settings. Only the look of the screen changes.
 
@@ -84,14 +85,14 @@ Before you start, connect your mod to your computer with the USB cable and open 
 ### To install the full setup file
 
 1. In EScribe, open the **File** menu and choose **Open**.
-2. Choose **Gremlin-High-Contrast-Full-Setup-v1.0.ecig**.
+2. Choose **Gremlin-High-Contrast-Full-Setup-v1.1.ecig**.
 3. Select **Upload Settings to Device**.
 4. Follow step 4 under "To add a single profile" to lock each cup's resistance.
 
 ### To install the theme only
 
 1. Select the **Theme** tab.
-2. Load **Gremlin-High-Contrast-Large-Text-v1.0.ecigtheme**.
+2. Load **Gremlin-High-Contrast-Large-Text-v1.1.ecigtheme**.
 3. Select **Upload Settings to Device**.
 
 ### To add a single profile
@@ -145,9 +146,9 @@ When heating stops, the home screen returns.
 
 ### Lock screen
 
-![Lock screen. The time, the date, BATTERY, and 87 percent.](images/lock-screen.png)
+![Lock screen. LOCKED in yellow, then FIRE 5X TO UNLOCK, then BATTERY and 87 percent.](images/lock-screen.png)
 
-Shows the time, the date, and the battery percentage in large text.
+When the mod is locked, the screen says **LOCKED** and tells you how to unlock it: **press the fire button 5 times quickly.** It also shows the battery percentage.
 
 ### New coil screen
 
@@ -192,9 +193,18 @@ Everything else uses standard settings. You can change these in EScribe:
 - **Session length**: General tab, Session Mode, Time.
 - **Battery cutoff**: Mod tab, Battery. We suggest 3.0 volts.
 - **Profile names**: General tab, Name.
-- **Clock and lock settings**.
+- **Auto-lock and the unlock button sequence.**
+- **Clock settings.**
 
-## 8. Tips
+## 8. If the screen says LOCKED
+
+The mod locks itself so it can't fire by accident.
+
+- **To unlock:** press the **fire button 5 times quickly**.
+- **To lock it yourself:** press the fire button 5 times quickly.
+- **Auto-lock:** the full setup file turns auto-lock **off**, so the mod only locks when you lock it. If you installed the theme only, your mod may still lock itself after a few minutes of not being used. To turn that off, open EScribe, find the lock settings, and set Auto Lock to off. Then select Upload Settings to Device.
+
+## 9. Tips
 
 - **Keep profile names short.** About 8 letters fit on one line, and longer names use two lines. Examples: XL, QUEST, XL CLEAN.
 - **Turn brightness up to 10** in the menu for the clearest screen.
@@ -202,7 +212,7 @@ Everything else uses standard settings. You can change these in EScribe:
 - **Firing with no heater attached is safe.** The mod sends no power. The status line shows "No Atomizer."
 - **Back up first.** Before uploading anything new, save your current setup in EScribe with File, then Save.
 
-## 9. Getting help
+## 10. Getting help
 
 For questions or problems, open an issue on this project's GitHub page.
 
