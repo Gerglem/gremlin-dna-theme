@@ -74,6 +74,7 @@ A control is highlightable if it has an Action or an editable (non-ReadOnly) Set
 - YOffset is relative to the baseline (negative = above).
 - Include Ω as **both** U+03A9 (937) and U+2126 (8486). A missing glyph renders as a box. **The shipped fonts carry 937 only**, in Normal and Small but not Big — so a label must use U+03A9, and `Ω` is a plain text label rather than a picture (High Contrast uses it for the ohms row).
 - **Built SemiBold metrics:** Normal 18 (digits ~17px), Big 24 (~22px), Small 13 (~13px; line height = 14+4 = **18px**, so Status controls need **≥19px height** or the top gets clipped).
+- **Label widths are exact and checkable:** a string's pixel width is the sum of its glyphs' `XAdvance`, so you can measure a label against its control before building. Worked examples at High Contrast sizes (Normal 24, Small 18): `Ω OHMS` = 65px Normal, `NEW COIL?` = 88px Normal but 68px Small (which is why it is Small), `LOCK?` = 53px Normal but 40px Small in a 44px control. Over-wide labels wrap or clip. When parsing the font XML, note `Bytes` is base64 and can contain `/`, so match `[^>]*?` rather than `[^/]*?` to reach `XAdvance`.
 
 ## Images
 PNG, base64, RGBA. Battery meter images 80×7. Icons are 12×12 pixel art. Wallpapers 80×160 (pure black in Gremlin).

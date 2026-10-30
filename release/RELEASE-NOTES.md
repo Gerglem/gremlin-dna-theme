@@ -13,7 +13,7 @@ The High Contrast theme is a separate build on its own version track — see [`.
 
 ## v2.2
 
-**The new-coil screen now has a LOCK toggle.** Swap a heater with the resistance lock off and the mod asks **NEW COIL?**. Answering **YES, NEW** stores the new cold resistance but leaves the lock *off*, which is easy to miss — and because the prompt only appears while the lock is off, leaving it off means you get asked again on every swap. The toggle is now on that screen so you can lock it without walking back through the menu.
+**The new-coil screen now has a LOCK toggle.** Swap a heater with the resistance lock off and the mod asks **NEW COIL?**. Answering **YES, NEW** stores the new cold resistance but leaves the lock *off*, which is easy to miss — and because the prompt only appears while the lock is off, leaving it off means you get asked again on every swap. The toggle is now on that screen, labelled **LOCK?** so it reads as part of the prompt, and you can lock it without walking back through the menu.
 
 The usual sequence with a locked coil: unlock, swap the heater, let it measure, lock again.
 

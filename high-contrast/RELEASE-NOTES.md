@@ -11,13 +11,13 @@ The current release is **v1.2**. The color theme has its own notes in [`../relea
 
 ## v1.2
 
-**An ohms screen, reached from the menu.** Until now this theme had no resistance control or readout anywhere, so checking or locking a cup meant going back to EScribe. The menu's fourth row is now **Ω**, and it opens a screen showing the heater's locked resistance in large digits, with the lock toggle and a MEASURE action beside it.
+**An ohms screen, reached from the menu.** Until now this theme had no resistance control or readout anywhere, so checking or locking a cup meant going back to EScribe. The menu's fourth row is now **Ω OHMS**, and it opens a screen showing the heater's locked resistance in large digits, with the lock toggle and a MEASURE action beside it.
 
-The symbol rather than the word: **Ω** is what is printed on cups and quoted in specs, and it reads at a glance where "OHMS" does not.
+The symbol *and* the word: **Ω** is what is printed on cups and quoted in specs and reads at a glance, and the word is there for anyone who does not recognise it. Both fit the row at full text size.
 
 Fitting it meant repacking the menu: the divider is gone and the five rows run edge to edge. At this text size 160 pixels holds exactly five rows and no more, which is why the ohm controls went to a screen of their own rather than taking a sixth.
 
-**A LOCK toggle on the new-coil screen too.** Answering **YES** to **NEW COIL?** stores the new cold resistance but leaves the lock off, and the prompt only appears while the lock is off — so without this you would be asked again on every swap. Unlock, swap the heater, let it measure, lock again.
+**A LOCK? toggle on the new-coil screen too.** Answering **YES** to **NEW COIL?** stores the new cold resistance but leaves the lock off, and the prompt only appears while the lock is off — so without this you would be asked again on every swap. Unlock, swap the heater, let it measure, lock again.
 
 **Both vaping profiles now start at 380°F.** XL was 420°F and QUEST was 385°F. Both now open at the bottom of the usable range so you work up to your own setting rather than down from someone else's.
 

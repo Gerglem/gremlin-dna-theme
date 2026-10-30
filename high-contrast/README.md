@@ -137,17 +137,17 @@ When heating stops, the home screen returns.
 
 ### Menu
 
-![Menu screen. TEMP with a temperature, WATTS with a power, LIGHT with a brightness, the ohm symbol, and BACK.](images/menu-screen.png)
+![Menu screen. TEMP with a temperature, WATTS with a power, LIGHT with a brightness, the ohm symbol with the word OHMS, and BACK.](images/menu-screen.png)
 
 - **TEMP**: your set temperature.
 - **WATTS**: the power limit.
 - **LIGHT**: screen brightness, from 1 to 10. Set it to 10 for the brightest screen.
-- **Ω**: opens the ohms screen, where you read and lock the heater's resistance.
+- **Ω OHMS**: opens the ohms screen, where you read and lock the heater's resistance.
 - **BACK**: returns to the home screen.
 
 ### Ohms
 
-Choose **Ω** in the menu to open this screen. It is where you check that the mod has measured your heater correctly.
+Choose **Ω OHMS** in the menu to open this screen. It is where you check that the mod has measured your heater correctly.
 
 - **LOCKED**: the resistance the mod has stored for this heater, in ohms. This is the number the temperature control works from, so it needs to be right.
 - **LOCK**: the resistance lock. A **solid padlock** means locked, an **open padlock** means unlocked. Lock it once the number above looks right.
@@ -164,14 +164,14 @@ When the mod is locked, the screen says **LOCKED** and tells you how to unlock i
 
 ### New coil screen
 
-![New coil screen. NEW COIL question, YES, NO, MEASURE, and LOCK with a padlock.](images/new-coil-screen.png)
+![New coil screen. NEW COIL question, YES, NO, MEASURE, and LOCK question with a padlock.](images/new-coil-screen.png)
 
 This screen appears if you attach a different heater while the resistance lock is off.
 
 - **YES**: this is a new heater.
 - **NO**: this is the same heater. NO is selected by default, for safety.
 - **MEASURE**: reads the heater again.
-- **LOCK**: the resistance lock. Answering YES stores the new reading but leaves the lock off, so this is here to turn it on without going to the menu.
+- **LOCK?**: the resistance lock. Answering YES stores the new reading but leaves the lock off, so this is here to turn it on without going to the menu.
 
 If you leave the lock on, this screen does not appear at all when you change heaters. Unlock it first, swap the heater, then lock it again.
 
