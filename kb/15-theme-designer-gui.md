@@ -192,6 +192,20 @@ as good as our guess at the compiler's output.
 the XML. One save settles the encoding, and the per-cup replace warning could then be written as the single
 condition it should be rather than the five-layer chain that emulates it (`07` #24).
 
+### Tested 2026-10-30: what the editor accepts
+
+| Expression | Result |
+|---|---|
+| `Atomizer -> Coil -> Cold Ohms > 0.4 and General -> Atomizer/Profile = 1` | **accepted** |
+| `Atomizer -> Temperature > Miscellaneous -> Board Temperature` | **rejected**: *Invalid Value - Must be a number!* |
+
+So `and` is real, and **the right-hand side of a comparison must be a literal**. A measurement can be
+compared only against a number, never against another measurement - the inserter will put a second
+measurement into the box, but the dialog refuses it on OK.
+
+That settles a question this project has gone back and forth on. The limit is real; it is the
+*reason* given for it that was wrong earlier (`09`).
+
 ### What it does not change
 
 The at-temperature indicator is still blocked, but **for a different reason than recorded** (`09`). The
