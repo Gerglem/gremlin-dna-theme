@@ -167,11 +167,11 @@ Children: `Source/Setting` (editable if not ReadOnly, e.g., brightness), `Compar
 |---|---|---|
 | `0` | (seen; likely "always" or "==") | M |
 | `1` | value ≠ RefValue | C |
-| `2` | value > RefValue | H |
+| `2` | value > RefValue | **C** (on-device 2026-10-30) |
 | `3` | value < RefValue | C |
 | `4` | value ≥ RefValue (or ≤) | M |
 | `128 + n` | negated form of n (`129` = equals, **confirmed** with profile slots; `130` ≤, `131` ≥) | H/C |
-| `64` | AND of the nested Compares | C |
+| `64` | AND of the nested Compares. **Does not work on the DNA100C — tested 2026-10-30:** a variant whose `Compare` was `AND(profile == 1, ohms > 0.4)` never applied, while the same `ohms > 0.4` on its own did. Emulate it by layering flat variants (`07` #24). | **X** |
 | `65` | OR of the nested Compares | H |
 `RefValue` is numeric and compared in the field's units (%, °F, seconds…).
 

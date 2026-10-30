@@ -25,12 +25,14 @@
 
   **Result, 2026-10-30:** on the XL profile the OHMS page read **0.464 in white**, not red, against a 0.40 limit; QUEST read 0.314 white as expected. **Color Themes behaves identically** — its home screen showed 0.464 in the theme colour, not red, on the same test config. So the warning does not fire, and it is not a layout or variant-ordering quirk of one theme: on the High Contrast OHMS page the red variants are the only variants on that control, with nothing to lose a precedence fight to. **But "neither red" does not isolate the cause:** operators **2** (`>`) and **64** (AND) are both used *only* by this new code. The original v1.0 theme used exactly one operator, **3** (`<`), for the low-battery red, and that is the only comparison ever proven on this hardware. kb/10 lists 64 as confirmed, but not from a working theme here.
 
-  **Probe build registered (result pending).** One theme puts three independent probes on the OHMS page in three colours, so a single photo decides it:
+  **Probe build — RESULT, 2026-10-30: the AND is the problem.** One theme puts three independent probes on the OHMS page in three colours, so a single photo decides it:
   - value **red** if `ohms > 0.4` (flat, no AND) — tests operator 2 alone.
   - LOCKED **magenta** if `AND(profile == 1, ohms > 0.4)` — tests operator 64.
   - MEASURE **cyan** if `ohms < 0.9` (flat, operator 3) — tests whether cold ohms can be compared at all, using the one operator known to work.
 
   Readings: MEASURE cyan but value white → operator 2 is the problem, and the warning should be rebuilt inverted on operator 3 (default red, white below the limit). Value red but LOCKED white → the AND is the problem. Nothing coloured → cold ohms cannot be used in a `Compare`, and the warning needs a different source field or has to be dropped.
+
+  **Read on the XL profile at 0.464:** the value went **red** (`ohms > 0.4`, flat) and MEASURE went **cyan** (`ohms < 0.9`, flat), but LOCKED stayed yellow (`AND(profile == 1, ohms > 0.4)`). So **operator 2 works, operator 3 works, and the field is readable in a `Compare`** — only the nested AND fails. `10` corrected: operator 2 promoted to confirmed, operator 64 marked as not working on this firmware.
 
 ## Ideas
 - **More color themes:** off-board memory is the limit (93.6% on the DNA75C). Free image space first, e.g. let more themes use the standard gremlin.
