@@ -23,6 +23,7 @@
 19. **Two memory pools.** Images and fonts use **off-board** memory; controls and condition variants use **on-board**. Check both with Theme Designer → Space Used, on the **DNA75C** (least room). Recolored images are expensive off-board; text color variants are cheap.
 20. **Evolv's large font (24 px) has only ~56 characters.** It lacks I, G, E, D, L, U and more. Use it for numbers, or synthesize missing glyphs.
 21. User Toggles are **not** saved in `.ecig` exports; they live on the device.
+22. **Accepting a new coil is not the same as locking it, and the ohm lock latches *cold ohms* (17825794) — not the reading on the prompt.** The new-coil screen shows the pending measurement in **1048579**, which only becomes cold ohms when **YES** is accepted. Since the published configs ship `EvolvWDColdOhms = 0` on every slot, toggling the lock on the prompt *before* accepting locks **0**. Observed on a DNA100C 2026-10-30; locking after YES latches the new value correctly. Both new-coil lock controls are therefore guarded (default `<Hidden/>` with the real element carrying `<Compare Operator="1" Field="1048579" RefValue="0" />` on an `UpdateLive` control) so they appear only once a reading exists.
 
 ## Theme building
 - Explicit `Color="(1, 1, 1, 1)"` on selectable items keeps text **white on the white highlight** (invisible). Omit the color for default white.
