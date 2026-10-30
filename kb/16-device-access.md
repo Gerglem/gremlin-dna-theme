@@ -13,6 +13,25 @@ HID is the goal because it is demonstrably capable of the whole job: it is how e
 
 ---
 
+## What is and is not reachable - settled by Evolv, 2015
+
+From Evolv staff on the Researcher Forum, and it bounds this whole document:
+
+- **All operation and monitoring is reachable** over the plain-text interface. "Anything you can do in
+  Device Monitor is a wrapper for command line commands." That part is done, in `17`.
+- **Settings and themes are not.** "Loading firmware is encrypted, and the settings bake to a binary
+  file for upload." So a `.ecig` cannot be pushed to the mod by any text command - uploading a theme
+  needs EScribe, or the HID path below, and the binary format is not published.
+- **The HID interface is serial tunneled over HID**, and "that is totally standard". So a CLI over HID
+  would speak the *same plain-text commands*, not a separate binary protocol. That is a far smaller
+  job than the obfuscated-assembly route suggested, and it is the portable one: on macOS the CDC port
+  does not work at all (the composite device needs an Interface Association Descriptor, which macOS
+  does not support), while HID-tunneled serial works everywhere.
+
+**So the goal splits in two.** Reading and driving the device: solved, see `17`. Uploading a config:
+still requires EScribe or a reverse-engineered binary format, and no amount of serial work changes
+that.
+
 ## The promising route: call Evolv's own code
 
 EScribe is **.NET**, and its assemblies load and reflect fine from the local install (`%APPDATA%\Evolv\EScribe Suite`). That means the transfer logic can potentially be *called* rather than reimplemented — no protocol reverse engineering, and correctness comes free because it is the vendor's own implementation.

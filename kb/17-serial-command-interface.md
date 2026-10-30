@@ -100,6 +100,39 @@ On DNA Color the standard deviation divides by N; on earlier boards by N−1.
 | `S=GET DEVICE ENERGY` | `S=23144.58MWH` |
 | `S=GET RESETS` | `S=1` |
 
+## Protocol rules, from Evolv
+
+**Serialize. One query, wait for the reply, then the next.** Do not pipeline: the board will not send a
+reply until its send buffer is empty, so batching gains nothing and can deadlock - its receive buffer
+fills while it waits to finish sending to you. Replies are **FIFO with no correlation id**, so three
+`B=GET CELL n` in a row come back as three bare values in order and you must track which is which.
+
+Evolv says no inter-command delay is needed and Device Monitor uses none; **substantially more than 30
+queries per second** is achievable. One community implementation nonetheless found ~5 ms between
+batches reduced dropped replies, and `E=GET *` in particular wanting ~50 ms. If replies go missing,
+that is the knob.
+
+**EScribe can be connected at the same time.** It talks over HID and leaves the CDC serial port free,
+which is why the query tool works with EScribe open.
+
+### A 50 Hz firehose exists
+
+**Research tab -> Serial Output -> CSV (Excel)** makes the board stream all the important values at
+**50 Hz**, no polling at all. Evolv measured it costing the device a few percent of performance.
+
+For logging - the cold-ohms-against-puff-count dataset the replace thresholds need (`02`) - this is a
+better instrument than a query loop, and it is a setting rather than code. **Untried here.**
+
+### What the feature keys mean
+
+From Evolv: `PC` power commands, `TC` temperature commands, `St` long-term statistics, `FG` fuel
+gauging (so `C=GET` works), `S:n` multi-cell with max n, `M` profiles. They exist so a device can
+advertise a restricted or extended feature set, and tools adapt - something advertising only `PC` will
+never be asked for a temperature.
+
+This board reports `FG` **not** at all and `C=GET` returns `?`, while `C=GET%` works - consistent with
+a single-cell board without full fuel gauging.
+
 ## Writes — documented, not run here
 
 These change the device. **`F=` fires the coil.**
