@@ -1,5 +1,7 @@
 # Gremlin: DNA100C Thelema Solo build + Divine Tribe TCR setup
 
+**Low vision? See the High Contrast theme: [high-contrast/README.md](high-contrast/README.md)**
+
 A Lost Vape Thelema Solo converted to an **Evolv DNA100C**, set up for Divine Tribe heaters (**V5 XL** and **Lightning Quest**) with true TCR, Session Mode, and a custom theme, **Gremlin**.
 
 ![Gremlin screens](images/20-gremlin-screens-render.png)
