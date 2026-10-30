@@ -1,8 +1,5 @@
 # 09 – Open Items
 
-## Open work
-- **Lightning Quest swab calibration on the DNA.** Load QuestCup, lock cold resistance at room temperature, swab at 470°F. Light gold = TCR 125 is right; adjust the curve if not (`02`).
-
 ## Firmware limitations (not fixable in a theme)
 - No "at temperature" indicator: Heating Time Done (353173506) is rejected by the DNA100C firmware.
 - No live session countdown: Puff Time can't be displayed (Theme Designer crashes when it's set as a Field source).

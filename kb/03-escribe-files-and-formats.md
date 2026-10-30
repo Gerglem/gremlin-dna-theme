@@ -41,12 +41,12 @@
 ## Reference setups (as published)
 **Gremlin - Color Themes v2.1** (`../release/Gremlin-Color-Themes-Full-Setup-v2.1.ecig`, also as single profiles in `../release/profiles/`):
 - Slot 1 **DTv5XL** (material DTv5XL/TCR 200, 36W, 392°F, session 60s)
-- Slot 2 **QuestCup** (material QuestCup/TCR 125, 25W, 470°F for calibration)
+- Slot 2 **QuestCup** (material QuestCup/TCR 120, 25W, 385°F)
 - Slot 3 **DTv5XL-Clean** (Watts, 38W, 120s), slot 4 **QuestCup-Clean** (Watts, 35W, 45s)
 - Slots 5–8 hidden. Cold resistance 0 and unlocked on all slots. Battery soft cutoff 3.0V. Color theme switches off (Classic).
 
 **Gremlin High Contrast v1.1** (`../high-contrast/files/Gremlin-High-Contrast-Full-Setup-v1.1.ecig`):
-- Same settings with short names **XL / QUEST / XL CLEAN / Q CLEAN**, both temperature profiles at 420°F, and **auto-lock off** (`EvolvXAutoLock=0`).
+- Same settings with short names **XL / QUEST / XL CLEAN / Q CLEAN**, XL at 420°F and QUEST at 385°F, and **auto-lock off** (`EvolvXAutoLock=0`).
 
 Notes:
 - Materials needed on the device: **DTv5XL, QuestCup, Watts**. Others can be removed if no profile uses them.

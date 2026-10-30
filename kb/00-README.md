@@ -45,7 +45,7 @@ Both themes are released and tested on a DNA100C. Memory on the DNA75C (the tigh
 
 ## Device facts at a glance
 - **Mod:** Lost Vape Thelema Solo shell with an **Evolv DNA100C** (international firmware SP55.1 INT). Battery: Molicel P42A 21700.
-- **Heaters:** Divine Tribe **V5 XL** cups (TCR 200, ~36W) and **Lightning Quest** (TCR 125, 25W; DNA swab calibration still pending).
+- **Heaters:** Divine Tribe **V5 XL** cups (TCR 200, ~36W) and **Lightning Quest** (TCR 120, 25W).
 - Fresh V5 XL cup cold resistance: Divine Tribe spec 0.44–0.49Ω.
 - TCR values from other mods (e.g., a Pico Plus) do **not** transfer to the DNA. Recalibrate with the swab test.
 - The chip numbers profiles from **1** (confirmed with the profile accent colors).

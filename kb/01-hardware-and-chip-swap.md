@@ -1,7 +1,7 @@
 # 01 – Hardware and Chip Swap
 
 ## Background
-- Goal: a slim box mod with true custom TCR for Divine Tribe heaters (V5 XL, TCR 200; Lightning Quest, TCR 125), with an autofire/session feature like the Divine Tribe Pico Plus firmware.
+- Goal: a slim box mod with true custom TCR for Divine Tribe heaters (V5 XL, TCR 200; Lightning Quest, TCR 120 after calibration — Divine Tribe publishes 125), with an autofire/session feature like the Divine Tribe Pico Plus firmware.
 - The stock **Lost Vape Thelema Solo (Quest 2.0 chip)** has **no custom TCR**, only preset materials (Ti, Ni, SS316, SS904). Lost Vape marketing calls them "TCR modes," which is misleading.
   - Calibration attempts on the V5 XL in **Ti mode at 37W**: displayed 300°F → black swab; 250°F → medium brown; 225°F → light tan (≈ true 470°F); 200°F → faint off-white but scorched quickly. That's roughly **2.6 true °F per displayed °F**. Unusable as real TC. SS904 is the closest preset but was never validated.
   - The Quest USB port is charge/update only. **Arctic Fox (NFE)** has unofficial Quest support, but it needs a modified USB cable, IC pin jumping, and on some boards about 50 solder-point processor replacements. Not pursued.

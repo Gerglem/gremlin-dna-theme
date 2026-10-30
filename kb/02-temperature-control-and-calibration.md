@@ -9,7 +9,7 @@ The mod compares the heater's **live resistance** to its **locked cold resistanc
 1. Set the temperature to **470°F**. Light gold on a swab ≈ 470°F. Cotton ignites around 750°F.
 2. Fire until the displayed temperature stops rising, then touch the swab to the cup floor for about **10s** while firing.
 3. **Light gold** = calibrated. White = raise TCR. Brown or black = lower TCR.
-4. Changing the TCR means generating a new material curve, re-importing it, re-locking the cold ohms, and swabbing again. Move in small steps — on the Pico the Lightning cup took 110 → 100 → 95.
+4. Changing the TCR means generating a new material curve, re-importing it, re-locking the cold ohms, and swabbing again. Move in small steps — on the Pico the Lightning cup took 110 → 100 → 95, and on the DNA the Quest took 125 → 120.
 
 **Working temperature: start low and climb.** Once the TCR is calibrated, set the temperature at the low end (~380°F) and work up a few degrees at a time rather than starting high. Vapor appears well below 350°F, so a low start is still usable and it avoids scorching the load. Sustained heat above ~500°F is a primary cup-wear driver.
 
@@ -17,10 +17,10 @@ The mod compares the heater's **live resistance** to its **locked cold resistanc
 | Heater | TCR | Power | Notes |
 |---|---|---|---|
 | **DT V5 XL cup** | **200** (Divine Tribe published; 180 for the standard V5, 200 for the XL) | 36–37W (DT: 36W to reach 500°F; 27–37W pulsing) | **Swab at 470°F on the DNA was light gold at TCR 200.** Stay below 38W and 500°F; preheat, boost and punch off; Replay off with TC. |
-| **DT Lightning Quest (LQ)** | **125** (Divine Tribe product page); reported values range 105–135 at 28W | 25W | Not yet swab-verified on a DNA; start at 125. For comparison, a Pico Plus needed **TCR 95** (110 → medium brown, 100 → tan, 95 → light gold), which does **not** carry over to the DNA. |
+| **DT Lightning Quest (LQ)** | **120** (swab-verified on this DNA100C; Divine Tribe publishes 125, reported values range 105–135 at 28W) | 25W | **Swab at 470°F: tan at TCR 125, light gold at 120.** One step. For comparison, a Pico Plus needed **TCR 95** (110 → medium brown, 100 → tan, 95 → light gold), which does **not** carry over to the DNA. |
 | Original (SiC) Quest crucible | ~345 | ~30–48W | Reference only |
 
-Reference V5 XL profile: **36W, set temperature ~392°F** (380–420°F is a usable range; vapor appears even at 380°F because terpenes and THC volatilize below 350°F), **session 60s** (Divine Tribe guidance).
+Reference V5 XL profile: **36W, set temperature ~392°F** (380–420°F is a usable range; vapor appears even at 380°F because terpenes and THC volatilize below 350°F), **session 60s** (Divine Tribe guidance). Reference Lightning Quest profile: **25W, set temperature 385°F, session 60s**.
 
 **No temperature ramp feature:** the DNA can't do a scheduled 380→420°F ramp, and a theme can't run timers. The workaround of using up/down steps was explored, but the step-size toggles (fields 10 and 266) seemed to do nothing and were removed from the theme.
 
@@ -47,14 +47,14 @@ The format is a header plus `°F,relative resistance` points, linear α in °F t
   219.8738170347,1.16874868559411
   800,1.81333333333333
   ```
-- `questcup-tcr125.csv` (generated with the same display fix):
+- `questcup-tcr120.csv` (generated with the same display fix):
   ```
   "Temperature (degF)","Electrical Resistivity"
-  -100,0.8833333333333333
+  -100,0.888
   68,1.0
   200,1.002
-  219.8738170347,1.1054679284963194
-  800,1.5083333333333333
+  219.8738170347,1.1012492113564667
+  800,1.488
   ```
 - **Display fix:** the curve is flattened to 1.002 at 200°F and rejoins the linear line around 220°F. This makes the live-temperature readout work on DNA boards. Above 220°F it's identical to linear, so vaping temperatures aren't affected.
 - To generate a new TCR `t`: α=t/100000; points (-100,R(-100)), (68,1), (200,1.002), (219.8738170347,R(219.87)), (800,R(800)).

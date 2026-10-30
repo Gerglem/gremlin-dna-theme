@@ -8,7 +8,7 @@ This is the setup half of my Thelema Solo DNA100C build (**[chip swap guide](chi
 
 **Downloads:** https://github.com/Gerglem/gremlin-dna-theme/tree/main/release
 - `Gremlin-Color-Themes-v2.1.ecigtheme`: the theme
-- `materials/dtv5xl-tcr200.csv` and `materials/questcup-tcr125.csv`: the TCR material curves
+- `materials/dtv5xl-tcr200.csv` and `materials/questcup-tcr120.csv`: the TCR material curves
 - `profiles/DTv5XL-Profile.ecigprofile`, `QuestCup.ecigprofile`, `DTv5XL-Clean.ecigprofile`, `QuestCup-Clean.ecigprofile`
 - `Gremlin-Color-Themes-Full-Setup-v2.1.ecig`: the full setup — the theme plus the four profiles, with cold resistance cleared so you measure your own
 
@@ -19,7 +19,7 @@ This is the setup half of my Thelema Solo DNA100C build (**[chip swap guide](chi
 | Profile | Mode | TCR | Power | Temp | Session |
 |---|---|---|---|---|---|
 | **DTv5XL** | Temp control | 200 | 36W | 392°F (start here, work up) | 60s |
-| **QuestCup** (Lightning Quest) | Temp control | 125 | 25W | 470°F (calibration temp — turn it down before you vape it) | 60s |
+| **QuestCup** (Lightning Quest) | Temp control | 120 | 25W | 385°F (start here, work up) | 60s |
 | **DTv5XL-Clean** | Wattage | — | 38W | — | 120s |
 | **QuestCup-Clean** | Wattage | — | 35W | — | 45s |
 
@@ -27,7 +27,7 @@ The temperature in each profile is a starting point, not a recommendation. **Set
 
 Sources:
 - **V5 XL:** Divine Tribe's published settings are TCR 200, 36W to reach 500°F. Their burn-off clean is **38W in wattage mode, held upside down, for 2 minutes**, then cool completely.
-- **Lightning Quest:** Divine Tribe lists **TCR 125, or 25W in wattage mode**. For cleaning, use **35W wattage mode for up to 45 seconds at a time**, stopping if resistance climbs past about **0.60Ω**, then let it cool before another cycle.
+- **Lightning Quest:** Divine Tribe lists **TCR 125, or 25W in wattage mode**. A swab test on this DNA100C came out tan at 125 and light gold at **120**, so the files here ship **TCR 120** — run your own swab test anyway (step 4). For cleaning, use **35W wattage mode for up to 45 seconds at a time**, stopping if resistance climbs past about **0.60Ω**, then let it cool before another cycle.
 - Both curves include a **display fix**: the curve is flattened slightly between 200°F and 220°F so the live temperature readout behaves on DNA boards. Above 220°F it is identical to a straight TCR line, so vaping temperatures are unaffected.
 
 ---
@@ -45,7 +45,7 @@ Get **EScribe**, Evolv's free configuration software, from the official page: <h
 1. **Materials** tab → **Import Material** → `dtv5xl-tcr200.csv`.
 2. Name it **DTv5XL** and check **Temperature-Sensing**.
 3. Push it to **Materials on Device** with the ▶ arrow.
-4. Repeat with `questcup-tcr125.csv` as **QuestCup**.
+4. Repeat with `questcup-tcr120.csv` as **QuestCup**.
 5. Keep the built-in **Watts** material on the device. The cleaning profiles use it.
 
 The TCR value is built into the CSV curve, so there's no separate TCR field to set.
@@ -76,7 +76,7 @@ A published TCR gets you close. The swab test tells you how far off *your* mod a
 
 ![Swab: too hot](../images/swab-tcr110-too-hot.jpg) ![Swab: close](../images/swab-tcr100-close.jpg) ![Swab: correct](../images/swab-tcr95-correct.jpg)
 
-*(These were a Lightning cup on a Pico at TCR 110 → 100 → 95. Different mods need different values. On the DNA, the V5 XL hit light gold at TCR 200 on the first try.)*
+*(These were a Lightning cup on a Pico at TCR 110 → 100 → 95. Different mods need different values. On the DNA, the V5 XL hit light gold at TCR 200 on the first try, and the Lightning Quest took one step: tan at 125, light gold at 120.)*
 
 To change the TCR on a DNA, you need a new material curve. The CSV format is documented in the repo, along with the formula for generating one at any TCR value.
 

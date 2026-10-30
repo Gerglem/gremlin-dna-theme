@@ -55,7 +55,7 @@ A profile stores the settings for one heater: power, temperature, and session ti
 - [High-Contrast-Profile-Lightning-Quest.ecigprofile](files/profiles/High-Contrast-Profile-Lightning-Quest.ecigprofile)
   - Name on screen: **QUEST**
   - For: the Divine Tribe Lightning Quest heater.
-  - Settings: temperature control, 420°F, 25 watts, 60-second sessions.
+  - Settings: temperature control, 385°F, 25 watts, 60-second sessions.
 - [High-Contrast-Profile-V5XL-Cleaning.ecigprofile](files/profiles/High-Contrast-Profile-V5XL-Cleaning.ecigprofile)
   - Name on screen: **XL CLEAN**
   - For: burning residue off a V5 XL cup.
@@ -68,7 +68,7 @@ A profile stores the settings for one heater: power, temperature, and session ti
 The temperature profiles also need a **material file**. The material file tells the mod how to read the heater's temperature.
 
 - [dtv5xl-tcr200.csv](files/materials/dtv5xl-tcr200.csv): for the XL profile.
-- [questcup-tcr125.csv](files/materials/questcup-tcr125.csv): for the QUEST profile.
+- [questcup-tcr120.csv](files/materials/questcup-tcr120.csv): for the QUEST profile.
 
 ## 3. How to download a file from this page
 
@@ -99,7 +99,7 @@ Before you start, connect your mod to your computer with the USB cable and open 
 
 1. Select the **Materials** tab. Select **Import Material** and choose the matching material file:
    - **dtv5xl-tcr200.csv** for XL.
-   - **questcup-tcr125.csv** for QUEST.
+   - **questcup-tcr120.csv** for QUEST.
    - The cleaning profiles do not need a material file.
 2. Make sure the material appears under **Materials on Device**. If it does not, select it and press the arrow button to move it there.
 3. Select the **General** tab, choose an empty profile slot, select **Load Profile**, and choose the profile file.
