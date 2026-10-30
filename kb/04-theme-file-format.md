@@ -45,6 +45,9 @@ Colors in ColorScheme are **unsigned 32-bit ARGB integers** (e.g., 4294967295 = 
 - `Toggle Full=PNG Empty=PNG` + Source Setting: an on/off switch. Select toggles it.
 - `Status FontStyle HAlign VAlign [Color]`: shows the chip's status text ("Firing," "No Atomizer," and the highlighted control's `Status="…"` help text). See gotchas.
 - `Hidden`: nothing drawn.
+- **`Usage` on a `UIDesign`** is Theme Designer's "Special Usage": `0` none, `1` lock screen, `2` main screen, `3` new atomizer, **`4` power lock**, **`5` theme change**. The last two are unused here and untried (`15`).
+- **`UsageFlags="128"`** is the "Fire from this screen" checkbox. Our main screen sets it; nothing else does.
+- **`Wallpaper="n"` is 0-indexed** against the GUI's three wallpaper slots, so `0` is slot 1.
 - `FontStyle`: **0 = Normal (UIFont 1), 1 = Big (UIFont 2), 2 = Small (UIFont 3).**
 - Element attribute `Status="text"` = help text the chip shows in the Status element when that control is highlighted. **Gremlin strips all of these.**
 

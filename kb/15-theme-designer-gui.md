@@ -75,6 +75,76 @@ The GUI lists them Big, Normal, Small; the `FontStyle` numbers run Normal, Big, 
 
 ---
 
+## Screens tab
+
+Three panels: a **control palette** down the left, the **canvas** in the middle (the 80x160 screen, with
+everything past 80 px shown as checkerboard), and the **properties** of whatever is selected on the right.
+A **preview strip** of every screen runs down the far right, and **Add New Screen** sits under it.
+
+### Control palette, and a naming trap
+
+| Palette | XML element | Used by us |
+|---|---|---|
+| Label | `<Label>` | 130 |
+| Memo | `<Memo>` | - |
+| Field | `<Field>` | 74 |
+| **Gauge** | **`<Meter>`** | 15 |
+| Toggle | `<Toggle>` | 17 |
+| Picture | `<Picture>` | 110 |
+| Status | `<Status>` | 3 |
+| Chart | `<Chart>` | - |
+| Hidden | `<Hidden>` | 3 |
+
+**The GUI calls it Gauge; the XML calls it `Meter`.** The battery bar is one. Searching the file for
+"Gauge" finds nothing.
+
+### Screen properties, mapped
+
+With nothing selected, the properties panel edits the **Form** - the screen itself.
+
+| GUI | XML | Notes |
+|---|---|---|
+| Wallpaper: 1 / 2 / 3 / None | `Wallpaper="n"` | **0-indexed**: the XML's `0` is the GUI's `1` |
+| Special Usage | `Usage="n"` | The full list, below |
+| Fire from this screen | **`UsageFlags="128"`** | Present on our main screen and nowhere else, and the checkbox is clear on the lock screen - which is what this attribute has always been |
+| Size | - | Fixed 80, 160 |
+| Name | `Name="..."` | Our menu screens carry one; the three special screens do not |
+| Exit Up / Exit Down | **no XML equivalent found** | Screen-level navigation we have never used. Not written when unset |
+| Tab Order: Automatic / Manual | **not in our XML** | Automatic is the default, so nothing is written |
+| Listing Order | **not in our XML** | Appears to be the `UIDesign ID` order |
+
+Buttons: Free Motion - Show Grid - **Screenshot** - Copy Screen - Paste Screen - Delete Screen.
+
+### Special Usage: two screen types we never knew existed
+
+| GUI | `Usage` | Have we built one? |
+|---|---|---|
+| None | `0` | Yes - every menu screen |
+| Lock Screen | `1` | Yes |
+| Main Screen | `2` | Yes |
+| New Atomizer | `3` | Yes |
+| **Power Lock** | `4` | **No** |
+| **Theme Change** | `5` | **No** |
+
+`04` and `06` only ever documented 0-3, because those are the ones our themes use. **Power Lock** presumably
+shows while the mod's power lock is engaged - the feature behind `EvolvPowerLockPassword` (`03`). **Theme
+Change** presumably shows when the active theme switches, which is directly relevant to Color Themes, where
+switching looks are the whole point.
+
+Neither has been tried. Both are worth a look before the next feature gets squeezed into an existing screen.
+
+### The preview strip does not evaluate conditions
+
+The strip renders every screen with placeholder values - profile 1, 400F, 250W, cold ohms 0.250. In the
+New Atomizer preview the **NEW** value renders **red** at 0.250, when the replace warning only turns red
+above 0.41 (`02`). The red is the last variant on that control, so the preview appears to draw the
+**last variant regardless of its condition** rather than the one the firmware would pick.
+
+So the preview is good for layout and useless for conditional color. `07` is amended accordingly: use it
+to check that things fit, and never to check that a condition works.
+
+---
+
 ## Not yet mapped
 
-Screens tab · Indicator Light · Language · Credits · the condition editor and its operator list · the action editor · control property panels · Space Used · all five menus.
+Indicator Light · Language · Credits · the condition editor and its operator list · the action editor · control property panels · Space Used · all five menus.

@@ -33,7 +33,7 @@
 - Fonts: render or bitmap at the target pixel size. Horizontal condensing caused blur, and "pixel-hard" thresholding at small sizes was unreadable. Evolv's own Built SemiBold.
 - The ChildScreen index is **design ID − 1**, not list position.
 - Keep the zip entry `ECigTheme.xml`, UTF-8 BOM, and `\r\n` inside screen XML.
-- Previews: the local Python renderer (`render.py`) is approximate. Theme Designer's preview is reliable for layout. On-device photos are the final truth.
+- Previews: the local Python renderer (`render.py`) is approximate. Theme Designer's preview is reliable **for layout only** - it appears to draw the **last variant of a control regardless of its condition**, so a conditional color looks permanently on (`15`). On-device photos are the final truth.
 - **Don't reproduce known characters/IP in art.** The gremlin is an original creature design (not movie Gremlins).
 
 ## Tool/process
