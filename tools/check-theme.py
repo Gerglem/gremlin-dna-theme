@@ -57,6 +57,24 @@ def screens(path):
                 yield str(int(f.get("Index")) + 1), ET.fromstring(f.text)
 
 
+WHITE = "(1, 1, 1, 1)"
+
+
+def is_selectable(ctl):
+    """A control the firmware can highlight.
+
+    Selectable controls are drawn on a **white highlight band**, so explicit
+    white text on one is invisible (`kb/07`). What makes a control selectable
+    is an **editable** Setting - one without `ReadOnly="1"` - or an `Action`.
+    That is how the High Contrast home screen lost its profile name in
+    `v1.2.06`: the name is the profile selector, which is editable, and the
+    replace warning's cancel layer painted it white on white.
+    """
+    if ctl.find(".//Action") is not None:
+        return True
+    return any(st.get("ReadOnly") is None for st in ctl.iter("Setting"))
+
+
 def is_tint(child):
     c = child.find("Compare")
     return (c is not None and c.get("Operator") == "1" and c.get("Field") in TINT_FIELDS
@@ -69,6 +87,13 @@ def check(path):
         for ctl in screen.iter("Control"):
             kids = list(ctl)
             where = f"design {did} control at {ctl.get('Location')}"
+            if is_selectable(ctl):
+                for i, k in enumerate(kids, 1):
+                    if k.get("Color") == WHITE:
+                        errors.append(f"{where}: child {i} paints explicit white on a selectable "
+                                      f"control, which is drawn on a white highlight - it will be "
+                                      f"invisible (kb/07). Omit the color, or state the condition so "
+                                      f"the default is never overridden")
             if len(kids) > CEILING:
                 errors.append(f"{where}: {len(kids)} children, over the ceiling of {CEILING} "
                               f"- the last {len(kids) - CEILING} are dropped silently (kb/07 #26)")

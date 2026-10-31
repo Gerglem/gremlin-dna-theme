@@ -51,7 +51,7 @@ None of these are part of the build; they are how a build gets checked.
 | `dna-query.ps1` | The same read-out over the USB serial port |
 | `dna-stream.ps1` | Captures the 64 Hz CSV stream (switch EScribe to CSV first) |
 | `make-bench-config.py` | Builds a throwaway `.ecig` that pre-locks a chosen resistance on each profile. **The only way to exercise the replace warning**, since published configs ship cold ohms 0 (`12`). Do not fire on one; do not commit one |
-| `check-theme.py` | **Structural gate. Run before any release.** Fails a build where any control exceeds the child ceiling of 8 (`07` #26, measured) and warns at exactly 8, where a seventh color theme would break it. Reads both `.ecigtheme` and `.ecig` |
+| `check-theme.py` | **Structural gate. Run before any release.** Fails a build where any control exceeds the child ceiling of 8 (`07` #26, measured), or paints explicit white on a selectable control, where the highlight makes it invisible (`07`). Warns at exactly 8 children, where a seventh color theme would break the control. Reads both `.ecigtheme` and `.ecig`; verified to fail `v1.2.06` and pass `v1.2.07` |
 | `probe_pyb.py` | Inert IronPython probe for EScribe's Device Monitor. Hunts a live `PYB` and dumps the real flash layout - the next step for programmatic upload (`16`) |
 | `probe_open_link.py` | The proven recipe for opening a device link from inside EScribe and attaching it to a Programmer (`16`). Reads the port string from `dna-port.txt` |
 | `samples/` | A real puff recording, and the device-to-PC half of a settings upload |

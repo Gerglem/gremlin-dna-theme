@@ -501,6 +501,12 @@ confirmed under the condition that caused the bug, not around it.
 
 `v1.2.07` is the High Contrast release and is **proven on hardware**.
 
+**Checked afterwards, so the same trap is not waiting elsewhere:** four controls still carry explicit-white
+cancel layers - the HC OHMS page and new-coil prompt, and the Color Themes home screen and new-coil prompt.
+**None of them is selectable** (all `ReadOnly`, no `Action`), so none can be drawn on the highlight and none
+is at risk. The rule is now mechanical in `tools/check-theme.py`, which fails `v1.2.06` and passes
+`v1.2.07`. Rewriting those four to the `18` B shape is therefore **cleanup, not a bug fix**.
+
 ## Registered: does operator 64 (AND) actually work? - WRITTEN BEFORE RUNNING, 2026-10-30
 
 Settles the contradiction in the audit above, and decides whether v3's replace warning is two layers or
