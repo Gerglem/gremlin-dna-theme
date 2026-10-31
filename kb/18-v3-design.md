@@ -91,26 +91,38 @@ case, and the intent is legible**. `09`'s deferred "collapse to two layers" item
 
 ### C. The one question that decides the theme tint
 
-At four children the ohms row still cannot carry the six tints (4 + 6 = 10, over the ceiling), so it
-**keeps reading white** - the compromise `07` #24 accepted.
+At four children the ohms row cannot carry the six tints (4 + 6 = 10, over the ceiling), so it **keeps
+reading white** - the compromise `07` #24 accepted.
 
-Getting the tint back needs the warning down to **one** variant, which means folding the two Quest
-rules together with an `OR` inside the `AND`:
+**Collapsing the condition does not solve this, and an earlier draft of this section was wrong to say
+it did.** Even a single warning variant gives `1 default + 6 tints + 1 variant = 8` - the exact number
+the ceiling is inferred to be and the one principle 1 exists to stay away from. Folding the Quest
+rules together with an `OR` inside an `AND` is therefore not worth testing for this purpose: the best
+case still lands on the ceiling.
+
+**The route that does work is principle 1 - split the control**, the same shape as the battery fix:
 
 ```xml
-<Compare Operator="64">
-  <Compare Operator="2" Field="<ohms>" RefValue="0.41" />
-  <Compare Operator="65">
-    <Compare Operator="4" Field="262151" RefValue="2" />
-    <Compare Operator="4" Field="262151" RefValue="4" />
-  </Compare>
-</Compare>
+<Control Location="(16, 88)" … ZOrder="n">     <!-- default + 6 tints = 7 children -->
+<Control Location="(16, 88)" … ZOrder="n+1">   <!-- 2 children -->
+  <Hidden />
+  <Field … Color="(1, 0.24, 0.16, 1)">  <the warning condition>  </Field>
+</Control>
 ```
 
-That is **nesting depth 3, and only depth 2 is proven.** One probe settles it, built the same way as
-the operator-64 probe - its own 2-child control, a flat positive control alongside, registered before
-running. **Worth doing before B is cut**, because the answer changes B from four children to two and
-decides whether that row is tinted.
+Below the limit the overlay is hidden and the tinted value shows. Over it, the red `Field` draws the
+**same value, same font, same position** on top of the tinted one.
+
+**The open question is whether that double-draw is clean.** Two controls painting identical glyphs at
+identical coordinates should coincide exactly - the fonts are bitmaps with no anti-aliasing (`07`) -
+but nothing in either theme has ever drawn text over text, so it is unproven. If it renders cleanly,
+**every tinted control in the theme can carry a warning**, and the ceiling stops constraining the
+design at all. If it smears, the ohms row keeps its white compromise and nothing else changes.
+
+Note the battery fix (A) is the *easy* case of the same question - a `Picture` over a `Meter`, where
+the overlay covers its rect opaquely, and there is already precedent: the firing indicator at
+`(2, 118)` on the session screen is a `Hidden` + `Picture` control overlaying the status line, and it
+ships and works. Text over text is the case with no precedent.
 
 ### D. Make the ceiling mechanical, not remembered
 
@@ -150,7 +162,7 @@ and 0 during the first session after power-on* (`09`, audit). Either guard it - 
 
 | | Item | Needs hardware? |
 |---|---|---|
-| 1 | **C** - the depth-3 nesting probe | yes, one upload |
+| 1 | **C** - the text-over-text overlay probe | yes, one upload |
 | 2 | **A** - split the battery meter | builds blind, test with the rest |
 | 3 | **B** - rewrite the four warning chains (shape depends on 1) | |
 | 4 | **D** - the build-time child check | no |
@@ -158,4 +170,4 @@ and 0 during the first session after power-on* (`09`, audit). Either guard it - 
 | 6 | one bench pass over everything, both themes | yes |
 
 Note **A and D together close the audit's live defect and stop it recurring**, and neither depends on
-the probe - so if the depth-3 answer is slow in coming, they are not blocked by it.
+the probe - so if the overlay answer is slow in coming, they are not blocked by it.

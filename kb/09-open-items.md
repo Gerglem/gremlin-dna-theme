@@ -338,8 +338,9 @@ it, whose `RefValue` EScribe zeroes.
 across the four profiles, matching the result it shipped on, this time with a theme active.
 
 **Proven depth is 2** - one `Compare` nested inside one `Compare`. Three levels (an `OR` inside an
-`AND`) is **not** tested, and `18` explains why that specific question decides whether the ohms row
-can have its theme color back.
+`AND`) is **not** tested, and `18` section C explains why collapsing the condition does **not** buy the ohms row its theme color
+back either way - even one variant plus the six tints lands on the ceiling - and why the open
+question is a text-over-text overlay instead.
 
 ## Registered: the HC home-screen replace warning (v1.2.06) - WRITTEN BEFORE RUNNING, 2026-10-30
 
