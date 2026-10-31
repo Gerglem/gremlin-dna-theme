@@ -227,6 +227,56 @@ Three candidates remain, and the earlier test cannot separate them:
 Note **b** and **a** are not exclusive in principle, but the probe separates what matters: whether a
 later variant can repaint at all.
 
+## Probe 1 result, and Probe 2 registered - 2026-10-30
+
+### Probe 1: operator 4 works; precedence is the problem
+
+| Profile | Ohms | Session time |
+|---|---|---|
+| 1 DTv5XL | 0.464 **RED** | white |
+| 2 QuestCup | 0.450 RED | white |
+| 3 DTv5XL-Clean | 0.650 RED | white |
+| 4 QuestCup-Clean | 0.314 plain | **45s GREEN** |
+
+The isolated operator-4 variant **fired**, so equality matches and hypothesis **c** is dead. The ohms
+cancel variant carried an explicit white this time and **still lost to the red above it**, so **b** is
+dead too. That leaves **a: the first matching variant wins, not the last.**
+
+The theme was switched off for this run (confirmed by the operator), so the six theme variants never
+matched and cannot explain the result.
+
+**`04` and `10` are therefore both wrong**, and the replace warning was designed on the wrong rule
+from the start - which is also why no amount of operator-swapping helped. No shipped feature ever
+caught it: the theme toggles and the low-battery bar can only ever have one variant true at a time.
+
+### Probe 2, registered before running
+
+`PROBE2-precedence.ecig`, same four locked profiles.
+
+**A - decide precedence outright.** The session-time field gets two variants that are *both always
+true*: **GREEN** if `profile != 0`, then **BLUE** if `cold ohms != 0`.
+
+- **GREEN** -> first match wins. Confirms the reading above.
+- **BLUE** -> last match wins, which would contradict Probe 1 and send this back to the start.
+
+**B - the fix.** The ohms chain reordered most-specific-first, which is what first-match-wins
+requires:
+
+    default -> red if ohms > 0.6 -> white if profile == 1 -> white if profile == 3
+            -> red if ohms > 0.41 -> the six theme colors
+
+Expected, if first-match-wins holds:
+
+| Profile | Locked | First match | Expected |
+|---|---|---|---|
+| 1 XL | 0.4637 | `profile == 1` | **plain/white** |
+| 2 Quest | 0.4504 | `ohms > 0.41` | **RED** |
+| 3 XL-Clean | 0.6500 | `ohms > 0.6` | **RED** |
+| 4 Quest-Clean | 0.3141 | none | **plain** |
+
+A green session time plus that column is the whole fix verified in one upload. Note the ordering
+costs the XL its theme color across its healthy range, the same trade `07` #24 already accepted.
+
 ## Deferred: known simplifications
 
 Things we know are now unnecessarily complicated, held back deliberately so they can be applied in one
