@@ -54,7 +54,10 @@ driver install, just `pip install hidapi` (installed). Framing and traps in `16`
 `17` and applies to both transports. `tools/dna-query.ps1` does the same over serial, and
 `tools/dna-stream.ps1` captures the 64 Hz CSV.
 
-**Writing a config is not solved.** The architecture is mapped as far as reflection can take it
+**Writing a config: the layout blocker is SOLVED 2026-10-30** - `UWB.FE(ggq)` gives the DNA100C's board
+class `A.WIA`, `JSL(None, ggq, None)` gives a real `PYB`, and `PE()` returns the actual flash map (three
+regions, 200,448 bytes used; full detail in `16`). No device involved. The write itself is untried and is
+where Jake's go-ahead is needed. Superseded text follows: the architecture is mapped as far as reflection can take it
 (`16`): the chain is `.ecig root -> GGQ -> DWB.JSL -> PYB -> PYB.UE -> Programmer`, and it is blocked
 on obtaining a live `PYB`, because the flash layout is **derived per config** rather than declared per
 board. `tools/probe_pyb.py` is inert and ready to run in Device Monitor.

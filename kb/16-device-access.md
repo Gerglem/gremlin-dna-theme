@@ -385,6 +385,73 @@ reads a map, it does not apply one. **The mod need not even be plugged in.**
 If `JSL(None, ...)` rejects the null first argument, that argument is the settings document and the
 fix is to pass one - which we can build, since `GGQ` already comes from our own file.
 
+## SOLVED 2026-10-30: the real flash layout, from Evolv's own code
+
+`tools/probe_layout.py`. Every step of the chain worked on the first run, with the mod not involved
+at all.
+
+    GGQ from <DESabertooth Device="109" Version="1" />   -> A.GGQ  [109.1]
+    UWB.FE(ggq)                                          -> A.WIA
+    DSL(ggq) true for exactly one subclass               -> WIA    (agrees)
+    dwb.JSL(None, ggq, None)                             -> A.PYB
+    pyb.PE()                                             -> LogicalLayout
+
+**The DNA100C's board class is `A.WIA`**, and it was identified two independent ways: the dispatcher
+returned it, and `DSL(ggq)` came back true for **exactly one** of the 25 concrete subclasses - the
+same one. The `GGQ` printed its own identity as `[109.1]`, which matches EScribe's debug log, so the
+board identity built from our own `.ecig` root is right.
+
+**`JSL` accepted `None` as its first argument**, so a settings document is not needed to obtain a
+`PYB` or its layout. That was the open worry and it is answered.
+
+### The layout
+
+    PCSize      5,341,184
+    PCSizeUsed    200,448
+
+| Region | Size | Device offset | PC offset | Read-only | Hash whole | Chunk |
+|---|---|---|---|---|---|---|
+| 0 | 101,888 | `0x000000` | `0x000000` | no | no | 1024 |
+| 1 | 256 | `0x018E00` | `0x018E00` | no | no | 1024 |
+| 2 | 98,304 | `0x500000` | `0x500000` | no | no | 1024 |
+
+`101,888 + 256 + 98,304 = 200,448`, exactly `PCSizeUsed` - the three regions account for the whole
+used image, so nothing is missing from the map.
+
+Reading it against what the project already knows: region 2 is 96 KB at `0x500000`, which is the
+**off-board** space `06` tracks at 93.6% for images and fonts; region 0 is ~99.5 KB of on-board
+settings and controls; region 1 is a 256-byte block of its own. All three are writable and hashed in
+1 KB chunks, which is consistent with the differential hashing gate in the inventory below.
+
+**This is the thing `16` said must never be hand-built**, because the map is derived per config from
+feature IDs rather than declared per board. It no longer has to be: Evolv's own code produces it on
+request, in-process, with no device attached.
+
+### What that changes
+
+The v3.0 blocker is gone. Writing a config is no longer a research problem - the remaining work is
+engineering, and the next piece is `PYB.UE(Func<>, Int32) -> OCC`, which returns a Programmer that
+*has* this layout. That is the object `16` found could not be built correctly before.
+
+### Where the line is now
+
+Everything up to here has been device-free: no link opened, nothing written, the mod not even
+required to be plugged in. **The next steps are not.** In order of increasing commitment:
+
+1. **Still safe** - feed a real `.ecig` document to `JSL` instead of `None` and compare layouts. It
+   tests the "derived per config" claim directly, and still writes nothing.
+2. **Still safe** - call `PYB.UE(...)` for a Programmer. Until a stream is attached it talks to
+   nothing.
+3. **Touches the device** - attach a link (`tools/probe_open_link.py` has the proven recipe) and run
+   `PerformUpload(ctx, progress, dontUpload=True)`, the vendor's own dry run.
+4. **Writes to flash** - the same call with `dontUpload` false.
+
+Steps 1 and 2 are mine to do. **Steps 3 and 4 need Jake to say so explicitly**, and 4 is the first
+thing in this entire effort that can brick the mod. The safety gates inventoried in this file -
+pre-upload backup, device identity check, firmware handshake, per-frame CRC, differential hashing,
+the write transaction - all live above this layer and are the reason for going through Evolv's code
+rather than around it.
+
 ### Where this leaves a push
 
 **Further away than it looked, and deliberately not attempted.** Driving `PerformUpload` with a
