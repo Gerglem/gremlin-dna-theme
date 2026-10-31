@@ -1,5 +1,88 @@
 # 16 – Driving the mod programmatically
 
+## DECISION 2026-10-30: EScribe comes out of the loop
+
+Jake's call, and it is the right one: *"The goal has always been for you to directly interface with
+it. I don't want to use escribe anymore."*
+
+Every probe tonight ran **inside** EScribe's Device Monitor, driving Evolv's own obfuscated code by
+reflection. That was chosen in `16` to keep Evolv's safety gates by construction. It has been
+productive, but it is not the goal, and it means every operation needs EScribe open and a script
+pasted into a GUI by hand.
+
+### What direct access already does, today, with no EScribe at all
+
+`tools/dna-hid.py` over the vendor HID interface - no EScribe, no COM port, no driver:
+
+| | |
+|---|---|
+| **Reads** | version, product, cold ohms, active material, active profile, setpoints, battery, board and room temperature, puff statistics - the whole of `17` |
+| **Writes live state** | `M=#` switches profile, `T=#F` moves a setpoint, `F=#S` fires |
+
+So "read the mod and change what it is doing" is **already solved without EScribe.** What is not is
+reading or writing the **settings image** - the config and theme blob.
+
+### What tonight actually bought for the direct route
+
+The EScribe detour produced exactly the thing the direct route could not safely guess:
+
+| | |
+|---|---|
+| **The flash layout** | 3 regions - 101,888 at `0x000000`, 256 at `0x018E00`, 98,304 at `0x500000`; 200,448 bytes used; 1 KB hash chunks |
+| **The memory areas** | `EEPROM` `0x0..0x600`, settings `0x600..0x18E00`, `KERNEL` `0x18E00..0x18F00`, `FLASH` `0x500000..0x518000` |
+| **The board class** | device code 109.1 -> `A.WIA`, confirmed two ways |
+
+`16` insisted the layout must never be hand-built because it is derived per config rather than
+declared per board. **It no longer has to be guessed or hand-built - it is measured.** That is the
+single most valuable thing to carry out of the EScribe work, and it is now in this repo rather than
+locked inside their assemblies.
+
+### What is still missing, precisely
+
+**The PC-to-device half of the settings transfer.** From the passive capture (`16`):
+
+    frame:    01 | DE | outer_len | F8 2B | inner_len | payload | 3-byte trailer
+    payload:  7-bit encoded, entropy 5.38 b/B
+    captured: 208 frames, device-to-PC only
+
+We know the framing and the opcode. We have never seen what the PC *sends* to start a transfer -
+which is almost certainly why calling `AX()` directly times out: the board is streaming telemetry in
+the plain-text protocol and nothing has told it a binary transfer is beginning.
+
+### The route from here, and the irony in it
+
+**One USB capture of EScribe doing a single "Download Settings from Device"** gives the request side.
+After that EScribe is never needed again: the layout is already in hand, the framing is known, and
+the transport is `dna-hid.py`.
+
+Using EScribe once more is the fastest way to stop needing it.
+
+USBPcap plus Wireshark on the `VID_268B&PID_0433` endpoint, one download, one upload if he is
+willing. Both halves decoded gives a pure-Python implementation.
+
+### The honest cost of leaving the vendor's code
+
+`16` chose the EScribe route specifically to inherit Evolv's gates: pre-upload backup, device
+identity check, firmware handshake, per-frame CRC, differential hashing, the write transaction, and
+the `dontUpload` dry run. **Going direct means we implement those ourselves or go without them.**
+
+For **reading**, that costs nothing - a read cannot damage anything.
+
+For **writing**, it is the real tradeoff. Jake has accepted brick risk equivalent to the vendor
+software; this is slightly worse than that, because the vendor software would still have its own
+checks. The mitigation is to build the gates back in deliberately - the inventory in `16` is the
+checklist - and to read-verify every write before trusting it.
+
+### Parked, not deleted
+
+`tools/probe_orchestrator.py` hunts the layer above `AX` inside `DEScribe.Core` - the thing that
+sends `get version` and brackets a transfer with its markers. It is the fallback if the capture
+route stalls, and it is the only remaining way to get a working transfer *without* decoding the
+protocol ourselves. Not the plan, but worth keeping.
+
+
+---
+
 > ## Where this stands, 2026-10-30
 >
 > This file is written in discovery order and is long. The conclusions, so a cold reader does not
@@ -12,7 +95,7 @@
 > | **Opening a link** | **SOLVED.** `BGQ.FE(port, vid, pid, ver, OpenConfiguration, 1, enum0) -> POT`, with the port string derived from WMI - no hand-made file |
 > | **Building a Programmer** | **SOLVED.** `PYB.UE(func, n)` with **n >= 128** - the Int32 is an address whose high bit must be set |
 > | **Reading the settings image** | **`AX()` times out**, with every argument-level suspect eliminated. The Programmer carries the layout, knows the version and is correctly addressed. **HID contention with Device Monitor is the only theory left** |
-> | **Writing a config** | **Untried.** Needs the read working first, then the `dontUpload` dry run, then Jake's explicit go-ahead |
+> | **Writing a config** | **Untried**, and the route has changed - see the decision above. EScribe is out of the loop; the remaining gap is the PC-to-device half of the transfer protocol, to be had from one USB capture |
 >
 > **Everything before "SOLVED: the real flash layout" is the investigation that got there**, including
 > several wrong turns kept on purpose. Where an older section is superseded it says so inline, but if

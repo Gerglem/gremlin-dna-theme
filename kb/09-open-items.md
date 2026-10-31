@@ -1441,6 +1441,12 @@ releases, and everything in `16` and `17` is in service of them.
 
 ### v3.0 - direct device push
 
+**Route changed 2026-10-30:** Jake wants no EScribe in the loop at all. The reflection work stays
+valuable - it produced the flash layout, which `16` said must never be guessed - but the destination
+is a pure-Python implementation over `tools/dna-hid.py`. The one remaining gap is the PC-to-device
+half of the settings transfer, and **one USB capture of EScribe doing a single download closes it**,
+after which EScribe is never needed again. Detail and the safety tradeoff in `16`.
+
 **Status 2026-10-30, after eleven probes:** the whole chain is built and a Programmer now holds a
 live link to the board. `AX()` - the download - times out, and that is the only step left before a
 read works. Detail and the three suspects are in `16`. Nothing has ever been written to the device.
