@@ -14,7 +14,7 @@ Rewritten 2026-10-30 at the end of a long session. Everything below is current.
 **Repository is fully pushed.** `main` matches `origin/main`; nothing is held back. The earlier
 instruction to keep work local was discharged on 2026-10-30.
 
-**Current builds:** Color Themes **`v2.2.05`**, High Contrast **`v1.2.06`**.
+**Current builds:** Color Themes **`v2.3.00`**, High Contrast **`v1.2.06`**. **Neither has been on hardware.** `v2.3.00` carries the battery split (`18` A); `v1.2.06` carries the home-screen warning.
 
 | | State |
 |---|---|
@@ -71,6 +71,8 @@ board. `tools/probe_pyb.py` is inert and ready to run in Device Monitor.
 
 1. **v1.2.06** - the High Contrast home-screen warning. Built and verified by inspection only; the
    test is **registered and the bench file built** (card below), awaiting a sitting with the mod.
+1b. **v2.3.00** - the battery split. Needs the pack under 15%, or the level written from Device
+   Monitor (`14`), to confirm the red bar still appears. Nothing else in that build changed.
 2. **`ResampleOhms` from a child screen** - the MEASURE button on the HC OHMS page is present but was
    never pressed.
 3. **The new-coil screen on Color Themes** - the hidden `LOCK?` row was only confirmed on High Contrast.
@@ -193,7 +195,13 @@ Themes spends 6 of its 8 slots on tinting**: 27 controls carry a default plus th
 are mutually exclusive), but they leave **one usable slot** on any tinted control, which is the real
 structural limit of the v2 design.
 
-### Defect 1: the low-battery warning sits on the ceiling
+### Defect 1: the low-battery warning sits on the ceiling - FIXED in v2.3.00, untested
+
+> Split per `18` principle 1 on 2026-10-30 and shipped as `v2.3.00`. The red `Picture` now sits on its own
+> 2-child control over the same rect, next in both file order and `ZOrder`. Verified off-device: the only
+> difference from `v2.2.05` anywhere in the eleven screens is this split, the warning image is byte-identical,
+> and `tools/check-theme.py` passes. **The red bar has not been seen on hardware since the change.**
+
 
 **The only functional variant in the whole theme that sits above position 5 is the low-battery red,
 and it is child 8 of 8** - on both the home screen and the session screen, at `(0, 0)`.

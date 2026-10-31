@@ -39,7 +39,7 @@ limitation that turned out not to exist.
 
 ## Changes, in the order they should be built
 
-### A. Split the battery meter — fixes a live defect
+### A. Split the battery meter — fixes a live defect  ✅ DONE in v2.3.00, untested on hardware
 
 The only functional variant above position 5 in the whole theme is the low-battery red, at **child 8
 of 8** on both the home and session screens (`09`, audit). In `v1.0` it was child 2 of 2.
@@ -124,13 +124,24 @@ the overlay covers its rect opaquely, and there is already precedent: the firing
 `(2, 118)` on the session screen is a `Hidden` + `Picture` control overlaying the status line, and it
 ships and works. Text over text is the case with no precedent.
 
-### D. Make the ceiling mechanical, not remembered
+### D. Make the ceiling mechanical, not remembered  ✅ DONE - `tools/check-theme.py`
 
 Both bugs this project has had were invisible on inspection. The build should refuse to ship them:
 
-- **fail** the build if any control exceeds **7** children,
-- **warn** at exactly 7,
-- **fail** if a control mixes tint variants with non-tint conditions, which is principle 1 as a check.
+- **fail** if any control exceeds **8** children - over the inferred ceiling;
+- **fail** if a control mixes tint variants with conditions, which is principle 1 as a check;
+- **fail** if a condition sits in a slot past the 7th, where one more theme would drop it;
+- **warn** at exactly 8 children, meaning no headroom left.
+
+The thresholds moved while building it. An earlier draft of this section said *fail over 7, warn at
+7*, which would have warned on **27 controls every single build** - all of them default-plus-six-tints,
+all of them safe and deliberate. A check that cries wolf 27 times gets ignored, so the rule keys on
+the thing that is actually dangerous: a *condition* near the ceiling, or tints and conditions sharing
+a control. The 27 tint-only controls are silent.
+
+Still worth adding later: a **cross-file consistency check** between the `.ecigtheme` and the `.ecig`.
+They have diverged before - EScribe zeroed four `RefValue`s in one and not the other - and nothing
+currently catches it.
 
 Add to the verifier in `08`. This is the cheapest item here and prevents the recurrence of both #26
 and the battery-meter defect.

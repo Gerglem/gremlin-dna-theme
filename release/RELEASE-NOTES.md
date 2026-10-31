@@ -5,9 +5,42 @@ Files are named for their version, in the original v1.0 format:
 - `gremlin_v<version>_theme.ecigtheme` — the theme on its own
 - `gremlin_v<version>.ecig` — the theme plus the four Divine Tribe profiles and their materials
 
-The current release is **v2.2**. Older versions stay in this folder, so a link to a specific version keeps working.
+The current release is **v2.3**. Older versions stay in this folder, so a link to a specific version keeps working.
 
 The High Contrast theme is a separate build on its own version track — see [`../high-contrast/RELEASE-NOTES.md`](../high-contrast/RELEASE-NOTES.md).
+
+---
+
+## v2.3
+
+**Not yet tested on hardware.** Structural only — nothing about how the theme looks or behaves is
+meant to change. See the note at the end of this section.
+
+**The low-battery warning was one step away from disappearing, silently.** The battery bar turns red
+below 15%. That warning has worked since v1.0, where the battery control held two things: the bar and
+the red. v2.1 added the six color themes, which put six more tinted bars on the same control — and
+because the red has to be drawn *last* to show over whichever theme is active, it ended up eighth of
+eight on a control that is only known to hold about eight. One more theme and it would have stopped
+appearing, with nothing to show that anything had changed; the only way to notice would have been to
+run the pack flat and see no warning.
+
+The red is now its own layer sitting over the bar instead of being the last item on it. Same artwork,
+same 15% threshold, same appearance — it simply can no longer be crowded out. The battery control is
+back to seven items with room to spare, and adding a seventh color theme later cannot affect the
+warning at all.
+
+Nothing else changed: every screen, all six themes, every other reading, and the memory footprint are
+identical. No new images.
+
+**If you are upgrading from v2.2** there is nothing to re-learn and no profile reload needed — the
+profiles and materials in the `.ecig` are unchanged from v2.2.
+
+**Testing note:** this is the first Gremlin release built by editing the previous release's XML
+directly rather than from the generator, and it has not been on a device yet. Everything verifiable
+off-device has been checked — the file parses, the only difference from v2.2.05 anywhere in all
+eleven screens is the battery split, and the warning artwork is byte-identical — but the red bar
+itself has not been seen on hardware since the change. Drain a pack below 15%, or set the level in
+Device Monitor, before trusting it.
 
 ---
 
