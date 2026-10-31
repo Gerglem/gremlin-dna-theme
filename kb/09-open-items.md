@@ -79,6 +79,42 @@ where Jake's go-ahead is needed. Superseded text follows: the architecture is ma
 on obtaining a live `PYB`, because the flash layout is **derived per config** rather than declared per
 board. `tools/probe_pyb.py` is inert and ready to run in Device Monitor.
 
+### USB capture: the host side is visible, the download is not (2026-10-30, late)
+
+EScribe is out of the loop by Jake's instruction, and the route is a USB capture rather than more
+reflection. Tooling is installed and working; full detail in `16`.
+
+| | |
+|---|---|
+| Wireshark 4.6.9 + USBPcap 1.5.4.0 | installed. USBPcap is **bundled in the Wireshark installer**, on its own "USB Capture" page, not in Choose Components |
+| The mod on this machine | USB **address 10** on `\.\USBPcap1` |
+| Both directions captured | **yes, for the first time** - `F8 2A` is the host's request, `F8 2B` the device's reply |
+| A settings download in the capture | **no.** The capture was stopped before EScribe ran one |
+
+**The correction that matters:** `F8 2B` is not a transfer opcode. It is one half of a
+request/response pair. Thirty seconds of idle polling produced **exactly 207 `F8 2B` frames** -
+the same count this repo attributed to a real upload - so the earlier "settings transfer"
+write-up in `16` may have been describing ordinary telemetry all along.
+
+Baseline for comparison: `tools/samples/hid-idle-baseline.log`. Raw `.pcapng` files stay in
+`Downloads` and never enter this repo: their string descriptors carry the device serial (`12`).
+
+### Registered test: does the settings download ride `F8 2A`? (set 2026-10-30, NOT YET RUN)
+
+Written down **before** the capture so the result cannot be read to fit.
+
+**Method.** Capture USB address 10 with EScribe open and connected, then perform exactly one
+*Download Settings from Device*. Compare against the idle baseline above: 207 exchanges in 30 s,
+about 7/s, requests `inner_len` 0x07-0x0d, replies 0x30-0x38.
+
+| Outcome | What it means | What to do next |
+|---|---|---|
+| **A** - rate jumps far above 7/s, thousands of exchanges, same `F8 2A`/`F8 2B` opcodes | The earlier `16` write-up was telemetry; the transfer is the same channel | Replay `F8 2A` reads from `dna-hid.py` |
+| **B** - a different opcode, a different endpoint, or bulk traffic on the CDC interface `MI_01` | The baseline was pure telemetry and the transfer is elsewhere | Decode the new opcode |
+| **C** - nothing beyond the idle rate | EScribe never actually performed the download | Diagnose EScribe, not the protocol |
+
+Anything else: record it as it is. Do not force it into A, B or C.
+
 ### Device and environment state
 
 - Mod on **COM4**, HID interface `MI_00` present. Serial Output Format is **Plain Text Serial**.
@@ -102,7 +138,7 @@ board. `tools/probe_pyb.py` is inert and ready to run in Device Monitor.
 
 Rewritten 2026-10-30 at the end of the session. The previous version of this section still told you to
 load `v2.2.05` and `v1.2.06` and predates everything proven that day, so it is replaced rather than
-amended. **Current builds: `v2.3.02` and `v1.2.08`.**
+amended. **Current builds: `v2.3.03` and `v1.2.08`.**
 
 **Nothing in this session exercised this screen.** Every bench run read the home screen or the OHMS
 page. Of the four things listed here, one is half-answered and three are open.
@@ -118,9 +154,9 @@ page. Of the four things listed here, one is half-answered and three are open.
 
 **Jake's call: the new-atomizer screen ships working in v2.3.** It is no longer a background tracker -
 `v2.3` is not finished until the four items above are confirmed on hardware. The theme work in
-`v2.3.02` is done and proven; this is what remains between it and a final release.
+`v2.3.03` is done and proven; this is what remains between it and a final release.
 
-Test it with the plain **`gremlin_v2.3.02.ecig`**, not a bench config - the prompt is driven by a
+Test it with the plain **`gremlin_v2.3.03.ecig`**, not a bench config - the prompt is driven by a
 fresh load zeroing cold ohms, and a bench config pre-locks resistances, which suppresses exactly the
 condition under test.
 
@@ -573,10 +609,10 @@ probes sit on their own 2-child controls with explicit colors.
 
 | Profile | Locked | `DEP2` depth 1 | `DEP3` depth 3 | `OR3` 3-child OR | `DEP4` depth 4 |
 |---|---|---|---|---|---|
-| 1 XL | 0.4637 | **orange** | grey | grey | grey |
-| 2 QUEST | 0.4504 | **orange** | **magenta** | **grey** | **green** |
-| 3 XL CLEAN | 0.6500 | **orange** | grey | **grey** | **green** |
-| 4 Q CLEAN | 0.3141 | grey | grey | grey | grey |
+| 1 XL | 0.4637 | **orange** | gray | gray | gray |
+| 2 QUEST | 0.4504 | **orange** | **magenta** | **gray** | **green** |
+| 3 XL CLEAN | 0.6500 | **orange** | gray | **gray** | **green** |
+| 4 Q CLEAN | 0.3141 | gray | gray | gray | gray |
 
 **Two findings, and the second was not on the card as a possibility.**
 
@@ -587,7 +623,7 @@ correct, **in a single variant**.
 **2. `Operator="65"` (and by implication `64`) takes exactly TWO children. A third kills it.**
 `OR3` never lit on any profile. That is not "the third child was ignored": with three children
 `OR(ohms > 0.6, AND(…p==2), AND(…p==4))`, dropping *any* one of them still leaves a form that is true
-on profile 2 or profile 3, and it was grey on both. So the compare does not partially evaluate - **it
+on profile 2 or profile 3, and it was gray on both. So the compare does not partially evaluate - **it
 fails outright**. `64` and `65` are binary operators, not n-ary lists, and the only way to combine
 three conditions is to nest a second operator. That is worth knowing before anyone writes one by hand
 in Theme Designer and wonders why a condition never fires.
@@ -690,7 +726,7 @@ color and staying white, which is the one user-visible thing `v2.3` could delive
 `Downloads\PROBE-DEPTH.ecig`, built from `v2.2.05` with the four standard locked resistances. Four
 probes on the main screen, each on its own **2-child** control. **Do not fire.**
 
-| Row | Colour | Condition | Nesting |
+| Row | Color | Condition | Nesting |
 |---|---|---|---|
 | `DEP2` | orange | `ohms > 0.41` | depth 1 - the positive control, already proven |
 | `DEP3` | magenta | `AND(ohms > 0.41, OR(p==2, p==4))` | **depth 3** - an OR inside an AND |
@@ -704,10 +740,10 @@ one working is enough.
 
 | Profile | Locked | `DEP2` | `DEP3` | `OR3` | `DEP4` |
 |---|---|---|---|---|---|
-| 1 XL | 0.4637 | **orange** | grey | grey | grey |
+| 1 XL | 0.4637 | **orange** | gray | gray | gray |
 | 2 QUEST | 0.4504 | **orange** | **magenta** | **cyan** | **green** |
-| 3 XL CLEAN | 0.6500 | **orange** | grey | **cyan** | **green** |
-| 4 Q CLEAN | 0.3141 | grey | grey | grey | grey |
+| 3 XL CLEAN | 0.6500 | **orange** | gray | **cyan** | **green** |
+| 4 Q CLEAN | 0.3141 | gray | gray | gray | gray |
 
 The `OR3`/`DEP4` column is exactly the replace warning's intended behaviour, which is the point: if
 those two light on profiles 2 and 3 and nowhere else, the rule fits in one variant.
@@ -723,7 +759,7 @@ profile 2 only. That is what separates "depth 3 works" from "the rule is express
 - **Both wrong, `DEP3` correct** → depth 3 works but the rule needs two variants, which is
   `2 + 6 + 1 = 9` and over the ceiling. `v2.3` ships section B only; the ohms row stays white.
 - **`DEP3` also wrong** → nesting stops at depth 2. Same outcome, and `10` gets a measured limit.
-- **`DEP2` grey anywhere it should be orange** → void, not negative. The upload or the locks did not
+- **`DEP2` gray anywhere it should be orange** → void, not negative. The upload or the locks did not
   land; re-run.
 - **Anything lit on profile 4** → something matches unconditionally; suspect the default child.
 
@@ -745,7 +781,7 @@ resistances. **Do not fire. Reload the real config after.**
 
 Four independent probes on the main screen, each **its own control with exactly 2 children** so the
 child ceiling cannot confound anything, and each using **only operators confirmed on-device** inside
-the nesting. Each reads dark grey `(0.3, 0.3, 0.3, 1)` when its condition is false, so an unmatched
+the nesting. Each reads dark gray `(0.3, 0.3, 0.3, 1)` when its condition is false, so an unmatched
 probe is still legible and cannot be mistaken for a missing control.
 
 | Row | Replaces | Condition | Color when true |
@@ -763,12 +799,12 @@ menu navigation is untouched - `(56, 140)` still opens MENU, so profiles switch 
 
 | Profile | Locked | `AND1` | `AND2` | `OR13` | `FLAT` |
 |---|---|---|---|---|---|
-| 1 DTv5XL | 0.4637 | **green** | grey | **cyan** | **orange** |
-| 2 QuestCup | 0.4504 | grey | **magenta** | grey | **orange** |
-| 3 DTv5XL-Clean | 0.6500 | grey | grey | **cyan** | **orange** |
-| 4 QuestCup-Clean | 0.3141 | grey | grey | grey | grey |
+| 1 DTv5XL | 0.4637 | **green** | gray | **cyan** | **orange** |
+| 2 QuestCup | 0.4504 | gray | **magenta** | gray | **orange** |
+| 3 DTv5XL-Clean | 0.6500 | gray | gray | **cyan** | **orange** |
+| 4 QuestCup-Clean | 0.3141 | gray | gray | gray | gray |
 
-Profile 4 is the all-grey row: nothing may light there, which catches a variant that matches
+Profile 4 is the all-gray row: nothing may light there, which catches a variant that matches
 unconditionally. Profiles 1 and 2 together are what actually prove the AND - each has one probe true
 and one false on the *same* two fields, so an AND that merely ignores its second child is caught.
 
@@ -784,7 +820,7 @@ and one false on the *same* two fields, so an AND that merely ignores its second
   safe construction.
 - **`OR13` lights but `AND1` does not** - OR works, AND does not. Partial win: the cleaning-profile
   special case collapses, the thresholds stay layered.
-- **`FLAT` grey on every profile** - void, not negative. The upload did not take or the locks did not
+- **`FLAT` gray on every profile** - void, not negative. The upload did not take or the locks did not
   land; check MENU -> PROFILE shows a non-zero resistance and re-run.
 - **A row missing entirely** - a layout or font problem in the probe, not a logic result. Re-cut it.
 
@@ -795,10 +831,10 @@ was live throughout and did not interfere.
 
 | Profile | Locked | `AND1` | `AND2` | `OR13` | `FLAT` | Ohms readout |
 |---|---|---|---|---|---|---|
-| 1 DTv5XL | 0.4637 | **GREEN** | grey | **CYAN** | **YELLOW** | 0.464 white |
-| 2 QuestCup | 0.4504 | grey | **MAGENTA** | grey | **YELLOW** | 0.450 **RED** |
-| 3 DTv5XL-Clean | 0.6500 | grey | grey | **CYAN** | **YELLOW** | 0.650 **RED** |
-| 4 QuestCup-Clean | 0.3141 | grey | grey | grey | grey | 0.314 plain |
+| 1 DTv5XL | 0.4637 | **GREEN** | gray | **CYAN** | **YELLOW** | 0.464 white |
+| 2 QuestCup | 0.4504 | gray | **MAGENTA** | gray | **YELLOW** | 0.450 **RED** |
+| 3 DTv5XL-Clean | 0.6500 | gray | gray | **CYAN** | **YELLOW** | 0.650 **RED** |
+| 4 QuestCup-Clean | 0.3141 | gray | gray | gray | gray | 0.314 plain |
 
 **All sixteen cells match.** Green appears on profile 1 only and magenta on profile 2 only - the two
 cells that cannot both be right unless the AND is evaluating *both* of its children. Profile 4 is
@@ -1323,7 +1359,7 @@ first time.
 ### The `SET` fix is confirmed
 
 Same run, home screen: `SET 385°F` reads clearly as dark text inside the white highlight bar, where
-`v2.3.02` showed an empty white box. Removing the explicit grey and letting the firmware invert
+`v2.3.02` showed an empty white box. Removing the explicit gray and letting the firmware invert
 against the highlight was the right fix, and `InitiallyHighlighted` was the right diagnosis.
 
 `v2.3.03` is therefore **proven on hardware in full** - warning chains, theme tint, profile settings,
@@ -1345,29 +1381,29 @@ has written down: **after pressing YES, NEW - does the prompt stay on screen?**
 
 The suspicion was nearly dismissed as a camera artefact. It was measured instead: a hard contrast
 stretch of the photograph recovers `SET` and the `385F` above it as clean letterforms, while the
-value box stays **uniformly saturated with no glyph structure at all**. Grey text on a white
+value box stays **uniformly saturated with no glyph structure at all**. Gray text on a white
 highlight would sit about 97 levels below the background and would have come straight out. The box
 is genuinely empty.
 
-**Why this one control and not the seventeen others sharing its colour:** the home-screen setpoint
+**Why this one control and not the seventeen others sharing its color:** the home-screen setpoint
 carries **`InitiallyHighlighted="1"`**. It is on the white highlight from the moment the screen
 draws, permanently. The menu value fields use the same `(0.62, 0.62, 0.62, 1)` and are perfectly
 readable, because a menu value is highlighted only while you are on that row.
 
 That also explains why the earlier attempt to widen `check-theme.py` produced 18 errors against a
-build that works: the colour was never the whole condition.
+build that works: the color was never the whole condition.
 
-**The fix is to remove the colour, not to darken it.** No fixed value can be right in both states -
-the grey works on the dark background and fails on the highlight; a dark colour would do exactly the
+**The fix is to remove the color, not to darken it.** No fixed value can be right in both states -
+the gray works on the dark background and fails on the highlight; a dark color would do exactly the
 reverse. Every *other* editable control on that screen - the profile name, watts, session time,
 every toggle, and all of High Contrast - already has no `Color` at all, and the firmware inverts
 them correctly against whichever background they land on. `v2.3.03` makes the setpoint match its
 siblings.
 
-**This is pre-existing, not a v2.3 regression** - the same control and colour are in `v2.2.05`.
+**This is pre-existing, not a v2.3 regression** - the same control and color are in `v2.2.05`.
 
 `check-theme.py` now encodes the real rule: pure white fails on any selectable control, and a merely
-pale colour fails where the highlight is permanent. That is one hit on `v2.3.02`, not eighteen.
+pale color fails where the highlight is permanent. That is one hit on `v2.3.02`, not eighteen.
 
 ### Also found: the theme-only release had fallen a version behind
 
@@ -1380,19 +1416,19 @@ two formats must be bumped together even when a change only applies to one of th
 
 One photograph of the Color Themes home screen shows `SET` followed by a blank white box where the
 setpoint should be; another, with the highlight elsewhere, reads `SET 385F` normally. The setpoint
-field at design 2 `(38, 50)` is `(0.62, 0.62, 0.62, 1)` - a light grey - on an **editable** Setting,
+field at design 2 `(38, 50)` is `(0.62, 0.62, 0.62, 1)` - a light gray - on an **editable** Setting,
 which makes it selectable and therefore drawn on the white highlight. That is the same shape as the
 `v1.2.06` bug.
 
 **It was not recorded as a bug, and `check-theme.py` was reverted rather than widened.** The same
-grey is the menu-row value colour from `06`, used on **18 controls since `v1.0`**, all of which have
+gray is the menu-row value color from `06`, used on **18 controls since `v1.0`**, all of which have
 worked in service. A rule catching it reported 18 errors against a build that demonstrably works -
 the identical crying-wolf failure this file already warned about over the child-count thresholds.
 One over-exposed photograph is not evidence against a year of use.
 
 **Open question for the operator, and it is a one-look answer:** on the home screen, with the
 setpoint row highlighted, *can you actually read the number*? If yes, the photo is a camera artefact
-and nothing is wrong. If no, the grey needs darkening on that control - and probably only that one,
+and nothing is wrong. If no, the gray needs darkening on that control - and probably only that one,
 since the menu rows are fine.
 
 ### Probe 3, run 2 - the real finding: the script host cannot see EScribe's document

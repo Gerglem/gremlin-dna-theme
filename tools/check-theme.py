@@ -63,17 +63,17 @@ WHITE = "(1, 1, 1, 1)"
 def is_pale(color):
     """Colours that vanish on the white selection highlight.
 
-    Pure white always does. A light grey does too, but **only on a control
+    Pure white always does. A light gray does too, but **only on a control
     that is actually sitting on the highlight** - which is why this pairs with
     `is_always_highlighted` below rather than with `is_selectable`.
 
     The distinction was measured on 2026-10-30. `(0.62, 0.62, 0.62, 1)` is the
-    menu-row value grey, used on 18 controls since `v1.0` and perfectly
+    menu-row value gray, used on 18 controls since `v1.0` and perfectly
     readable on all of them - because a menu value is highlighted only while
-    you are on that row. The *same* grey on the home-screen setpoint is
+    you are on that row. The *same* gray on the home-screen setpoint is
     invisible, because that control carries `InitiallyHighlighted="1"` and is
     therefore highlighted permanently. One control broken, seventeen fine,
-    same colour.
+    same color.
     """
     if not color:
         return False
@@ -88,7 +88,7 @@ def is_pale(color):
 
 def is_always_highlighted(ctl):
     """`InitiallyHighlighted="1"` - drawn on the white highlight from the moment
-    the screen appears, so a pale colour on it is never readable."""
+    the screen appears, so a pale color on it is never readable."""
     return ctl.get("InitiallyHighlighted") == "1"
 
 

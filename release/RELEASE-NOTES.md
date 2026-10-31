@@ -29,8 +29,8 @@ screens plus one fix.
 **Tested on a DNA100C, all four profiles plus the new-coil prompt.**
 
 **The set temperature is readable again.** On the home screen the `SET` value sits on the white
-selection bar permanently, and it was being drawn in a light grey — which on white is nothing at
-all. It now takes whatever colour contrasts with the bar, the way every other adjustable value on
+selection bar permanently, and it was being drawn in a light gray — which on white is nothing at
+all. It now takes whatever color contrasts with the bar, the way every other adjustable value on
 that screen already did. This was not new in v2.3; it has been that way for a while.
 
 **Locking a brand-new setup:** when you first load a config the mod has no resistance stored, so the

@@ -39,15 +39,12 @@ locked inside their assemblies.
 
 ### What is still missing, precisely
 
-**The PC-to-device half of the settings transfer.** From the passive capture (`16`):
+**The PC-to-device half of the settings transfer.**
 
-    frame:    01 | DE | outer_len | F8 2B | inner_len | payload | 3-byte trailer
-    payload:  7-bit encoded, entropy 5.38 b/B
-    captured: 208 frames, device-to-PC only
-
-We know the framing and the opcode. We have never seen what the PC *sends* to start a transfer -
-which is almost certainly why calling `AX()` directly times out: the board is streaming telemetry in
-the plain-text protocol and nothing has told it a binary transfer is beginning.
+> **Superseded later the same evening.** A USB capture now shows the host side directly, and it
+> changes the reading: `F8 2B` is the *reply* half of a request/response pair whose request is
+> `F8 2A`. See **"The host side, captured over USB 2026-10-30"** at the end of this file. What is
+> still genuinely missing is a capture that contains an actual settings download.
 
 ### The route from here, and the irony in it
 
@@ -830,6 +827,13 @@ Monitor, or by constructing one once `GGQ` is identified - and take the Programm
 
 ## The settings transfer, captured 2026-10-30
 
+> **Caveat added the same evening - read this section with it.** A later USB capture recorded
+> **exactly 207 `F8 2B` frames during 30 seconds of pure idle polling**, with no transfer of any
+> kind taking place. The frame count, the size range and the 7-bit encoding all match what is
+> described below. That does not prove this section wrong, but the traffic described here may be
+> the ordinary telemetry channel rather than the settings transfer. The test that settles it is
+> registered in `kb/09`.
+
 One real `Upload Settings to Device` was watched from a second HID handle while EScribe did the work.
 Sample kept at `tools/samples/hid-upload-capture.log` (device-to-PC only; telemetry stripped, scanned
 for identifying strings).
@@ -1144,3 +1148,81 @@ If the port turns out to be a text console, it may be the shorter path to a work
 - **USB capture** (USBPcap/Wireshark) of EScribe doing a real transfer would reveal the HID protocol exactly, without fighting obfuscation. Heavier setup, but it is the method that cannot fail.
 - **Reimplementing HID from scratch** in Python needs a package (`hidapi` or `pywinusb`); none is installed, and pip is available. Only worth it once the protocol is known.
 - **Device Monitor's Python** (`14`) already gives live read *and write* of running values, but it is GUI-bound, so it does not reach the goal on its own.
+
+## The host side, captured over USB 2026-10-30
+
+The first capture taken with USBPcap rather than by borrowing a HID handle, so **both directions are
+present for the first time.**
+
+### Tooling, as actually installed
+
+| | |
+|---|---|
+| Wireshark | 4.6.9 x64 |
+| USBPcap | 1.5.4.0, **bundled in the Wireshark installer** on its own "USB Capture" page - it is *not* in the Choose Components list, which is easy to miss and sends you hunting for a separate download |
+| Filter device | `\.\USBPcap1` - this machine has one root hub, so every device shares it |
+| The mod | USB **address 10**, `VID_268B&PID_0433`, composite: `MI_00` vendor HID, `MI_01` CDC serial on COM4 |
+
+Wireshark's **Attached USB Devices** picker does not reliably register a selection; starting the
+capture fails with *"Selected capture options result in empty capture."* The dependable form is the
+command line, from an elevated shell:
+
+    & "C:\Program Files\USBPcap\USBPcapCMD.exe" -d '\.\USBPcap1' -o "$env:USERPROFILE\Downloads\capture.pcap" --devices 10 -b 8388608 -s 65535 --inject-descriptors
+
+Device filtering matters for more than tidiness: **two keyboards share this root hub**, and an
+unfiltered capture records keystrokes.
+
+Wireshark launches `USBPcapCMD.exe` as a child process with an empty command line, so a capture
+started from the GUI looks like a hung process if you go hunting for it in `Win32_Process`.
+
+### The frame layout, both directions
+
+    01 | DE | inner_len | F8 2A | <inner_len bytes>     host -> device  (request)
+    01 | DE | inner_len | F8 2B | <inner_len bytes>     device -> host  (reply)
+
+**`F8 2B` was never a transfer opcode.** It is the device's half of a request/response pair whose
+request is `F8 2A`. Everything written in this repo before tonight described `F8 2B` as "the
+settings frames" - that was one side of a conversation mistaken for a protocol.
+
+Every frame is padded to 63 bytes on the wire regardless of `inner_len`.
+
+### What 30 seconds of idle looks like
+
+EScribe open and Device Monitor polling, nothing else happening:
+
+| | |
+|---|---|
+| Exchanges | 207 request/reply pairs in 30 s, about 7/s |
+| Request sizes | `inner_len` 0x07-0x0d; 196 of 207 are 0x0c or 0x0d |
+| Reply sizes | mostly 0x30-0x38 - small request, larger reply |
+| Encoding | **no byte >= 0x80 inside `inner_len`**, confirming the 7-bit packing |
+| Trailer | 2 bytes >= 0x80 did appear *outside* `inner_len`, so the 7-bit rule is established for the payload proper, not for the padding |
+
+Sample: `tools/samples/hid-idle-baseline.log` - first 40 exchanges, descriptors stripped.
+
+### The shape of a request, and a hypothesis about it
+
+    f82a  len=0x07  01 5b 06 74 73 40 03
+    f82b  len=0x0d  07 3f 06 4e 61 01 68 6e 02 35 45 00 00
+
+    f82a  len=0x0d  07 5e 1c 40 40 40 08 68 02 4f 5e 00 00
+    f82b  len=0x34  2e 2f 1c 40 40 40 08 68 02 52 02 04 6c ...
+
+Byte 3 of the request (`06`, `1c`, `02`) comes back at the same position in the reply, so it is a
+tag or sub-command rather than data. The `40 40 40 08` run in the longer form has the shape of a
+7-bit-encoded 32-bit value - plausibly an address.
+
+**This is a hypothesis, not a finding.** If it holds, the settings image may be readable by issuing
+`F8 2A` reads directly, with no transfer mode to enter and no `AX()` to make work. That would be a
+far shorter road than decoding a bulk protocol. Do not build on it until the test in `kb/09` runs.
+
+### What this capture does not contain
+
+**A settings download.** The capture was stopped before EScribe performed one - it ends at 30.81 s
+holding nothing but idle polling. Obtaining that is the first job of the next session.
+
+### Privacy
+
+A raw `.pcapng` carries the USB string descriptors, one of which is the device serial.
+**Raw captures stay in `Downloads` and never enter this repo** (`kb/12`). Only stripped,
+payload-only extracts such as `tools/samples/hid-idle-baseline.log` are committed.
