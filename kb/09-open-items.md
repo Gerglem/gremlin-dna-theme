@@ -134,6 +134,58 @@ Anything else: record it as it is. Do not force it into A, B or C.
 3. **The new-coil screen on Color Themes** - the hidden `LOCK?` row was only confirmed on High Contrast.
 4. Where the child ceiling actually falls. **8 renders and 11 truncates**, both observed; 9 and 10 are unmeasured.
 
+## Tracked: Clean profiles show temperature, and the live row blanks while firing
+
+Observed on hardware 2026-10-30, `v2.3.03`, profile **DTv5XL-Clean**. Jake's call: document now,
+change nothing tonight.
+
+| | Idle | Firing |
+|---|---|---|
+| Live temperature row | `450F` shown | **absent** |
+| `SET` row | `SET 450F` | `SET 450F` |
+| Power / time | 38W / 120s | 38W / 120s |
+| Cold ohms / live ohms | 0.524 / 0.874 | 0.586 / 0.586 |
+| Status box | - | `Firing` |
+
+**Two questions, and they may share one answer.**
+
+1. **Should a Clean profile show temperature controls at all?** It is a burn-off profile run at
+   watts. `SET 450F` on it is at best noise and at worst misleading.
+2. **Why does the live row vanish exactly when it is useful?** `16778242` with `UpdateLive` +
+   `ReadOnly` is documented in `05` as showing *live temperature while firing*. Here it does the
+   reverse: it reads the setpoint when idle and goes blank under fire.
+
+The tidy explanation is that the Clean profile is in wattage mode, so there is no regulated
+temperature to report and the control has nothing to draw once firing begins - which would make
+both observations one bug: **the temperature controls are not conditioned on the profile actually
+being in temperature control.**
+
+Against that: the idle frame reads cold 0.524 against live 0.874, a rise that only makes sense if
+the board is sensing temperature. That may simply be a hot coil read moments after a fire.
+
+**What would settle it:** read the profile's mode and the live temperature over `tools/dna-hid.py`
+while that profile fires, and compare against a vaping profile doing the same. No theme change
+until that is known - the correct fix differs depending on the answer.
+
+## Tracked: a board over-temperature warning
+
+Jake's request, 2026-10-30. Not designed, not built.
+
+Board temperature is field **`6`** (`05`), in Celsius, and `17` already reads it over HID, so the
+data is in hand. What is missing is the display rule and the threshold.
+
+**The design constraint to respect:** the home-screen controls at `(0, 0)` on designs 1 and 2 are
+**already at the 8-child ceiling** - six theme tints plus defaults - and `tools/check-theme.py`
+warns on exactly this. A board-temp warning therefore cannot be another variant on an existing
+control. It needs its own control or its own row, or something has to come off.
+
+**Open before any build:**
+
+- What threshold? The firmware has its own protection and throttles on its own; this warning is
+  for visibility *ahead* of that, so the number belongs below whatever the board already acts on.
+- Where does it show - home screen, the status box that currently reads `Firing`, or both themes?
+- Field `6` is Celsius and the themes are in Fahrenheit, so it needs converting or labeling.
+
 ## Tracked: the new-atomizer screen — the least-tested thing in either build
 
 Rewritten 2026-10-30 at the end of the session. The previous version of this section still told you to
