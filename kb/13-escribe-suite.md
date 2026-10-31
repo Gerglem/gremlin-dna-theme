@@ -98,9 +98,36 @@ EScribe (`16`) is untested. It is the obvious next capture target after the sett
 understood, because a tool whose whole job is driven from a saved file is far easier to automate
 than a GUI.
 
+### The Fire Test is a programmatic firing gateway (Jake, 2026-10-31)
+
+The functional tests are the most valuable part of this tool, and not for testing.
+
+**The Fire Test fires the device on command, with parameters**, from a saved job: fire time in
+seconds, fire power in watts, and an expected cold-resistance window. Nothing else in the suite
+does this. EScribe can read live values while *you* hold the button, but it cannot make the
+device fire, and it cannot fire it for a specified duration at a specified power.
+
+That matters for two tracked items that are otherwise stuck:
+
+- **Clean-profile temperature** (`09`). The open question is what a Clean profile reports while
+  firing, versus a vaping profile. Answering it by hand means holding the button and reading the
+  screen, which is exactly the measurement that is hardest to do accurately. A 5-second fire at a
+  set wattage, repeatable, with a HID capture running, turns it into a clean experiment.
+- **Board over-temperature warning** (`09`). A threshold cannot be chosen without knowing how
+  field `6` actually behaves under sustained load. That needs controlled, repeatable firing.
+
+It would also give the project something it has never had: a way to exercise the device without a
+human holding a button, which is what any real test of a theme's live readouts requires.
+
+**Unknown and worth capturing early:** whether the Fire Test drives firing over the same `F8 2A`
+frame protocol (`16`), or through a production-only command set. If it is the former, firing may
+be reachable directly from `tools/dna-hid.py` without the Production Utility at all.
+
 **Caution:** it loads *firmware*, which EScribe's normal upload path does not. Do not run
 `Program & Test` casually to see what happens - capture a run only with a known-good firmware
-file selected, or with the firmware field deliberately left empty if that is permitted.
+file selected, or with the firmware field deliberately left empty if that is permitted. The fire
+and battery tests appear to be independently checkable, so the first capture should try to
+exercise a test **without** a firmware file loaded.
 
 ## Connecting to the mod
 
