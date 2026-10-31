@@ -157,6 +157,36 @@ If byte 3 tracks the offset it is an address and composing writes is in reach; i
 `00,58,70,48,60,78` regardless, it is a sequence tag and the address lives elsewhere in the
 payload.
 
+**Answered the same day: byte 3 stayed `00,58,70,48,60,78`.** It is structural. The write group
+is a fixed 341-byte block rewritten in full on any change - 83% of its bytes are constant and
+frames 1, 2 and 6 never move at all. Probes committed at `tools/probes/`.
+
+A single-field change (profile 1 temperature `380F -> 420F`) moved **five bytes, all in frame 3**:
+offsets 11, 18, 19, 56 and 57. The last two are the frame's trailing pair and move on every
+change - almost certainly a checksum. The remaining three are not contiguous and no byte-aligned
+integer reading of them gives 380 and 420, which points at a 7-bit packed bitstream rather than a
+byte array. Hypothesis, not a finding. Full detail in `16` -> "Byte 3 is not an address".
+
+### Registered test: is the settings block a 7-bit packed bitstream? (set 2026-10-31, NOT YET RUN)
+
+Written down before running so the result cannot be read to fit.
+
+**Method.** Upload a series of single-field profiles stepping profile 1 temperature through known
+values (`380, 390, 400, 410, 420`), one upload per step, capturing each. Diff frame 3 of each
+group against the previous.
+
+| Outcome | What it means | What to do next |
+|---|---|---|
+| **A** - the same offsets (11, 18, 19) move every step, by amounts consistent with one value shifting across 7-bit boundaries | Block is a 7-bit packed bitstream | Write a bit-level unpacker, then map fields by offset |
+| **B** - one offset moves monotonically with temperature and the others are unrelated | Fields are byte-aligned after all; 11/18/19 moving together was coincidence | Map fields directly, byte by byte |
+| **C** - different offsets move at different steps | The layout is not fixed in the way assumed | Re-examine before going further |
+
+The checksum at 56-57 will move in all three cases and tells us nothing by itself.
+
+**Blocking issue regardless of outcome:** nothing composed locally can be uploaded until the
+checksum at offsets 56-57 is understood. Reproducing the block is not enough if the device
+rejects it.
+
 ### Device and environment state
 
 - Mod on **COM4**, HID interface `MI_00` present. Serial Output Format is **Plain Text Serial**.

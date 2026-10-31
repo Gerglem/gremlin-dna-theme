@@ -1274,10 +1274,64 @@ confirmation of the encoding rule in the host-to-device direction.
 
 Sample: `tools/samples/hid-write-group.log`.
 
-#### Not decoded
+#### Byte 3 is not an address - the group is a fixed block (answered 2026-10-31)
 
-- Whether byte 3 (`00,58,70,48,60,78`) is an address or a sequence tag. Six frames cannot
-  separate those. The test is a config file differing in one known field at a known offset.
+Settled with purpose-built single-field profiles (`tools/probes/`, built from
+`release/profiles/DTv5XL-Profile.ecigprofile`).
+
+Byte 3 runs `00,58,70,48,60,78` on **every group ever captured**, across a one-watt change, a
+two-profile change and a full theme upload. It is structural, not an address.
+
+The group is a **fixed-layout 341-byte settings block that EScribe rewrites in full** whenever
+anything inside it changes. Comparing the groups from two unrelated edits:
+
+| Frame | Bytes | Differing bytes between two unrelated edits |
+|---|---|---|
+| 1 | 58 | **0** |
+| 2 | 58 | **0** |
+| 3 | 58 | 9 |
+| 4 | 58 | 32 |
+| 5 | 58 | 18 |
+| 6 | 51 | **0** |
+
+282 of 341 bytes (83%) are constant. Frames 1, 2 and 6 never moved. This is why a one-watt edit
+and a two-profile edit both wrote exactly 341 bytes, and why `0x7f` padding fills the tail: the
+block is emitted at full length regardless of content.
+
+**This is the good outcome.** Composing a write does not require decoding an address scheme - it
+requires reproducing one small block that is already mostly constant, with variable fields at
+fixed offsets that can be mapped one edit at a time.
+
+#### One field moves five bytes (measured 2026-10-31)
+
+Profile 1 temperature `380F -> 420F`, nothing else changed. Exactly five bytes moved, **all in
+frame 3**; frames 1, 2, 4, 5 and 6 were byte-identical.
+
+| Offset in frame 3 | Before | After |
+|---|---|---|
+| 11 | `5e` | `68` |
+| 18 | `00` | `01` |
+| 19 | `7c` | `22` |
+| 56 | `0a` | `26` |
+| 57 | `6c` | `66` |
+
+Offsets 56 and 57 are the frame's final two bytes and moved on every change observed - almost
+certainly a checksum or CRC over the frame.
+
+That leaves offsets 11, 18 and 19 for one scalar field, which are **not contiguous**. No
+byte-aligned integer reading of them yields 380 and 420, in Fahrenheit or Celsius. The likely
+explanation is that the block is a **7-bit packed bitstream**, not an array of bytes: fields do
+not start on byte boundaries, so one field can disturb several non-adjacent bytes. That is
+consistent with the 7-bit rule holding everywhere else in this protocol, but it is a
+**hypothesis, not a finding** - do not build on it.
+
+#### Still not decoded
+
+- The packing. Whether offsets 11/18/19 are one field in a 7-bit bitstream, or separate fields
+  that happen to move together. The test: a series of single-field uploads stepping one value
+  through known increments, watching which offsets move and by how much.
+- Which offsets hold which field. Only temperature has been isolated so far.
+- The checksum at offsets 56-57. Needed before any composed write will be accepted.
 - Declared `inner_len` is `0x3c` (60) but only **58** payload bytes are present. 5 header + 60
   exceeds the 63-byte HID report, so the declared and carried lengths disagree. Reason unknown.
 - What the prologue and terminator exchanges mean.

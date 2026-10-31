@@ -62,6 +62,46 @@ If that is right it has consequences — stale screens would still occupy memory
 
 ---
 
+## The Production Utility - a second way onto the device
+
+`Production Utility - Evolv DNA 100 Color` is a separate application in the suite, not a mode of
+EScribe. It exists for factory bring-up: program a device, test it, log the result, repeat.
+
+**Why it matters here.** It writes **firmware and a settings file** to the device in a single
+`Program & Test` action, driven entirely by a saved job rather than by clicking through EScribe's
+tabs. That makes it the most promising candidate for a scriptable write path - worth grabbing the
+functionality from (Jake, 2026-10-31).
+
+What its Setup tab exposes:
+
+| Field | Note |
+|---|---|
+| Model Name | free text |
+| **Firmware File** | Browse / Save. "Select the latest firmware to have it loaded onto the device." |
+| **Settings File** | Browse / Save. "Select your mod's default settings file. It can be reloaded by clicking Restore Defaults." |
+| Manufacturing Notes | free text |
+| Production stage | dropdown, observed value `after assembly` |
+
+Functional tests it can run, with the values seen on this install:
+
+| Test | Parameters |
+|---|---|
+| **Fire Test** - device fires and reads ohms. Needs a resistor or non-temperature coil | Fire Time 5 s, Fire Power 50 W, Expected Cold Resistance 0.9 - 1.1 ohm, optional Maximum Cell Voltage Drop 0.5 V |
+| **Battery Test** - cells have reasonable voltages | Minimum Cell Voltage 3.65 V |
+| **Final Configuration** | Fire Power 20 W |
+
+`File` has New / Open / Save, so a job is a file - the shape of that file is **unknown and not yet
+examined**. Tabs are Setup, Production and Log.
+
+**Nothing here is captured yet.** Whether `Program & Test` uses the same `F8 2A` frame protocol as
+EScribe (`16`) is untested. It is the obvious next capture target after the settings block is
+understood, because a tool whose whole job is driven from a saved file is far easier to automate
+than a GUI.
+
+**Caution:** it loads *firmware*, which EScribe's normal upload path does not. Do not run
+`Program & Test` casually to see what happens - capture a run only with a known-good firmware
+file selected, or with the firmware field deliberately left empty if that is permitted.
+
 ## Connecting to the mod
 
 From EScribe's debug log, which is worth knowing if a connection ever misbehaves:
