@@ -561,6 +561,36 @@ explicitly sized `Array[Object]`.
 `tools/probe_address.py` reads every `WYB`'s fields to find the bad address, lists `DDY`'s
 constructors, and retries `JSL` properly marshalled.
 
+### Two hypotheses killed, 2026-10-30
+
+**The memory map is not malformed.** `KE()`'s four areas are start/end pairs that tile the layout
+exactly, so the nameless one is simply the settings block between EEPROM and KERNEL:
+
+| Area | Range | Size | Layout region |
+|---|---|---|---|
+| `EEPROM` | `0x000000`..`0x000600` | 1,536 | region 0, with the next |
+| `''` | `0x000600`..`0x018E00` | 100,352 | 101,888 together |
+| `KERNEL` | `0x018E00`..`0x018F00` | 256 | region 1 |
+| `FLASH` | `0x500000`..`0x518000` | 98,304 | region 2 |
+
+**`JSL` does not want a document either.** Given a non-null first argument it **returns null** - it
+does not throw - so `JSL(None, ggq, None)` is the correct call and the earlier *"expected object,
+got NoneType"* was only ever an IronPython marshalling error of mine, not a signal about the
+argument. The `PYB` we already build is the right one.
+
+**What that leaves.** `DDY..ctor(Byte address, NDY)` - and the parameter is a **`Byte`**, so valid
+values are 0..255, while every address in the map above is far larger. So `address` is not a memory
+offset; it is a small identifier. `UE`'s `Int32` is the only thing we control that could reach it,
+and only six values have been tried.
+
+`tools/probe_ue_sweep.py` tries all 256 and reports what `NDY` is - if it is an enum, its names may
+say what kind of address this is. It passes a **null** `Func`, so even a `UE` that succeeds cannot
+reach the device.
+
+If every value gives the identical error, the Int32 is not the address and the bad one is computed
+inside `TCC.Initialize` from `PYB` state not yet identified - in which case the next lead is
+`SRB.EE` / `TCC`, not `UE`.
+
 ### Where this leaves a push — SUPERSEDED, kept for the reasoning
 
 > **Overtaken 2026-10-30 by the section above.** Its second branch - *"or by constructing one once
