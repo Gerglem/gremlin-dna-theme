@@ -11,6 +11,19 @@ The High Contrast theme is a separate build on its own version track — see [`.
 
 ---
 
+## Which file do I want?
+
+- **`gremlin_v2.3.03.ecig`** — the theme plus the four profiles. This is the one to load.
+- **`gremlin_v2.3.03_theme.ecigtheme`** — the screens only, if you already have the profiles you want
+  and do not want them touched.
+
+`v2.2.05` is kept as the last build before the v2.3 work, in case you want to go back. The
+intermediate v2.3.00, .01 and .02 builds were steps along the way and are not here — .00 was
+withdrawn the day it was published, and the other two are superseded by .03, which is the same
+screens plus one fix.
+
+---
+
 ## v2.3.03
 
 **The set temperature is readable again.** On the home screen the `SET` value sits on the white
