@@ -224,6 +224,60 @@ Approaches, cheapest first:
 
 Do (3) first - it is one replay and it tells us whether this is even a real gate.
 
+**Result, 2026-10-31: the replay was IGNORED. The checksum is not the gate - session context is.**
+
+A captured write group was replayed verbatim with `tools/replay-group.py --send`, with a USB
+capture running. All eight frames reached the device **byte-exact** - confirmed on the wire, not
+just by hidapi's return value. The device sent **zero replies**: no `f82b` of any kind, not an
+ACK and not an error.
+
+Device state afterwards, read over `tools/dna-hid.py`:
+
+| | |
+|---|---|
+| Product / version | reads normally |
+| `P=GET SP` | **36.00 W** |
+| `T=GET SP` | **385.00 F** |
+| Board / battery / ohms | 101.78 F, 4.077 V, 0.462 ohm - all normal |
+
+Those are the **pre-existing** values. Nothing was written, nothing was corrupted, and the device
+was healthy throughout. The screen had gone dark, which was the device re-enumerating, not damage.
+
+**Why it failed, and the mistake behind it.** In every captured upload, EScribe performs the full
+**207-exchange connect-and-download first**, then writes. The group's own prologue frame
+(`02 2f 1a ..`) is not the session setup - it is the last step before the payload. The group was
+replayed cold, out of session, and the device simply did not engage.
+
+This is what EScribe's own startup dialog does when it offers to connect and download: that
+prompt *is* the handshake (Jake, 2026-10-31).
+
+**What this changes.** The checksum was the wrong thing to chase first. Before any composed write
+can be tested, the device has to be brought into whatever state the 207-exchange handshake
+establishes. Until then a write is ignored rather than rejected, and a silent ignore teaches
+nothing about the checksum either way.
+
+### Registered test: what does the handshake establish? (set 2026-10-31, NOT YET RUN)
+
+Written down before running.
+
+**Method.** Replay the captured connect-and-download (`tools/samples/hid-connect-download.log`,
+full reports needed - the committed sample is truncated to 40 exchanges) and then, in the same
+HID session without closing the handle, replay the write group.
+
+| Outcome | What it means | What to do next |
+|---|---|---|
+| **A** - the group is ACKed | The handshake is a replayable prefix; writing is reachable now | Then test the checksum with `--flip` |
+| **B** - the handshake replies but the write is still ignored | Something in the handshake is challenge/response or stateful, not replayable | Diff our replies against the captured ones to find where they diverge |
+| **C** - the handshake itself gets no replies | Even reads need state we do not have | Compare against `dna-hid.py`, which DOES get replies - the difference is the clue |
+
+`dna-hid.py` reaching the text interface with no handshake at all, in the same session where the
+binary write was ignored, says the device is reachable and the gap is specific to the binary
+settings channel.
+
+**Note for whoever runs this:** EScribe holds the HID handle **exclusively**. It must be closed
+before any replay - "the device is silent unless asked" is about traffic, not handle ownership,
+and conflating the two cost a cycle here.
+
 **Blocking issue regardless of outcome:** nothing composed locally can be uploaded until the
 checksum at offsets 56-57 is understood. Reproducing the block is not enough if the device
 rejects it.
