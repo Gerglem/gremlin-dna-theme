@@ -6,24 +6,41 @@ Rewritten 2026-10-30 at the end of a long session. Everything below is current.
 
 ### Read this first if you are picking up cold
 
-> **The mod may still be carrying a bench config.** The last thing uploaded to it in this session was
-> `BENCH-HC-v06.ecig` (or `-v05`), which **locks fake resistances on all four profiles** - 0.4637,
-> 0.4504, 0.6500, 0.3141 - so the replace warning could be exercised. Those do not match the cup in
-> the deck. **Reload the real config before using the device.** Do not fire on a bench config.
+**Current builds, both proven on hardware end to end:**
 
-**Repository is fully pushed.** `main` matches `origin/main`; nothing is held back. The earlier
-instruction to keep work local was discharged on 2026-10-30.
+| | Version | State |
+|---|---|---|
+| Color Themes | **`v2.3.03`** | daily driver. Warning chains, theme tint, profile settings, new-coil screen and setpoint all confirmed |
+| High Contrast | **`v1.2.08`** | theme proven as `v1.2.07`; `.08` adds the same profile settings and changes no screens |
 
-**Current builds:** Color Themes **`v2.3.03`**, High Contrast **`v1.2.08`**. **Both proven on hardware**, both carrying Jake's own profile settings. Every control in either build has now been seen working except the new-coil prompt, **which is the one gate left before v2.3 is final**. **Neither has been on hardware.** `v2.3.00` carries the battery split (`18` A); `v1.2.06` carries the home-screen warning.
+`release/` holds only these plus `v2.2.05` (the last build before the v2.3 work, kept as a fallback)
+and `v1.0` (archive). The intermediate `v2.3.00` / `.01` / `.02` builds were removed - `.00` was
+withdrawn the day it shipped and the others are superseded by `.03`.
+
+**Profiles are Jake's own**, taken from his `gremlin_v2.1.ecig` and confirmed against his
+`.ecigprofile` files: 385 F and 120 s on DTv5XL and Quest, 36/25/38/35 W, 45 s on Quest-Clean, and
+the shorter **Quest** / **Quest-Clean** names. The Lightning Quest keeps **TCR 120**, swab-verified
+on this chip, not the published 125 - **the loose `Quest.ecigprofile` on disk still has 125 and would
+undo that if loaded.**
+
+Published configs ship cold ohms **0 and unlocked** on all eight slots (`12`), so the mod measures
+the fitted cup on first use. Locking a fresh setup is done from **MENU -> PROFILE**, because the
+new-coil prompt closes when you answer YES (see the gate result below).
+
+> **Bench configs lock fake resistances and must not be fired on.** Several were built on 2026-10-30
+> and left in `Downloads`. None is loaded now; if one ever is, reload `gremlin_v2.3.03.ecig`.
 
 | | State |
 |---|---|
-| Replace warning, Color Themes | **Works. Proven on hardware** - `v2.3.02` reads theme / RED / RED / theme, one variant, tint intact |
-| Replace warning, High Contrast (OHMS page) | **Works. Proven on hardware** - same four readings |
-| Replace warning on the HC home screen | **Works. Proven on hardware** - `v1.2.07` reads dark / RED / RED / dark with the highlight on. `v1.2.06` had the right logic in an invisible color. Old entry: The profile name carries it. **Test registered and bench file built 2026-10-30** - `Downloads\BENCH-HC-HOME-WARNING.ecig`, card below |
-| 380F starting temperature | **Confirmed on hardware** |
-| Omega OHMS screen (HC) | **Confirmed working** - glyph, child screen, LOCK, MEASURE, BACK all render |
-| New-coil screen | **Works, proven on Color Themes.** The guard hides `LOCK?` at cold ohms 0, YES commits and closes the prompt, so the first lock is done from MENU -> PROFILE |
+| Replace warning, Color Themes home | **Proven** - `theme / RED / RED / theme` across four locked profiles, one variant, tint intact |
+| Replace warning, HC home screen | **Proven** - `dark / RED / RED / dark`, read with the highlight on |
+| Replace warning, HC OHMS page | **Proven** - same four readings |
+| Replace warning, **new-coil prompt** | **Never positively fired.** The only run had 0.461 on profile 1, correctly under its own 0.6 limit. Cosmetic, and the identical rule is proven on three other controls |
+| Starting temperature | **385 F** on both vaping profiles, confirmed |
+| Omega OHMS screen (HC) | **Confirmed** - glyph, child screen, LOCK, MEASURE, BACK all render |
+| `ResampleOhms` from a child screen | **Confirmed** - MEASURE re-reads |
+| New-coil screen | **Proven on Color Themes.** `LOCK?` hidden at cold ohms 0; YES commits and closes the prompt |
+| New-coil `LOCK?` on a *later* swap | **Inferred, not observed** - the guard passes once cold ohms is non-zero. Needs a real cup swap |
 
 ### The big result: a per-control child limit
 
