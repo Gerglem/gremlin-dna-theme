@@ -5,7 +5,7 @@
 Updated 2026-10-30, late in a long session. **41 commits are local and unpushed**, by instruction.
 Nothing in this stretch has gone to GitHub.
 
-**Builds:** Color Themes `v2.2.03`, High Contrast `v1.2.03`. **Neither has been tested on hardware**
+**Builds:** Color Themes `v2.2.04`, High Contrast `v1.2.04`. **The replace warning was tested 2026-10-30 and operator 129 failed; .04 is the fix, retest pending**
 since the replace warning was rebuilt. That is the gate on pushing anything.
 
 **Solved today, and large:** the mod is a plain-text command console over its USB serial port (`17`),
@@ -28,7 +28,7 @@ deferred simplifications below.
 ## Tracked: the new-atomizer screen
 
 Reworked repeatedly on 2026-10-30 and **never tested as it now stands**. Both themes changed; load
-`gremlin_v2.2.03.ecig` and `gremlin_high_contrast_v1.2.03.ecig`, and remember a full `.ecig` load
+`gremlin_v2.2.04.ecig` and `gremlin_high_contrast_v1.2.04.ecig`, and remember a full `.ecig` load
 zeroes cold ohms, so a cup has to be re-locked before anything resistance-driven can show.
 
 What is unverified, in the order a single swap would exercise it:
@@ -174,9 +174,24 @@ dismisses the screen, the lock row is only reachable on a later swap, and a firs
 from the OHMS page (HC) or PROFILE (CT). Either way nothing can lock 0, so this decides documentation,
 not correctness.
 
-### Result
+### Result - RUN 2026-10-30: operator 129 is dead
 
-_Not yet run._
+| Profile | Locked | Expected | Observed |
+|---|---|---|---|
+| 1 DTv5XL | 0.4637 | plain | **RED** |
+| 2 QuestCup | 0.4504 | RED | RED |
+| 3 DTv5XL-Clean | 0.6500 | RED | RED |
+| 4 QuestCup-Clean | 0.3141 | plain | plain |
+
+This is the pre-registered **"Profile 1 RED"** outcome: **operator `129` does not resolve on this
+firmware**. All four readings fit that single explanation - with the profile whitelist never matching,
+every cup falls back to the one 0.41 threshold, which is exactly what the photographs show.
+
+**Confirmed in passing:** both non-cleaning profiles start at **380F** and the cleaning pair at 450F,
+so that change works.
+
+**Fixed in v2.2.04 / v1.2.04** by switching the profile equality to **operator 4**, which is what
+Theme Designer compiles `=` to (`10`). Awaiting a re-run of this same card.
 
 ## Deferred: known simplifications
 
@@ -268,11 +283,11 @@ ohms, puff count and board temperature needs nothing further.
 Do this one last. It is the only piece needing hardware that is not already on the bench.
 
 ## Ideas
-- **User toggles.** The source catalog has a `User -> Toggle N` group, and the Language tab has a
-  `Toggles` section setting their `On:` / `Off:` text (`15`). That is a **user-settable flag a condition
-  can test** - we had assumed the format had nothing of the kind. If it behaves as it reads, it is the
-  missing half of several things we gave up on, because it lets the user choose a mode and the theme
-  react. Needs the ID first (`15` item 3b) and then one experiment to confirm it survives an upload.
+- ~~**User toggles** as a new discovery.~~ **We already use them.** The six Color Themes are exactly
+  this: fields `10`, `266`, `778`, `1034`, `1290`, `1546`, each tested with `Operator="1"` against 0.
+  So `User -> Toggle N` is the mechanism behind THEMES, it is proven on-device, and the Language tab's
+  `Toggles` section is where their `On:`/`Off:` text comes from (`15`). What remains open is only
+  whether any **unused** toggles are free for a new feature.
 - **A puff graph on the mod.** The `Chart` control draws the device's own puff recording and takes one
   setting, `Time Bars` (`15`). `Recordings -> Chart Present` (`05`) is the condition for hiding it when
   empty. 64x64 fits an 80x160 screen. Nothing in either theme uses this, and it would put the heat
