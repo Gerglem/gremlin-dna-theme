@@ -5,7 +5,7 @@ Files are named for their version, in the original v1.0 format:
 - `gremlin_v<version>_theme.ecigtheme` — the theme on its own
 - `gremlin_v<version>.ecig` — the theme plus the four Divine Tribe profiles and their materials
 
-The current release is **v2.3.02**. (A v2.3.00 was published and withdrawn the same day — see below.) Older versions stay in this folder, so a link to a specific version keeps working.
+The current release is **v2.3.02**. (v2.3 is not final: the new-atomizer screen is still being verified — see the knowledge base.) (A v2.3.00 was published and withdrawn the same day — see below.) Older versions stay in this folder, so a link to a specific version keeps working.
 
 The High Contrast theme is a separate build on its own version track — see [`../high-contrast/RELEASE-NOTES.md`](../high-contrast/RELEASE-NOTES.md).
 

@@ -14,7 +14,7 @@ Rewritten 2026-10-30 at the end of a long session. Everything below is current.
 **Repository is fully pushed.** `main` matches `origin/main`; nothing is held back. The earlier
 instruction to keep work local was discharged on 2026-10-30.
 
-**Current builds:** Color Themes **`v2.3.02`**, High Contrast **`v1.2.08`**. **Both proven on hardware**, both carrying Jake's own profile settings. Every control in either build has now been seen working except the new-coil prompt, which is tracked below. **Neither has been on hardware.** `v2.3.00` carries the battery split (`18` A); `v1.2.06` carries the home-screen warning.
+**Current builds:** Color Themes **`v2.3.02`**, High Contrast **`v1.2.08`**. **Both proven on hardware**, both carrying Jake's own profile settings. Every control in either build has now been seen working except the new-coil prompt, **which is the one gate left before v2.3 is final**. **Neither has been on hardware.** `v2.3.00` carries the battery split (`18` A); `v1.2.06` carries the home-screen warning.
 
 | | State |
 |---|---|
@@ -93,6 +93,16 @@ page. Of the four things listed here, one is half-answered and three are open.
 | 2 | Does the row appear after YES, and does the prompt survive `NewCoilAccept`? | **Open, and this is the one that matters** |
 | 3 | High Contrast shows the measured resistance on that screen; MEASURE removed to fit it (`11`) | **Never seen on hardware** |
 | 4 | The red replace warning on the prompt | **Never seen**, and it is now a different construction than when this was written |
+
+### v2.3 release gate, set 2026-10-30
+
+**Jake's call: the new-atomizer screen ships working in v2.3.** It is no longer a background tracker -
+`v2.3` is not finished until the four items above are confirmed on hardware. The theme work in
+`v2.3.02` is done and proven; this is what remains between it and a final release.
+
+Test it with the plain **`gremlin_v2.3.02.ecig`**, not a bench config - the prompt is driven by a
+fresh load zeroing cold ohms, and a bench config pre-locks resistances, which suppresses exactly the
+condition under test.
 
 ### Why item 2 is still open despite an earlier "confirmed"
 
@@ -1212,6 +1222,35 @@ same curve as `<Curve><Sections>` XML. A string comparison says every curve diff
 `EvolvWDColdOhms` and `EvolvWDOhmLock` are indexed **256..263** for the same profiles. Two bases in
 one document; `make-bench-config.py` uses the 256 base and is correct for what it touches.
 
+## v3.0 probe 1 result, 2026-10-30: no static route to a PYB
+
+`tools/probe_pyb.py`, run from Device Monitor. Full report:
+
+    === hunting a live PYB ===
+    PYB type found: True
+    live candidates: 0
+
+**What this rules out and what it does not.** The type exists in `DEScribe.Core`, so the chain in
+`16` is real. What came back empty is the *search*, and that search was narrow: it walked **static**
+fields and properties whose declared type is `PYB` or `FWB`, in `DEScribe.Core` only. So:
+
+- **Ruled out:** a static field or property that hands you a `PYB` or `FWB` directly.
+- **Not ruled out:** a live one held as an **instance** field somewhere - which is the likelier shape.
+  `FWB` is the document holder, and a document normally hangs off a form or a view-model, not a
+  static. Nothing reaches those from a static-only scan.
+- **Not ruled out, and possibly the whole answer:** whether a config was even **open** in EScribe when
+  the probe ran. With no document loaded there may be no `PYB` in existence to find.
+
+**`tools/probe_pyb2.py` is the follow-up** and is the one to run next, **with a config open**. It
+walks breadth-first from every static field in every `DEScribe*` assembly into instance fields,
+bounded by `MAX_NODES`, `MAX_DEPTH` and a visited set so it cannot hang EScribe or loop on a cycle.
+It also prints the open forms, so the report says whether a document was loaded - which makes an
+empty result interpretable instead of ambiguous.
+
+One safety change worth noting: probe 2 reads **fields only, never properties.** A property getter can
+run arbitrary code; a field read cannot. Probe 1 read static properties, which was a small risk when
+the search was narrow and not one worth carrying into a wide walk.
+
 ## The roadmap, and what each version means
 
 Set by Jake 2026-10-30. The point of the device-access work is not the protocol; it is these two
@@ -1219,7 +1258,7 @@ releases, and everything in `16` and `17` is in service of them.
 
 | Version | Ships when | State |
 |---|---|---|
-| **v2.3** | the theme's own structure is right | in progress - `18` |
+| **v2.3** | the theme is right **and the new-atomizer screen works** | theme done and proven; new-coil prompt is the remaining gate |
 | **v3.0** | **Claude can push edits straight to the device** | blocked on one thing, below |
 | **v4.0** | **Bluetooth** | not started; needs v3.0's work first |
 
