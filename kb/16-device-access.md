@@ -357,6 +357,34 @@ That leaves two possibilities, and `tools/probe_dwb3.py` tests both in one run:
 If neither turns anything up, the remaining option is to call `JSL` on each of the 25 with our own
 `GGQ` and keep whichever returns a usable `PYB` - crude, but decisive, and still device-free.
 
+### Probe 6 result: the dispatcher exists. The chain is fully resolved
+
+The 25 subclasses have no simple **properties** either - they are behaviour-only. But part 2 found
+the two pieces that make that irrelevant, both in `DEScribe.Core`:
+
+| | |
+|---|---|
+| **`UWB.FE(GGQ) -> DWB`**, *static* | **the dispatcher.** Hand it a board identity, get the right subclass back |
+| `UWB.BE(Guid) -> DWB`, static | a second lookup, by GUID |
+| **`DWB.DSL(GGQ) -> Boolean`** | *"do I handle this board?"* - presumably what `FE` uses, and an independent cross-check |
+
+**So none of the 25 has to be identified by hand.** Every one of them also carries `EPL`, `XPL` and
+`MPL`, all taking a `GGQ` - the per-board behaviour the subclasses exist for.
+
+The chain, complete and with nothing left inferred:
+
+    XElement("<DESabertooth Device='109' Version='1'/>")  -> GGQ    ctor(XElement)
+    UWB.FE(ggq)                                           -> DWB    static
+    dwb.JSL(None, ggq, None)                              -> PYB
+    pyb.PE()                                              -> LogicalLayout
+
+`tools/probe_layout.py` runs exactly that and dumps the regions. It is the first probe to exercise
+the upload-path objects, and still **opens no link, builds no Programmer, uploads nothing** - `PE()`
+reads a map, it does not apply one. **The mod need not even be plugged in.**
+
+If `JSL(None, ...)` rejects the null first argument, that argument is the settings document and the
+fix is to pass one - which we can build, since `GGQ` already comes from our own file.
+
 ### Where this leaves a push
 
 **Further away than it looked, and deliberately not attempted.** Driving `PerformUpload` with a
