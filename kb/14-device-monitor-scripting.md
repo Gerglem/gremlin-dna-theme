@@ -22,6 +22,27 @@ the rest of the install tree.
 > The firmware changelog (`13`) shows the exposed set did grow - SP9 added "Expose Board and Room
 > Temperature in terms of Celsius" for DNA 60 and DNA 250 - so the old list is demonstrably
 > incomplete for later devices.
+>
+> **Confirmed on hardware 2026-10-31.** Device Monitor on this install (DNA 100 Color, firmware
+> 1.1 SP55.1 INT) shows **`Board Temp`** and **`Room Temp`** as ordinary checkboxes alongside the
+> rest. The old list was wrong, and any conclusion resting on it needs rechecking.
+
+### The variable list this build actually offers
+
+Read off Device Monitor's own checkboxes, 2026-10-31. **This supersedes the manual's list.**
+
+| Group | Variables |
+|---|---|
+| Battery | `USB Power`, `USB Voltage`, `Current`, `Voltage`, `Level` |
+| Current Puff | `Power`, `Power Set`, `Temperature`, `Temperature Set`, `Current`, `Voltage`, `Cold Ohms`, `Live Ohms`, **`Board Temp`**, **`Room Temp`** |
+
+Note the names are **`Board Temp`** and **`Room Temp`**, not "Board Temperature". Use the exact
+string in `ECig['...']`.
+
+The Statistics pane below the graph adds per-puff aggregates that are not graph variables:
+`Puffs`, `Replayed`, `Temp-Protected`, and Last Puff / Mean / Std. Dev. / Total columns for
+`Energy`, `Power`, `Temperature`, `Temp. Peak` and `Time`. **`Temp-Protected` is a counter worth
+knowing** - it says how often the device actually hit temperature limiting.
 
 ---
 

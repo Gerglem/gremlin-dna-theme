@@ -461,18 +461,15 @@ rejects it.
 > - **Clean-profile temperature is not blocked at all.** Device Monitor exposes `Temperature`,
 >   `Temperature Set`, `Live Ohms` and `Cold Ohms`, and `ECig.Puff(3)` fires the device. The
 >   whole comparison can be scripted today - see `14` and the method below.
-> - **Board over-temperature is blocked, but on reading, not firing.** `Board Temperature` is
->   **not** in Device Monitor's variable list (`14` -> Limits: "the variable list above is
->   everything it offers" - **but that list comes from a decade-old manual, so check Device
->   Monitor's own graph checkboxes before accepting this; see the note at the top of `14`).
->   `tools/dna-hid.py` does read it, as `T=GET BOARD` - 106.59 F during
->   today's session - but EScribe holds the HID handle **exclusively** (established today), so
->   Device Monitor cannot be firing while `dna-hid.py` reads. That contention is the real
->   obstacle, and `tools/probe_contention.py` is the existing work on it.
+> - **Board over-temperature is NOT blocked either.** An earlier version of this note said it was,
+>   because `Board Temperature` is absent from the manual's variable list. **That list is a decade
+>   old.** Device Monitor on this build shows **`Board Temp`** and **`Room Temp`** as ordinary
+>   checkboxes - confirmed on hardware 2026-10-31, reading 90.21 F and 74.01 F. So firing and
+>   reading board temperature happen in the same tool, and the HID handle contention that note
+>   worried about never arises.
 >
-> Production Utility scripting may still be the way around the contention, since it drives firing
-> from a job rather than through Device Monitor. But it is a workaround for a handle conflict,
-> not the enabling feature the earlier note claimed.
+> Production Utility scripting is therefore not needed for either item. It remains interesting for
+> other reasons (`13`), but nothing here is waiting on it.
 
 ## Tracked: Clean profiles show temperature, and the live row blanks while firing
 
