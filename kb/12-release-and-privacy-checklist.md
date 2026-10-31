@@ -34,3 +34,15 @@ Exports contain the maintainer's real device state. Always fix these before publ
 - **Releasing means dropping the mini version** (`gremlin_v2.2.05.ecig` → `gremlin_v2.2.ecig`) across the files, the `<Comments>` / `EvolvThemeComments` descriptions and every link. Internal mini-versioned builds are **not pushed**.
 - **When a version bumps, rename the files and update every link that names them:** landing pages, guides, `README.md`, and the "Current state" table in `00`. Bump the version inside the theme too — `<Comments>` in the `.ecigtheme` and `EvolvThemeComments` (base64) in the `.ecig` — and add a `RELEASE-NOTES.md` entry on the matching track (`../release/` or `../high-contrast/`).
 - `.gitattributes` keeps `*.csv` as CRLF (`-text`); don't let tooling normalize them.
+
+## The device serial turns up in places you would not look
+
+The serial is the USB instance ID and must never enter this repo. Two sources found the hard way:
+
+- **EScribe window titles.** Device Monitor's caption is `Device Monitor - <theme> - <serial>`, with the
+  serial spaced into groups. Any script or screenshot that captures a window title captures the serial.
+  `tools/probe_pyb3.py` printed form titles verbatim until 2026-10-30; it now prints the type name only.
+- **Device enumeration output.** `USB\VID_268B&PID_0433\<serial>` (`16`).
+
+**Before pasting any probe report, log or screenshot into the repo, search it for the serial.** The
+release check greps for it, but that only catches what reaches a commit.

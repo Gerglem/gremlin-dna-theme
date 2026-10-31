@@ -96,8 +96,11 @@ if Application is not None:
     try:
         n = 0
         for f in Application.OpenForms:
-            try: nm = "%s(%r)" % (f.GetType().Name, f.Text)
-            except: nm = f.GetType().Name
+            # NEVER print f.Text - EScribe puts the device SERIAL in the window
+            # title ("Device Monitor - <theme> - <serial>"), and these reports
+            # get pasted into a public repo (kb/12). Type name only.
+            try: nm = f.GetType().Name
+            except: nm = "<form>"
             say("  form " + nm)
             roots.append((nm, f))
             n += 1

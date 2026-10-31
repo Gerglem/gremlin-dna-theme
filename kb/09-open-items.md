@@ -1275,6 +1275,36 @@ Fixed in place: the probe now `clr.AddReference`s WinForms before enumerating (f
 thread, and would itself be the finding. **A second empty result will mean something; the first one
 did not.**
 
+### Probe 3, run 2 - the real finding: the script host cannot see EScribe's document
+
+With WinForms loaded, `Application.OpenForms` contains **exactly one form: Device Monitor's own
+window.** The main EScribe window is not there, so neither is the open document. 296 objects, graph
+exhausted, zero hits - and this time that means something.
+
+Also learned: `ECig` and `Device` are the *same* object (`A.OJA`), i.e. the device interface, not a
+document; `Directories`, `UI` and `Script` are small host helpers (`A.ARO`, `A.JRO`, `A.SDO`). None
+of them leads anywhere near a `PYB`.
+
+**So three probes have now failed to find a live `PYB`, and the third explains why hunting harder
+will not help.** The document is simply not reachable from the script host.
+
+> **Privacy note, and a bug in our own tooling:** EScribe puts the **device serial in the window
+> title** - `Device Monitor - <theme> - <serial>`. Probe 3 printed form titles verbatim, so pasting a
+> report into this repo would have leaked it (`12`). Fixed: the probe prints the form's type name
+> only. Worth remembering for anything else that enumerates windows.
+
+### The pivot: build a PYB instead of finding one
+
+`16` mapped `.ecig root -> GGQ -> DWB.JSL(?, ggq, null) -> PYB -> PYB.UE(f, i) -> OCC` and called it
+blocked because **`DWB` is abstract**. But nobody has looked for a **concrete subclass**. If one
+exists, a `PYB` can be built from one of our own `.ecig` files and the live document stops mattering
+entirely - which also means the whole thing works without a document open.
+
+`tools/probe_dwb.py` asks exactly that, and reads **metadata only** - `BaseType`, `IsAbstract`,
+`GetConstructors`, `GetParameters`. It never reads a value and never invokes anything, so no static
+constructor can fire (`07` #28). It also reports whether `DEScribe.UI` is even loaded in the script
+host, which confirms or kills the separate-context theory outright.
+
 ## The roadmap, and what each version means
 
 Set by Jake 2026-10-30. The point of the device-access work is not the protocol; it is these two

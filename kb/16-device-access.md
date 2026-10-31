@@ -257,6 +257,42 @@ produce it. `tools/probe_pyb.py` (inert) hunts EScribe's own statics for a live 
 and dumps `PE()` - region sizes, device offsets, paging and read-only flags. That one report would
 settle the whole question.
 
+### Measured 2026-10-30: the script host cannot see EScribe's document
+
+Four probe runs settle the "get a live `PYB`" route. With `System.Windows.Forms` loaded explicitly -
+Device Monitor's IronPython host does **not** reference it by default, which made two earlier runs
+blind rather than negative - `Application.OpenForms` contains **exactly one form: Device Monitor's
+own window.** The main EScribe window is not there, so the open document is not reachable.
+
+| Probe | What it searched | Result |
+|---|---|---|
+| `probe_pyb.py` | static fields/properties of type `PYB`/`FWB` in `DEScribe.Core` | type found, 0 live |
+| ~~`probe_pyb2.py`~~ | every static field in every assembly | **froze EScribe** (`07` #28), deleted |
+| `probe_pyb3.py` run 1 | instance fields from live roots | blind - no WinForms reference |
+| `probe_pyb3.py` run 2 | same, WinForms loaded | 1 form (Device Monitor's own), 296 objects, **0 live** |
+
+The globals the host does expose are no help: `ECig` and `Device` are the **same** object (`A.OJA`),
+the device interface rather than a document, and `Directories` / `UI` / `Script` are small host
+helpers (`A.ARO`, `A.JRO`, `A.SDO`).
+
+**So the blocker named above is not "we have not looked hard enough" - it is structural.** Hunting a
+live `PYB` from a Device Monitor script cannot work.
+
+### The remaining in-process route: build a `PYB` rather than find one
+
+The chain needs a `PYB`; it does not care where one came from. `DWB.JSL(?, ggq, null)` is the only
+constructor, and it was written off because **`DWB` is abstract** - but nobody looked for a
+**concrete subclass**. If one exists, a `PYB` can be built from one of our own `.ecig` files, no
+open document required, which would also make the whole thing work headlessly.
+
+`tools/probe_dwb.py` asks that, plus whether `DEScribe.UI` is even loaded in the script host.
+**Metadata only** - `BaseType`, `IsAbstract`, `GetConstructors`, `GetParameters` - no value reads and
+no invokes, so no static constructor can fire.
+
+If there is no concrete `DWB` either, the in-process route is exhausted and the fallback is the USB
+capture: the device-to-PC half is already decoded (`tools/samples/hid-upload-capture.log`) and only
+the PC-to-device direction is missing.
+
 ### Where this leaves a push
 
 **Further away than it looked, and deliberately not attempted.** Driving `PerformUpload` with a
