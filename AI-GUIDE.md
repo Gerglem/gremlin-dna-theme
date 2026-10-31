@@ -2,6 +2,9 @@
 
 Everything in this repo was built with an AI assistant, and the docs are written so you can do the same: customize the theme, make TCR curves for other heaters, build profiles, or troubleshoot a chip swap.
 
+Read **[kb/19-objectives.md](kb/19-objectives.md)** first — it says what the project is for,
+where each goal stands, and which constraints are not negotiable. Then:
+
 ## Step by step
 1. **Pick an assistant that can work with files and run code.** Claude (with file creation/analysis) or ChatGPT (with code interpreter) both work. Theme files are zipped XML, so the assistant needs code execution to read and rebuild them.
 2. **Start a new chat and upload all of the `kb/*.md` files.** Tell it to read `kb/00-README.md` first, then `kb/07` for the traps. Those files contain the theme format, DNA field IDs, design spec, calibration method, and known pitfalls.

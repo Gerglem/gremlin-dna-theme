@@ -10,12 +10,15 @@ A Lost Vape Thelema Solo converted to an **Evolv DNA100C**, set up for Divine Tr
 
 ### If you are an AI assistant, read these in this order
 
-1. **[kb/00-README.md](kb/00-README.md)** — current versions, conventions, and the index to everything else. Start here, always.
-2. **[kb/07-gotchas-and-lessons.md](kb/07-gotchas-and-lessons.md)** — 24 numbered traps found the hard way. Several will cost you a build-and-test cycle each if you meet them fresh. Read before changing a theme.
-3. **[kb/04](kb/04-theme-file-format.md)** and **[kb/10](kb/10-xml-reference.md)** — the file format and a field-by-field XML reference. `10` carries a confidence column; respect it.
-4. **[kb/05-field-id-dictionary.md](kb/05-field-id-dictionary.md)** — numeric field IDs. Anything marked **M** is inferred, not verified.
-5. **[kb/14-device-monitor-scripting.md](kb/14-device-monitor-scripting.md)** — how to test a change against the live mod in seconds rather than by rebuilding and photographing a screen.
-6. **[kb/12-release-and-privacy-checklist.md](kb/12-release-and-privacy-checklist.md)** — before anything is published.
+1. **[kb/19-objectives.md](kb/19-objectives.md)** — **what this project is for and where each goal stands.** Read it first so you know which problem you are actually solving, and which constraints are not negotiable.
+2. **[kb/00-README.md](kb/00-README.md)** — current versions, conventions, and the index to everything else.
+3. **[kb/07-gotchas-and-lessons.md](kb/07-gotchas-and-lessons.md)** — 24 numbered traps found the hard way. Several will cost you a build-and-test cycle each if you meet them fresh. Read before changing a theme.
+4. **[kb/04](kb/04-theme-file-format.md)** and **[kb/10](kb/10-xml-reference.md)** — the file format and a field-by-field XML reference. `10` carries a confidence column; respect it.
+5. **[kb/05-field-id-dictionary.md](kb/05-field-id-dictionary.md)** — numeric field IDs. Anything marked **M** is inferred, not verified.
+6. **[kb/14-device-monitor-scripting.md](kb/14-device-monitor-scripting.md)** — how to test a change against the live mod in seconds rather than by rebuilding and photographing a screen. It fires the device on command, so most measurements are scriptable.
+7. **[kb/12-release-and-privacy-checklist.md](kb/12-release-and-privacy-checklist.md)** — before anything is published.
+
+If you are working on the **protocol** rather than a theme, read **[kb/16-device-access.md](kb/16-device-access.md)** instead of 3–5. It carries the frame format, the write path, the 7-bit packing and what is still undecoded.
 
 Then the design spec for whichever theme you are touching: **[kb/06](kb/06-gremlin-design-spec.md)** for Color Themes, **[kb/11](kb/11-high-contrast-design-spec.md)** for High Contrast.
 
@@ -25,10 +28,16 @@ Then the design spec for whichever theme you are touching: **[kb/06](kb/06-greml
 - [`AI-GUIDE.md`](AI-GUIDE.md): how to use these docs with an AI assistant
 - [`guides/chip-swap-thelema-solo-dna100c.md`](guides/chip-swap-thelema-solo-dna100c.md): chip swap guide (parts, soldering, screen, power-up)
 - [`guides/setup-gremlin-theme-profiles-calibration.md`](guides/setup-gremlin-theme-profiles-calibration.md): setup guide — loading the theme, materials, profiles, and calibration
-- [`release/`](release/): **`gremlin_v2.2.05_theme.ecigtheme`** (current theme) and **`gremlin_v2.2.05.ecig`** (v2.2 full device config: the theme plus the four Divine Tribe profiles), [`release/RELEASE-NOTES.md`](release/RELEASE-NOTES.md) (what changed in each version), `gremlin_v1.0_theme.ecigtheme` and `gremlin_v1.0.ecig` (v1.0 theme and full device config), `profiles/*.ecigprofile`, `materials/*.csv`
-- [`high-contrast/`](high-contrast/): **Gremlin High Contrast - Large Text v1.2**, a separate theme for low vision
+- [`release/`](release/): **`gremlin_v2.3.03_theme.ecigtheme`** (current theme) and **`gremlin_v2.3.03.ecig`** (current full device config: the theme plus the Divine Tribe profiles), [`release/RELEASE-NOTES.md`](release/RELEASE-NOTES.md) (what changed in each version), plus the superseded `v2.2.05` and `v1.0` pairs, `profiles/*.ecigprofile`, `materials/*.csv`
+- [`high-contrast/`](high-contrast/): **Gremlin High Contrast - Large Text v1.2.08**, a separate theme for low vision
 - [`kb/`](kb/): detailed technical notes — reverse-engineered theme format, DNA field IDs, design spec, gotchas, EScribe's install tree and its Python scripting API
-- [`tools/`](tools/): read the mod directly — resistance, temperatures, puff stats — with no EScribe involved. **`dna-hid.py`** talks over the vendor HID interface (needs `pip install hidapi`, and works on macOS where the serial port does not); `dna-query.ps1` does the same over the USB serial port; `dna-stream.ps1` captures the 64 Hz CSV stream. Command table in [`kb/17`](kb/17-serial-command-interface.md), transport detail in [`kb/16`](kb/16-device-access.md)
+- [`tools/`](tools/): talk to the mod directly, with no EScribe involved.
+  - **Reading:** **`dna-hid.py`** over the vendor HID interface (needs `pip install hidapi`, and works on macOS where the serial port does not); `dna-query.ps1` over the USB serial port; `dna-stream.ps1` for the 64 Hz CSV stream. Command table in [`kb/17`](kb/17-serial-command-interface.md).
+  - **Writing:** **`replay-session.py`** sends a captured settings upload back to the device and it applies — verified end to end. An upload is three phases in one HID session; `replay-group.py` drives one group, and **EScribe must be closed**, since it holds the HID handle exclusively.
+  - **Decoding:** **`unpack7.py`** expands the 7-bit packed settings block and reads the power and temperature fields (`--sample` self-checks).
+  - **Measuring:** `probe_clean_profile.py` is a **Device Monitor script**, not standalone — it fires the device and samples; `compare_profile_probe.py` compares two of its runs. `probes/` builds single-field profiles for protocol work (and **zeroes a profile's locked ohms**, so do not run them on a profile you want to fire).
+  - **Checking:** `check-theme.py` before shipping any build.
+  - Protocol detail in [`kb/16`](kb/16-device-access.md), samples in `tools/samples/`.
 - [`images/`](images/): build photos
 
 ## Gremlin - Color Themes v2.2
