@@ -221,6 +221,42 @@ Decoding work on `tools/samples/hid-upload-capture.log`, 2026-10-30:
 Conclusion: the device-to-PC half is a structured command and response stream, not bulk content. The
 image itself goes the other way, which a passive HID handle cannot see.
 
+### Building the chain offline - how far that gets
+
+Tried with no device involved, loading the assemblies and feeding a real `.ecig`:
+
+- **`GGQ` is reachable**; the type loads and both constructors are visible.
+- **`DWB` is abstract**, so `DWB.JSL` - the only `PYB` constructor - cannot be called without finding a
+  concrete subclass. That is the current wall for an out-of-process build.
+
+> PowerShell trap worth recording: a helper that catches `GetTypes()` failures must unwrap to the real
+> `ReflectionTypeLoadException`. Catching the bare `$_.Exception` yields a wrapper with no `.Types`,
+> the helper silently returns null, and types look absent when they are not. This produced one
+> completely wrong "GGQ NOT FOUND" result.
+
+### The layout is assembled piecemeal, not declared
+
+`DWB.RSL(PYB, IEnumerable<>, Int32, Int32, GYB)` is 50 bytes of IL and adds **one** region:
+
+    ldsfld   PagingMethod.ReadOnly
+    ldc.i4   32915   (0x8093)
+    call     YUB.XE
+    ldc.i4   32919   (0x8097)
+    call     YUB.XE
+    callvirt PYB.NE
+    call     Enumerable.ToArray
+    callvirt PYB.RE
+
+So regions are built from **feature IDs resolved through `YUB.XE`**, not from hard-coded offsets, and
+the full map is accumulated across several call sites. That rules out lifting a static table out of
+the assembly - and it is a second, independent reason not to hand-build a `LogicalLayout`: the real
+one is derived per config, not fixed per board.
+
+**The practical consequence:** the layout has to come from a live `PYB`. `tools/`-side work cannot
+produce it. `probe_pyb.py` (in Downloads, inert) hunts EScribe's own statics for a live `PYB` or `FWB`
+and dumps `PE()` - region sizes, device offsets, paging and read-only flags. That one report would
+settle the whole question.
+
 ### Where this leaves a push
 
 **Further away than it looked, and deliberately not attempted.** Driving `PerformUpload` with a
