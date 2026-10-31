@@ -7,10 +7,10 @@ This is the setup half of my Thelema Solo DNA100C build (**[chip swap guide](chi
 ![Gremlin screens](../images/20-gremlin-screens-render.png)
 
 **Downloads:** https://github.com/Gerglem/gremlin-dna-theme/tree/main/release
-- `gremlin_v2.2.04_theme.ecigtheme`: the theme
+- `gremlin_v2.2.05_theme.ecigtheme`: the theme
 - `materials/dtv5xl-tcr200.csv` and `materials/questcup-tcr120.csv`: the TCR material curves
 - `profiles/DTv5XL-Profile.ecigprofile`, `QuestCup.ecigprofile`, `DTv5XL-Clean.ecigprofile`, `QuestCup-Clean.ecigprofile`
-- `gremlin_v2.2.04.ecig`: the full setup — the theme plus the four profiles, with cold resistance cleared so you measure your own
+- `gremlin_v2.2.05.ecig`: the full setup — the theme plus the four profiles, with cold resistance cleared so you measure your own
 
 ---
 
@@ -88,7 +88,7 @@ Vapor comes off much lower than people expect — terpenes and THC volatilize be
 
 ## 5. Load the theme
 
-**Theme** tab → load `gremlin_v2.2.04_theme.ecigtheme` → **Upload Settings to Device.**
+**Theme** tab → load `gremlin_v2.2.05_theme.ecigtheme` → **Upload Settings to Device.**
 
 ### What Gremlin does
 - **Seven looks:** Classic, Retro, Synth, Toxic, Ice, Desert and Terminal, picked under **MENU → THEMES** (turn on one at a time; all off is Classic). They recolor the home screen, the lock screen, and each menu's title.

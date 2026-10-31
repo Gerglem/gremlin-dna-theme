@@ -80,7 +80,7 @@ v0.1 initial (Built font, main/lock/coil) · v0.2 inverted highlight, outlined i
 
 
 ## Gremlin - Color Themes v2.x
-Current internal build: `gremlin_v2.2.04_theme.ecigtheme` (theme title "Gremlin - Color Themes"); releases drop the mini version.
+Current internal build: `gremlin_v2.2.05_theme.ecigtheme` (theme title "Gremlin - Color Themes"); releases drop the mini version.
 
 **Themes:** Classic (all switches off) plus six color themes under **MENU → THEMES**: Retro, Synth, Toxic, Ice, Desert, Terminal. Turn on one at a time. Each theme is a User Toggle (see `05`); if several are on, the last in this order wins: Retro, Synth, Desert, Terminal, Toxic, Ice.
 

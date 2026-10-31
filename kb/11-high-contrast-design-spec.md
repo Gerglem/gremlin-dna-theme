@@ -1,6 +1,6 @@
 # 11 – Gremlin High Contrast - Large Text v1.2: Design Spec
 
-Current internal build: `../high-contrast/files/gremlin_high_contrast_v1.2.04_theme.ecigtheme` (theme title "Gremlin High Contrast - Large Text"). User landing page: `../high-contrast/README.md`.
+Current internal build: `../high-contrast/files/gremlin_high_contrast_v1.2.05_theme.ecigtheme` (theme title "Gremlin High Contrast - Large Text"). User landing page: `../high-contrast/README.md`.
 
 ## Goals
 Built for low vision. Large text, maximum contrast, only what's needed on each screen. Everything else stays at defaults and is changed in EScribe.

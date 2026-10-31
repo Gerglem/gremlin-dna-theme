@@ -10,7 +10,7 @@ Everything in this repo was built with an AI assistant, and the docs are written
    - *"Read these files. My mod is a DNA75C on international firmware. Make me a TCR 180 material CSV for a standard V5 cup, and a matching profile."*
    - *"Using the theme format and field IDs in these docs, change the Gremlin home screen to show battery voltage instead of the session time."*
    - *"I'm doing the Thelema chip swap and the screen stays blank after power-up. Walk me through troubleshooting."*
-5. **Ask for a new mini version on every build** (e.g., `gremlin_v2.2.04_theme.ecigtheme`) so you can tell builds apart and roll back.
+5. **Ask for a new mini version on every build** (e.g., `gremlin_v2.2.05_theme.ecigtheme`) so you can tell builds apart and roll back.
 6. **Load the file in EScribe, upload it to the mod, and test.** Send photos of the screen back to the assistant and describe what's wrong. Expect a few rounds. That's how Gremlin was built.
 7. **Shorten the loop where you can.** EScribe's Device Monitor runs Python against the live mod, and values like cold ohms are writable — so a condition can be exercised by setting a value and watching the screen, instead of rebuilding the theme with different numbers. See `kb/14`. Not everything can be tested this way, but what can, should be.
 

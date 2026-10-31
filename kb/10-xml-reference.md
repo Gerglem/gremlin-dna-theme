@@ -103,7 +103,7 @@ Colors are **unsigned 32-bit ARGB integers in decimal**, for example `4294967295
 | `ZOrder` | Draw order (newer EScribe). Without it, file order applies | H |
 
 **Child elements:** `Label`, `Field`, `Picture`, `Meter`, `Toggle`, `Status`, `Memo`, `Chart`, `Hidden`.
-**Variant rule:** the first child without `<Compare>` is the default. Children with `<Compare>` replace it when true, and the last true one wins. Selectability comes from having an `Action` or an editable `Setting` (no `ReadOnly`).
+**Variant rule:** the first child without `<Compare>` is the default. Children with `<Compare>` replace it when true, and **the last true one wins** — confirmed on-device 2026-10-30 with two always-true variants, where the second took effect. **A control may hold at most 8 children; beyond that they are silently ignored** (`07` #26). Selectability comes from having an `Action` or an editable `Setting` (no `ReadOnly`).
 
 ### 1.5 Child elements
 
@@ -179,7 +179,7 @@ Children: `Source/Setting` (editable if not ReadOnly, e.g., brightness), `Compar
 | `2` | value > RefValue | **C** (on-device 2026-10-30, the probe build). No other theme seen uses `2` or `3`; Copyman's expresses comparisons with `130` / `131` instead |
 | `3` | value < RefValue | C |
 | `4` | **equals.** Theme Designer compiles `=` to this, not to `129` (2026-10-30). Previously guessed as ≥/≤, which was wrong | **C** |
-| `128 + n` | negated form of n (`130` ≤; `131` ≥). **`129` is NOT equality — it does not resolve on this firmware.** Proven on hardware 2026-10-30 (`09`), and EScribe corroborates by zeroing the `RefValue` of any `129` compare it round-trips (`07`). Use **operator 4**. | `129` **disproved**. `130` / `131` **H+** — Copyman's theme uses them 1 and 7 times, together on field `1179649` to bracket a range, which is consistent with ≤ and ≥ but does not prove which is which |
+| `128 + n` | negated form of n (`130` ≤; `131` ≥). **`129` was wrongly blamed** for the replace-warning failure on 2026-10-30; the real cause was a per-control child limit (`07` #26). It remains untested, and EScribe does zero the `RefValue` of any `129` compare it round-trips, so prefer **operator 4**, which is confirmed equality on-device. | `129` **untested**. `130` / `131` **H+** — Copyman's theme uses them 1 and 7 times, together on field `1179649` to bracket a range, which is consistent with ≤ and ≥ but does not prove which is which |
 | `64` | **AND of the nested Compares. Confirmed - this is exactly what Theme Designer emits for the word `and`** (2026-10-30, generated file diffed against ours). An earlier conclusion that 64 was unsupported was wrong; see `07` #25. | **C** |
 | `65` | OR of the nested Compares | **H+** — used by **Copyman's** third-party theme (`13`), e.g. `<Compare Operator="65"><Compare Operator="1" Field="419954690" RefValue="0" /><Compare Operator="1" Field="419889154" RefValue="0" /></Compare>` on a preheat field. That theme runs, so **nesting itself works** and operator 64 failing is about that value, not the structure. Not vendor-confirmed: Evolv's own Default Theme contains no conditions at all. |
 `RefValue` is numeric and compared in the field's units (%, °F, seconds…).
