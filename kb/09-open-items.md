@@ -1241,9 +1241,14 @@ fields and properties whose declared type is `PYB` or `FWB`, in `DEScribe.Core` 
 - **Not ruled out, and possibly the whole answer:** whether a config was even **open** in EScribe when
   the probe ran. With no document loaded there may be no `PYB` in existence to find.
 
-**`tools/probe_pyb2.py` is the follow-up** and is the one to run next, **with a config open**. It
-walks breadth-first from every static field in every `DEScribe*` assembly into instance fields,
-bounded by `MAX_NODES`, `MAX_DEPTH` and a visited set so it cannot hang EScribe or loop on a cycle.
+**`tools/probe_pyb3.py` is the follow-up** and is the one to run next, **with a config open**.
+
+> `probe_pyb2.py` came first and **froze EScribe** - it seeded its walk by reading every static field in
+> the assemblies, which runs every type initializer (`07` #28). Stopped manually, nothing reached the mod,
+> script deleted. Probe 3 walks only from objects that already exist, so no initializer can fire, and it
+> is interruptible with a 20-second budget. It
+walks instance fields outward from `Application.OpenForms`, bounded by a node cap, a depth cap, a
+visited set and a wall-clock budget, and honours Device Monitor's Stop button.
 It also prints the open forms, so the report says whether a document was loaded - which makes an
 empty result interpretable instead of ambiguous.
 
