@@ -5,9 +5,41 @@ Files are named for their version, in the original v1.0 format:
 - `gremlin_v<version>_theme.ecigtheme` — the theme on its own
 - `gremlin_v<version>.ecig` — the theme plus the four Divine Tribe profiles and their materials
 
-The current release is **v2.3.01**. (A v2.3.00 was published and withdrawn the same day — see below.) Older versions stay in this folder, so a link to a specific version keeps working.
+The current release is **v2.3.02**. (A v2.3.00 was published and withdrawn the same day — see below.) Older versions stay in this folder, so a link to a specific version keeps working.
 
 The High Contrast theme is a separate build on its own version track — see [`../high-contrast/RELEASE-NOTES.md`](../high-contrast/RELEASE-NOTES.md).
+
+---
+
+## v2.3.02
+
+Profile settings only — the theme is byte-identical to v2.3.01.
+
+The four profiles now match the ones actually in daily use:
+
+| | Name | Watts | Temperature | Session |
+|---|---|---|---|---|
+| 1 | DTv5XL | 36 W | **385°F** | **120 s** |
+| 2 | **Quest** | 25 W | **385°F** | **120 s** |
+| 3 | DTv5XL-Clean | 38 W | power only | 120 s |
+| 4 | **Quest-Clean** | 35 W | power only | 45 s |
+
+**This reverses the 380°F starting temperature introduced in v2.2.** That change was made on the
+reasoning that you should work *up* to your own sweet spot rather than down from someone else's —
+but 385°F is the setting that has actually been in use, so the config now says so. It is a starting
+point either way, not a recommendation.
+
+Session time on the two vaping profiles goes 60 s → 120 s, and the QuestCup profiles are renamed to
+**Quest** and **Quest-Clean** so they fit the screen better.
+
+**The Lightning Quest stays at TCR 120, deliberately.** The source profile this came from carries
+TCR 125, which is what Divine Tribe publish, but 125 was swab-tested on this chip and came back tan
+at 470°F where 120 gives the light gold that means the chip and the cup agree. 125 reads about 5%
+hot on a DNA. Keeping the measured value rather than the published one — confirmed as the intended
+setting. Note the loose `Quest.ecigprofile` on disk still carries 125; the config is the correct one.
+
+Cold resistance still ships cleared to 0 and unlocked on all eight slots, as every release does, so
+the mod measures your own coil the first time you fire it.
 
 ---
 

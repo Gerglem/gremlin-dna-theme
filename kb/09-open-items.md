@@ -14,7 +14,7 @@ Rewritten 2026-10-30 at the end of a long session. Everything below is current.
 **Repository is fully pushed.** `main` matches `origin/main`; nothing is held back. The earlier
 instruction to keep work local was discharged on 2026-10-30.
 
-**Current builds:** Color Themes **`v2.3.01`** (untested; `v2.2.05` is the proven fallback and `v2.3.00` was withdrawn), High Contrast **`v1.2.07`** (proven). **Neither has been on hardware.** `v2.3.00` carries the battery split (`18` A); `v1.2.06` carries the home-screen warning.
+**Current builds:** Color Themes **`v2.3.02`**, High Contrast **`v1.2.08`**. Both carry Jake's own profile settings (below). The *themes* in them are `v2.3.01` (untested - `v2.2.05` is the proven fallback) and `v1.2.07` (proven on hardware). **Neither has been on hardware.** `v2.3.00` carries the battery split (`18` A); `v1.2.06` carries the home-screen warning.
 
 | | State |
 |---|---|
@@ -1111,6 +1111,50 @@ Unanswered either way. The DNA almost certainly has its own thermal limits and w
 to fire, but **whether it tells the user anything** is the open question - and if it only shows a status
 line, a theme could make it unmissable. Worth checking what the chip does at temperature before building
 anything, so the theme is not warning about a condition the firmware has already handled silently.
+
+## Jake's profile settings are now what ships, 2026-10-30
+
+Taken from his own `gremlin_v2.1.ecig` and confirmed against the four `.ecigprofile` files he
+supplied, which are the authoritative statement of what he runs.
+
+| | Name | Watts | Temperature | Session | Material |
+|---|---|---|---|---|---|
+| 1 | DTv5XL | 36 W | 385 F | 120 s | DTv5XL |
+| 2 | **Quest** | 25 W | 385 F | 120 s | QuestCup |
+| 3 | DTv5XL-Clean | 38 W | power only | 120 s | Watts |
+| 4 | **Quest-Clean** | 35 W | power only | 45 s | Watts |
+
+Six values changed in each build: `EvolvPSTemperature[0,1]` 380 -> 385, `EvolvWMTime[0,1]` 60 -> 120,
+and `EvolvATFriendlyName[1,3]` to the shorter names. Everything else already matched - watts,
+materials, both cleaning profiles, and the DTv5XL curve.
+
+**This reverses the 380 F start shipped in v2.2** (`06`). That was a deliberate change; 385 is what
+he actually uses, so the config now agrees with reality.
+
+### Two things deliberately NOT copied
+
+- **His locked cold ohms.** `v2.1` and the two vaping `.ecigprofile` files carry real readings with
+  the lock set - 0.4637 @ 69.3 F on the XL, 0.3141 @ 71.2 F on the Quest. Published configs ship 0
+  and unlocked (`12`), a baked-in lock is wrong for anyone else's cup, and it goes stale the moment a
+  cup is swapped. `tools/` asserts this on build.
+- **The Quest TCR curve.** His `Quest.ecigprofile` computes to **TCR 125**; the shipped config is
+  **TCR 120**. `02` records 120 as swab-verified on this very DNA100C - *tan at 125, light gold at
+  120* - with 125 reading about 5% hot because it is Divine Tribe's figure for their own board. His
+  profile file simply predates that test. **Keeping the measured value over the published one -
+  confirmed by Jake the same day: "the tcr for the quest should be 120".** The `.ecigprofile` on disk
+  is the stale one, not the config; worth regenerating it from the shipped curve so the two agree.
+
+### How the curves compare, since the formats differ
+
+A `.ecigprofile` stores the temperature curve as CSV text (`F,R` then points); a `.ecig` stores the
+same curve as `<Curve><Sections>` XML. A string comparison says every curve differs; comparing the
+*values* shows only the Quest differs. **Compare decoded points, never the encoded blob.**
+
+### An indexing trap in the same file
+
+`EvolvPSTemperature` and `EvolvWMTime` are indexed **0..7** for profiles 1..8, while `EvolvWDMaterial`,
+`EvolvWDColdOhms` and `EvolvWDOhmLock` are indexed **256..263** for the same profiles. Two bases in
+one document; `make-bench-config.py` uses the 256 base and is correct for what it touches.
 
 ## The roadmap, and what each version means
 

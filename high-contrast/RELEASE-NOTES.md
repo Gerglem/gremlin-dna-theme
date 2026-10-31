@@ -5,7 +5,18 @@ This theme is a major departure from the original Gremlin interface — larger t
 - `files/gremlin_high_contrast_<version>_theme.ecigtheme` — the theme on its own
 - `files/gremlin_high_contrast_<version>.ecig` — the theme plus four ready-made profiles
 
-The current release is **v1.2.07**. The color theme has its own notes in [`../release/RELEASE-NOTES.md`](../release/RELEASE-NOTES.md).
+The current release is **v1.2.08**. The color theme has its own notes in [`../release/RELEASE-NOTES.md`](../release/RELEASE-NOTES.md).
+
+---
+
+## v1.2.08
+
+Profile settings only — the theme is byte-identical to v1.2.07.
+
+Same four profiles as the Color Themes release: **385°F** and **120 s** on DTv5XL and Quest, 38 W /
+120 s and 35 W / 45 s on the two cleaning profiles, and the QuestCup profiles renamed **Quest** and
+**Quest-Clean**. The Lightning Quest keeps the swab-verified **TCR 120** rather than the published
+125. Cold resistance ships cleared and unlocked, as always.
 
 ---
 
