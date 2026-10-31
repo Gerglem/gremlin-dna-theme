@@ -1293,6 +1293,9 @@ will not help.** The document is simply not reachable from the script host.
 > report into this repo would have leaked it (`12`). Fixed: the probe prints the form's type name
 > only. Worth remembering for anything else that enumerates windows.
 
+### The pivot worked: see `16`. ~25 concrete `DWB` subclasses exist, `GGQ` takes an `XElement`,
+### and the chain needs no open document. Next: `probe_dwb2.py` identifies the DNA100C's subclass.
+
 ### The pivot: build a PYB instead of finding one
 
 `16` mapped `.ecig root -> GGQ -> DWB.JSL(?, ggq, null) -> PYB -> PYB.UE(f, i) -> OCC` and called it

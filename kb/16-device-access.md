@@ -293,6 +293,53 @@ If there is no concrete `DWB` either, the in-process route is exhausted and the 
 capture: the device-to-PC half is already decoded (`tools/samples/hid-upload-capture.log`) and only
 the PC-to-device direction is missing.
 
+### Probe 4 result, 2026-10-30: the chain is unblocked in principle
+
+`tools/probe_dwb.py`. Two findings, either of which would have been worth the run.
+
+**1. `DWB` has 44 subclasses and about 25 are concrete, every one with a parameterless constructor.**
+All in `DEScribe.Branding.Evolv`, named in the same obfuscated three-letter style (`JYA`, `DYA`,
+`MHA`, `LHA`, `NHA`, `RHA`, `XIA`, `LIA`, `FIA`, `CIA`, `WIA`, `KIA`, `PIA`, `UIA`, `ZIA`, `MKA`,
+`AKA`, `BKA`, `TKA`, `WKA`, `YKA`, `IKA`, `SKA`, `TPA`, `YPA`). The count and the branding namespace
+both say **one per board model** - the DNA product line is about that size.
+
+`16` called the chain blocked because `DWB` is abstract and `JSL` is its only `PYB` constructor.
+**That was true and is no longer the obstacle.** `JSL` is an *instance* method
+(`JSL(Object, GGQ, Nullable<T>) -> PYB`, `static=False`), so it needs a `DWB` instance - and there
+are two dozen to choose from, each costing nothing to construct.
+
+**2. `GGQ` is a struct with a `ctor(XElement)`.** The board identity can be built directly from the
+root element of one of our own `.ecig` files - `<DESabertooth Device="109" Version="1">`, the *device
+code 109.1* EScribe's own log prints. Nothing has to be reverse-engineered to produce it.
+
+So the route is now:
+
+    .ecig root --ctor(XElement)--> GGQ
+    concrete DWB subclass --ctor()--> dwb
+    dwb.JSL(null, ggq, null) --> PYB
+    pyb.PE() --> LogicalLayout     <- the real flash map
+    pyb.UE(func, int) --> OCC      <- a Programmer that HAS that layout
+
+### Also measured: we are inside EScribe, and `DEScribe.UI` is loaded
+
+`process: EScribe`, and `DEScribe.UI present: True`. So the main window **is** in this process - it
+simply is not in `Application.OpenForms` as seen from the script host, which points at thread
+affinity rather than a process boundary. Worth knowing, but **it no longer matters**: building a
+`PYB` needs no document at all, which is strictly better than finding one. It would also work with
+nothing open.
+
+### The open question, and it is now a small one
+
+**Which of the ~25 concrete subclasses is the DNA100C?** Metadata alone will not say. `tools/probe_dwb2.py`
+constructs each one and reads its **instance fields** looking for the device code 109 or a product
+string, which identifies the right class by evidence rather than by guessing at an obfuscated name.
+
+That probe crosses a line the previous four did not: it **instantiates** types. That is no longer
+metadata-only. Two things make it proportionate - these are branding descriptors with parameterless
+constructors, which is about as inert as a constructor gets, and **nothing in it touches the mod**,
+so the worst realistic outcome is another EScribe restart (`07` #28). It deliberately **does not call
+`JSL`**; that is the next step and belongs in its own run once the right class is known.
+
 ### Where this leaves a push
 
 **Further away than it looked, and deliberately not attempted.** Driving `PerformUpload` with a
