@@ -45,7 +45,7 @@ Three earlier beliefs in this repo were wrong. The current, evidence-backed posi
 | **Last match wins** | **Confirmed on-device.** Two always-true variants, the second took effect. `04` and `10` were right all along; a mid-session claim of first-match-wins was wrong |
 | **Operator 4 = equality** | **Confirmed on-device.** An isolated variant on `profile == 4` fired on exactly profile 4 |
 | **Operator 129** | **Untested, not disproved.** It was blamed for the warning failure and that was premature. EScribe does zero the `RefValue` of any `129` compare it round-trips, so prefer 4 |
-| **Operator 64 (AND)** | Does not work on this firmware (`10`). Unchanged |
+| **Operator 64 (AND)** | **Contested, and the evidence against it is confounded.** Every AND ever uploaded had operator `129` inside it, whose `RefValue` EScribe zeroes - so the AND could not have fired regardless. `10` rates it confirmed because Theme Designer emits it for `and`. Untested fairly; see the audit below |
 
 ### Device access: read and control are solved
 
@@ -168,6 +168,89 @@ transfer framing is already decoded from a passive capture (`16`,
   Readings: MEASURE cyan but value white → operator 2 is the problem, and the warning should be rebuilt inverted on operator 3 (default red, white below the limit). Value red but LOCKED white → the AND is the problem. Nothing colored → cold ohms cannot be used in a `Compare`, and the warning needs a different source field or has to be dropped.
 
   **Read on the XL profile at 0.464:** the value went **red** (`ohms > 0.4`, flat) and MEASURE went **cyan** (`ohms < 0.9`, flat), but LOCKED stayed yellow (`AND(profile == 1, ohms > 0.4)`). So **operator 2 works, operator 3 works, and the field is readable in a `Compare`** — only the nested AND fails. **Rebuilt 2026-10-30** as five layered flat variants instead (`07` #24); the layering is now the untested part, though every operator in it is confirmed on-device. `10` corrected: operator 2 promoted to confirmed, operator 64 marked as not working on this firmware.
+
+## Audit of v2.2.05, 2026-10-30 - two defects and a contradiction
+
+A full structural pass over both shipping builds, done with the `07` #26 lesson in hand: **count the
+children first**. Every control in both themes was counted and every non-cosmetic variant located by
+position. Method is reproducible - it is the only way to see this class of bug.
+
+### Child-count census
+
+| Children | Color Themes v2.2.05 | High Contrast v1.2.06 |
+|---|---|---|
+| 1 | 108 | 23 |
+| 2 | 4 | 14 |
+| 3 | - | 2 |
+| 5 | 5 | 2 |
+| 6 | - | 1 |
+| 7 | 27 | - |
+| **8** | **2** | - |
+
+**High Contrast is structurally clean** - nothing above 6, because it has no theme tints. **Color
+Themes spends 6 of its 8 slots on tinting**: 27 controls carry a default plus the six
+`Operator="1"` toggle variants and nothing else. Those are safe (they are purely cosmetic and the six
+are mutually exclusive), but they leave **one usable slot** on any tinted control, which is the real
+structural limit of the v2 design.
+
+### Defect 1: the low-battery warning sits on the ceiling
+
+**The only functional variant in the whole theme that sits above position 5 is the low-battery red,
+and it is child 8 of 8** - on both the home screen and the session screen, at `(0, 0)`.
+
+| | Battery meter at `(0, 0)` |
+|---|---|
+| `v1.0` | **2 children** - default, then red `Meter` if level `< 15%`. Proven in service |
+| `v2.2.05` | **8 children** - default, six theme tints, then the red `Picture` if level `< 15%` **last** |
+
+Adding the themes pushed a proven warning from position 2 to position 8. It has to be last, because
+last-match-wins is what lets it override a tint - so **the warning is only alive if the ceiling is
+exactly 8, and that number is inferred, not measured** (`07` #26). Nobody would notice either way
+without running the pack below 15%. This is the same failure mode as the ohms bug, in the one feature
+with a clean service history.
+
+**It is also fixable for free.** The 8th child is already a `Picture`, not a `Meter`, so it does not
+need the level: move it into its own control over the same rect at a higher `ZOrder`, with a default
+`<Hidden/>` ahead of it. Two children, no new images, and the tints keep their seven slots.
+
+### Defect 2: the live-ohms row shows a field known to read 0
+
+Session screen `(16, 104)` displays field **1048642**, which `05` records as *"Live ohms. Reads 0 when
+idle after boot, and 0 during the first session after power-on."* It carries seven children, all
+tinting, so it is not a ceiling risk - but it is a row that is blank or wrong exactly when a user would
+first look at it.
+
+### The contradiction: is operator 64 confirmed or dead?
+
+`09` and `10` disagree, and have since the replace-warning investigation closed:
+
+- **`10` line 183:** *"`64` - AND of the nested Compares. **Confirmed** - this is exactly what Theme
+  Designer emits for the word `and`"*, rated **C**.
+- **`09`, operator table:** *"Operator 64 (AND) Does not work on this firmware (`10`). Unchanged."*
+
+**`10` is closer to right, and neither is properly evidenced.** Every `.ecig` ever uploaded to this
+device containing an `Operator="64"` had **operator 129 inside it**:
+
+| File | The AND it carried |
+|---|---|
+| `gremlin_v2.2.02-TEST-threshold.ecig` | `AND(129 profile==1, 2 ohms>0.4)` |
+| `gremlin_high_contrast_v1.2.02-TEST-threshold.ecig` | same shape, four times |
+
+`129` is the operator EScribe **zeroes the `RefValue` of** on round-trip (`10`), so those compares read
+`profile == 0`, which never matches - the AND could not have fired whatever operator 64 does. **The
+on-device evidence against operator 64 is confounded, and the three-colour probe that produced the
+verdict predates the discovery that the tool emits `4` for equality, so it almost certainly used `129`
+too.**
+
+The fair test already exists and was never run: **`Downloads\Condition A and B.ecigtheme`**, authored
+by Theme Designer itself, one control, **two children**, carrying
+`AND(Operator 2 ohms > 0.4, Operator 4 profile == 1)` - both operators confirmed on-device, far below
+any ceiling. Independent support: Copyman's third-party theme uses `Operator="65"` (OR) and runs
+(`10` line 184), so nesting itself works.
+
+**This one test decides the shape of v3.** If the AND resolves, all four replace-warning chains
+collapse from five children to two, the cancel layers disappear, the Color Themes home screen gets its
+theme colour back across an XL's healthy range, and the cleaning-profile special case goes away.
 
 ## Registered: the HC home-screen replace warning (v1.2.06) - WRITTEN BEFORE RUNNING, 2026-10-30
 
