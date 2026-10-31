@@ -11,7 +11,7 @@
 > | **The flash layout** | **SOLVED.** Evolv's own code produces it on request, no device attached - `UWB.FE(ggq)` -> `A.WIA` -> `JSL` -> `PYB.PE()` |
 > | **Opening a link** | **SOLVED.** `BGQ.FE(port, vid, pid, ver, OpenConfiguration, 1, enum0) -> POT`, with the port string derived from WMI - no hand-made file |
 > | **Building a Programmer** | **SOLVED.** `PYB.UE(func, n)` with **n >= 128** - the Int32 is an address whose high bit must be set |
-> | **Reading the settings image** | **`AX()` times out.** The `Boolean[]` is ruled out; the version has still never actually been set (wrong type passed); HID contention with Device Monitor is the remaining suspect |
+> | **Reading the settings image** | **`AX()` times out**, with every argument-level suspect eliminated. The Programmer carries the layout, knows the version and is correctly addressed. **HID contention with Device Monitor is the only theory left** |
 > | **Writing a config** | **Untried.** Needs the read working first, then the `dontUpload` dry run, then Jake's explicit go-ahead |
 >
 > **Everything before "SOLVED: the real flash layout" is the investigation that got there**, including
@@ -685,6 +685,48 @@ level so inherited private members appear, sets the version as an `Int32`, and c
 If it still times out with the version genuinely set, the last suspect is **HID contention**: the
 probe runs inside Device Monitor, which polls the board itself, and this file already records that a
 second handle makes replies interleave.
+
+## CONFIRMED 2026-10-30: the Programmer carries the layout
+
+Walking `A.ECC`'s full type chain with `DeclaredOnly` at each level - inherited private members do
+not show otherwise, which is what made the previous dump look empty:
+
+    A.ECC    AE : JOC      FE : ROC      LE : Int32 = 12     VE : ZOC
+    A.YCC    (nothing declared)
+    A.TCC    NE : DDY
+    A.OCC    Stream : POT                UserModeVersion : Nullable<Int32> = 311105588
+             IE : LogicalLayout   <-- THE LAYOUT IS THERE
+             YE : Byte = 128      <-- our address, stored as the Byte it is
+             HE : Func<>   QE : Dictionary<>   TE : ACC   CE : None   KE : None
+
+**This is the thing `Programmer.CreateForDNAColor` never set**, and the reason `AX()` threw
+`NullReferenceException` every way it was tried before the `PYB` route existed. The detour was
+justified and it worked: the Programmer is correctly built, correctly addressed, knows the firmware
+version, and holds the real flash map.
+
+`UserModeVersion` also set cleanly once passed as the `Int32` it is, and survived `Initialize()`.
+
+### And `AX()` still times out - so every argument-level suspect is dead
+
+| Suspect | Status |
+|---|---|
+| `UE`'s address | **solved** - must have bit 7 set |
+| `JSL`'s document | **dead** - returns null when given one |
+| `AX`'s `Boolean[]` | **dead** - full array and empty array both time out |
+| `UserModeVersion` | **dead** - genuinely set this time, still times out |
+| The layout being absent | **dead** - it is present |
+
+What remains is what this file warned about before any of it started: **a second HID handle makes
+replies interleave.** These probes run inside Device Monitor, which polls the board continuously,
+while opening their *own* link alongside it.
+
+`tools/probe_contention.py` tries the two ways round that: borrow the link Device Monitor already
+has - walking the `ECig` object (`A.OJA`) for a live `POT` - so only one handle exists, and give
+`AX` a real `IProgressMonitor` instead of null. It closes nothing and disposes nothing.
+
+If borrowing finds no `POT` and a second handle still times out, the honest conclusion is that this
+cannot be done from inside Device Monitor, and the read has to run either with its polling stopped
+or from outside EScribe altogether.
 
 ### Where this leaves a push — SUPERSEDED, kept for the reasoning
 
