@@ -277,6 +277,64 @@ Expected, if first-match-wins holds:
 A green session time plus that column is the whole fix verified in one upload. Note the ordering
 costs the XL its theme color across its healthy range, the same trade `07` #24 already accepted.
 
+## Probe 2 result and Probe 3 registered - 2026-10-30
+
+### Probe 2: last match wins after all, and I had called it backwards
+
+The session-time field carried two always-true variants, GREEN then BLUE. **Every profile showed
+BLUE** - the second one. So **the last matching variant wins**, `04` and `10` were right, and the
+"first-match-wins" conclusion drawn from Probe 1 was wrong.
+
+The reordered ohms chain gave RED / RED / RED / plain, which plain last-match-wins explains on its
+own: `red > 0.41` still sat *after* the two cancels, so it won.
+
+### The real cause: a per-control child limit
+
+Counting every control in the theme:
+
+| Children | Controls |
+|---|---|
+| 1 | 108 |
+| 2 | 4 |
+| 5 | 4 |
+| 7 | 27 |
+| 8 | 2 |
+| **11** | **1 - the ohms readout** |
+
+**The ohms control is the only one in the theme above 8 children.** With a ceiling of 8 (a default
+plus seven variants) the v.04 order loses its last three entries:
+
+    1 default | 2-7 six theme colours | 8 red>0.41 | 9 white p==1 X | 10 white p==3 X | 11 red>0.6 X
+
+leaving `red > 0.41` as the only threshold - which is precisely the behavior seen in every run so far,
+under both operators. It also explains why changing 129 to 4 made no difference: the variants carrying
+those operators were never evaluated.
+
+**The ceiling is inferred, not proven.** 8 is where every other control in this theme happens to stop,
+so it is a plausible boundary rather than a measured one. What Probe 3 actually tests is whether the
+chain works once the control is small; it does not pin the exact limit.
+
+### Probe 3, registered before running
+
+`PROBE3-fix.ecig`. The six theme tints are dropped from the ohms control, leaving **5 children** in
+last-match-wins order:
+
+    default -> red if ohms > 0.41 -> white if profile == 1 -> white if profile == 3 -> red if ohms > 0.6
+
+| Profile | Locked | Last match | Expected |
+|---|---|---|---|
+| 1 XL | 0.4637 | white `p == 1` | **plain/white** |
+| 2 Quest | 0.4504 | `red > 0.41` | **RED** |
+| 3 XL-Clean | 0.6500 | `red > 0.6` | **RED** |
+| 4 Quest-Clean | 0.3141 | none | **plain** |
+
+- **plain / RED / RED / plain** - the design works and the ceiling was the whole problem. Ship it, and
+  record that a control may not exceed 8 children.
+- **Profile 1 still RED** - the ceiling is not the cause either, and the layered-cancel approach
+  should be abandoned for something that needs no two simultaneous matches.
+
+The cost either way: that row loses its theme tint, which `07` #24 already accepted.
+
 ## Deferred: known simplifications
 
 Things we know are now unnecessarily complicated, held back deliberately so they can be applied in one
