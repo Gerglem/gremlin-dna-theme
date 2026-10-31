@@ -827,12 +827,12 @@ Monitor, or by constructing one once `GGQ` is identified - and take the Programm
 
 ## The settings transfer, captured 2026-10-30
 
-> **Caveat added the same evening - read this section with it.** A later USB capture recorded
-> **exactly 207 `F8 2B` frames during 30 seconds of pure idle polling**, with no transfer of any
-> kind taking place. The frame count, the size range and the 7-bit encoding all match what is
-> described below. That does not prove this section wrong, but the traffic described here may be
-> the ordinary telemetry channel rather than the settings transfer. The test that settles it is
-> registered in `kb/09`.
+> **Caveat WITHDRAWN 2026-10-31.** The caveat added on 2026-10-30 doubted this section because a
+> capture held exactly 207 `F8 2B` frames during what was logged as 30 seconds of idle polling.
+> Same count because it was the same operation - **there is no idle polling**. A 123-second
+> capture on 2026-10-31, EScribe open and connected throughout, produced device traffic in one
+> 7-second window (a reconnect) and silence for the other 116 seconds. The device transmits only
+> when asked. This section stands as written.
 
 One real `Upload Settings to Device` was watched from a second HID handle while EScribe did the work.
 Sample kept at `tools/samples/hid-upload-capture.log` (device-to-PC only; telemetry stripped, scanned
@@ -1186,19 +1186,38 @@ settings frames" - that was one side of a conversation mistaken for a protocol.
 
 Every frame is padded to 63 bytes on the wire regardless of `inner_len`.
 
-### What 30 seconds of idle looks like
+### What a connect-and-download looks like
 
-EScribe open and Device Monitor polling, nothing else happening:
+**This section was headed "What 30 seconds of idle looks like" until 2026-10-31.** It never
+described idle. There is no idle - see the correction below.
+
+One `Connect and Download Settings`, measured from a clean CLI capture:
 
 | | |
 |---|---|
-| Exchanges | 207 request/reply pairs in 30 s, about 7/s |
-| Request sizes | `inner_len` 0x07-0x0d; 196 of 207 are 0x0c or 0x0d |
-| Reply sizes | mostly 0x30-0x38 - small request, larger reply |
+| Exchanges | 207 request/reply pairs, every time |
+| Requests | 207 frames, 2,549 payload bytes; `inner_len` 0x07-0x0d, 196 of 207 are 0x0c or 0x0d |
+| Replies | 207 frames, 10,011 payload bytes; mostly 0x30-0x38 - small request, larger reply |
+| Determinism | separate captures differ in about 9 lines out of 415, all counter-like |
 | Encoding | **no byte >= 0x80 inside `inner_len`**, confirming the 7-bit packing |
 | Trailer | 2 bytes >= 0x80 did appear *outside* `inner_len`, so the 7-bit rule is established for the payload proper, not for the padding |
 
-Sample: `tools/samples/hid-idle-baseline.log` - first 40 exchanges, descriptors stripped.
+Sample: `tools/samples/hid-connect-download.log` - first 40 exchanges, descriptors stripped.
+
+#### There is no idle telemetry (corrected 2026-10-31)
+
+A 123-second capture with EScribe open and connected the whole time produced device traffic in
+**one 7-second window** - the reconnect - and **nothing** across the other 116 seconds. The
+DNA100C sends no USB traffic unless EScribe asks for it.
+
+Three captures of supposedly different operations had made this obvious in hindsight: two
+`Upload Settings to Device` runs and one connect+download produced **byte-identical payloads**
+(0 differing lines between the two uploads, 9 between an upload and a connect). Identical
+traffic for different operations is impossible for live telemetry; it is the signature of one
+fixed sequence.
+
+What this invalidates: the "about 7/s" rate, and the name of the old baseline sample. What it
+does **not** invalidate: the frame layout, the 7-bit rule, or the transfer section above.
 
 ### The shape of a request, and a hypothesis about it
 
@@ -1216,13 +1235,56 @@ tag or sub-command rather than data. The `40 40 40 08` run in the longer form ha
 `F8 2A` reads directly, with no transfer mode to enter and no `AX()` to make work. That would be a
 far shorter road than decoding a bulk protocol. Do not build on it until the test in `kb/09` runs.
 
-### What this capture does not contain
+### The write path, captured 2026-10-31
 
-**A settings download.** The capture was stopped before EScribe performed one - it ends at 30.81 s
-holding nothing but idle polling. Obtaining that is the first job of the next session.
+**Writes ride the same `F8 2A` opcode as reads.** No separate write opcode, no bulk endpoint, no
+CDC traffic on `MI_01`. The machine has a single USB root hub, so one USBPcap filter covers every
+interface - the absence of bulk is a finding, not a coverage gap.
+
+The atomic unit is a **six-frame group carrying 341 payload bytes**, sent back-to-back with no
+reply between the frames, bracketed by a prologue exchange and a terminator:
+
+    02 2f 1a 00 ..        prologue request  -> reply 03 62 1a 00 ..
+    35 2e 1e 00 ..        write 1   (len 0x3b)
+    36 5a 1e 58 01 ..     write 2   (len 0x3c)
+    36 5a 1e 70 02 ..     write 3   (len 0x3c)
+    36 5a 1e 48 04 ..     write 4   (len 0x3c)
+    36 5a 1e 60 05 ..     write 5   (len 0x3c)
+    2d 3a 1e 78 06 ..     write 6   (len 0x33)
+    03 03 18 00 06 23 54  terminator
+    03 62 18 00 08 68 71  the single ACK for the whole group
+
+Byte 2 is `0x1e` on every write frame. Byte 4 runs 01,02,04,05,06 - **index 03 is absent** in
+every group observed.
+
+Scale, from two writes in one session:
+
+| Operation | Groups | Large frames | Payload bytes |
+|---|---|---|---|
+| Profile 1 power 36W -> 37W | 1 | 6 | 341 |
+| Full theme upload (`gremlin` v1) | ~91 | 568 | 31,059 |
+| Upload with nothing changed | 0 | 0 | 0 |
+
+**EScribe diffs before it writes.** An upload with no changes produces traffic byte-identical to
+a plain connect. That cost most of a session on 2026-10-31 before it was understood: three
+captures were read as "the transfer is missing" when the truth was that nothing needed writing.
+
+`0x7f` runs in the payload are **erased flash** - 0xFF under the 7-bit encoding. First
+confirmation of the encoding rule in the host-to-device direction.
+
+Sample: `tools/samples/hid-write-group.log`.
+
+#### Not decoded
+
+- Whether byte 3 (`00,58,70,48,60,78`) is an address or a sequence tag. Six frames cannot
+  separate those. The test is a config file differing in one known field at a known offset.
+- Declared `inner_len` is `0x3c` (60) but only **58** payload bytes are present. 5 header + 60
+  exceeds the 63-byte HID report, so the declared and carried lengths disagree. Reason unknown.
+- What the prologue and terminator exchanges mean.
 
 ### Privacy
 
 A raw `.pcapng` carries the USB string descriptors, one of which is the device serial.
 **Raw captures stay in `Downloads` and never enter this repo** (`kb/12`). Only stripped,
-payload-only extracts such as `tools/samples/hid-idle-baseline.log` are committed.
+payload-only extracts such as `tools/samples/hid-connect-download.log` are committed. Every
+sample added on 2026-10-31 was scanned for the serial in ASCII and UTF-16: 0 hits.

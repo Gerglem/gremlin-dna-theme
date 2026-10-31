@@ -1,11 +1,31 @@
-# DNA100C vendor HID - IDLE TELEMETRY BASELINE
-# Captured 2026-10-30 via USBPcap on an otherwise untouched device.
-# EScribe Device Monitor was connected and polling. NO settings transfer
-# was performed during this capture - that is the point of the file.
+# DNA100C vendor HID - CONNECT AND DOWNLOAD TRANSCRIPT
+# Captured 2026-10-30, RE-IDENTIFIED 2026-10-31.
+#
+# WAS NAMED hid-idle-baseline.log AND DESCRIBED AS IDLE TELEMETRY. THAT WAS
+# WRONG. This is EScribe's "Connect and Download Settings" sequence.
+#
+# What corrected it: a 123-second capture on 2026-10-31 with EScribe open
+# and connected the whole time produced device traffic in ONE 7-second
+# window - the reconnect - and silence for the other 116 seconds. The
+# DNA100C sends nothing on USB unless EScribe asks. There is no idle poll
+# loop, so there was no idle to baseline.
+#
+# The 207 request/reply pairs here are one complete connect-and-download:
+#   requests  207 frames /  2,549 payload bytes
+#   replies   207 frames / 10,011 payload bytes
+# Every connect observed produces the same 207 pairs; separate captures
+# differ only in a handful of counter bytes.
+#
+# This also resolves the caveat added to kb/16 on 2026-10-30, which doubted
+# the settings-transfer section because 30s of "idle" held exactly 207
+# F8 2B frames - the same count as a transfer. Same count because it was
+# the same operation. The section was right; the caveat was the error.
 #
 # Frame: 01 DE <inner_len> <op hi> <op lo> <inner_len payload bytes>
 #   f82a = host -> device (request)
 #   f82b = device -> host (reply)
+#
+# For the WRITE direction see hid-write-group.log in this directory.
 #
 # USB descriptors and control frames are EXCLUDED: the string descriptors
 # in a raw capture carry the device serial (kb/12). Raw .pcapng files stay

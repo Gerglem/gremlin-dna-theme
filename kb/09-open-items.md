@@ -87,19 +87,30 @@ reflection. Tooling is installed and working; full detail in `16`.
 | | |
 |---|---|
 | Wireshark 4.6.9 + USBPcap 1.5.4.0 | installed. USBPcap is **bundled in the Wireshark installer**, on its own "USB Capture" page, not in Choose Components |
-| The mod on this machine | USB **address 10** on `\.\USBPcap1` |
-| Both directions captured | **yes, for the first time** - `F8 2A` is the host's request, `F8 2B` the device's reply |
-| A settings download in the capture | **no.** The capture was stopped before EScribe ran one |
+| The mod on this machine | USB address **changes between sessions** - 10 on 2026-10-30, 12 on 2026-10-31. Capture with `-A` (all devices) and filter at parse time rather than pinning an address |
+| Both directions captured | **yes** - `F8 2A` is the host's request, `F8 2B` the device's reply |
+| A settings download in the capture | **yes, from 2026-10-31.** Reads, a one-field write and a full theme write are all captured |
 
 **The correction that matters:** `F8 2B` is not a transfer opcode. It is one half of a
-request/response pair. Thirty seconds of idle polling produced **exactly 207 `F8 2B` frames** -
-the same count this repo attributed to a real upload - so the earlier "settings transfer"
-write-up in `16` may have been describing ordinary telemetry all along.
+request/response pair.
 
-Baseline for comparison: `tools/samples/hid-idle-baseline.log`. Raw `.pcapng` files stay in
-`Downloads` and never enter this repo: their string descriptors carry the device serial (`12`).
+> **Superseded 2026-10-31.** This section went on to say that 30 seconds of idle polling produced
+> exactly 207 `F8 2B` frames, so the transfer write-up in `16` might have been telemetry. Both
+> halves were wrong in the same way: **there is no idle polling**, and the "idle" capture was
+> itself a connect-and-download. Same count because it was the same operation. See the answered
+> registered test below, and `16` -> "There is no idle telemetry".
 
-### Registered test: does the settings download ride `F8 2A`? (set 2026-10-30, NOT YET RUN)
+Reference transcripts: `tools/samples/hid-connect-download.log` (the read path, renamed from
+`hid-idle-baseline.log`) and `tools/samples/hid-write-group.log` (the write path). Raw `.pcapng`
+files stay in `Downloads` and never enter this repo: their string descriptors carry the device
+serial (`12`).
+
+**Driving the capture:** use `USBPcapCMD.exe` from the CLI, not the Wireshark GUI, so start and
+stop times are known and can be correlated against when a button was clicked. The GUI is not
+wrong - it reported `Dropped: 0` - but a capture whose window you cannot pin down is unreadable
+after the fact.
+
+### Registered test: does the settings download ride `F8 2A`? (set 2026-10-30, **ANSWERED 2026-10-31: A**)
 
 Written down **before** the capture so the result cannot be read to fit.
 
@@ -114,6 +125,37 @@ about 7/s, requests `inner_len` 0x07-0x0d, replies 0x30-0x38.
 | **C** - nothing beyond the idle rate | EScribe never actually performed the download | Diagnose EScribe, not the protocol |
 
 Anything else: record it as it is. Do not force it into A, B or C.
+
+**Result, 2026-10-31: outcome A, with one correction to the premise.**
+
+The transfer uses the same `F8 2A` / `F8 2B` opcodes. There is no second protocol, no bulk
+endpoint and no CDC traffic - confirmed against a single USB root hub, so the capture covered
+every interface. `tools/dna-hid.py` already speaks the right transport.
+
+The premise that needed correcting: **the comparison baseline was not idle.** There is no idle
+traffic at all. 123 seconds with EScribe connected produced one 7-second burst and 116 seconds
+of silence. The "idle baseline" was itself a connect-and-download, which is why its frame count
+matched a transfer exactly. Sample renamed to `tools/samples/hid-connect-download.log`.
+
+So the rate test in the table above could never have fired - there is no 7/s floor to exceed.
+What distinguishes a write is not rate but **payload direction**: a write puts up to 58 bytes in
+the *request*, where a connect never exceeds 13.
+
+| | Requests | Request bytes | Max request payload |
+|---|---|---|---|
+| Connect and download | 207 | 2,549 | 13 B |
+| Upload, nothing changed | 207 | 2,549 | 13 B |
+| Upload, one field changed | 222 | 3,030 | **58 B** |
+| Upload, full theme | 1,463 | 41,784 | **58 B** |
+
+Write path documented in `kb/16` -> "The write path, captured 2026-10-31", sample at
+`tools/samples/hid-write-group.log`.
+
+**Next test, registered before running:** build a config file differing from the device's current
+state in exactly one field at a known offset, upload it, and read byte 3 of the six write frames.
+If byte 3 tracks the offset it is an address and composing writes is in reach; if it stays
+`00,58,70,48,60,78` regardless, it is a sequence tag and the address lives elsewhere in the
+payload.
 
 ### Device and environment state
 

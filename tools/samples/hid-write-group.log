@@ -1,0 +1,62 @@
+# DNA100C vendor HID - SETTINGS WRITE GROUP
+# Captured 2026-10-31 via USBPcap, driven from the CLI (all devices on
+# \.\USBPcap1, device address 12).
+#
+# HOW IT WAS PRODUCED
+# Profile 1 power changed 36W -> 37W in EScribe, then "Upload Settings to
+# Device". That one-watt change wrote EXACTLY ONE group. A full theme
+# upload in the same session wrote ~91 of the same groups (568 large
+# frames, 31,059 payload bytes), so the group is the atomic write unit and
+# not an artifact of a small change.
+#
+# An upload with NOTHING changed writes nothing at all: it produces traffic
+# byte-identical to a plain connect. EScribe diffs before it writes.
+#
+# Frame: 01 DE <inner_len> <op hi> <op lo> <payload>
+#   f82a = host -> device (request)   f82b = device -> host (reply)
+#
+# WRITES RIDE THE SAME f82a OPCODE AS READS. No separate write opcode, no
+# bulk endpoint, no CDC traffic. The machine has a single USB root hub, so
+# one USBPcap filter covers every interface - this is not a coverage gap.
+#
+# GROUP SHAPE - the six write frames go out back-to-back with NO reply
+# between them, bracketed by a prologue exchange and a terminator:
+#
+#   02 2f 1a 00 ..        prologue request  -> reply 03 62 1a 00 ..
+#   35 2e 1e 00 ..        write 1
+#   36 5a 1e 58 01 ..     write 2
+#   36 5a 1e 70 02 ..     write 3
+#   36 5a 1e 48 04 ..     write 4
+#   36 5a 1e 60 05 ..     write 5
+#   2d 3a 1e 78 06 ..     write 6
+#   03 03 18 00 06 23 54  terminator
+#   03 62 18 00 08 68 71  the single ACK for the whole group
+#
+# Byte 2 is 0x1e on every write frame. Byte 4 runs 01,02,04,05,06 - index
+# 03 is absent in every group observed today.
+#
+# NOT DECODED, recorded so it is not mistaken for settled:
+#  - whether byte 3 (00,58,70,48,60,78) is an address or a sequence tag
+#  - declared inner_len is 0x3c (60) but only 58 payload bytes are present;
+#    5 header + 60 exceeds the 63-byte HID report, so the declared length
+#    and the carried length disagree and the reason is unknown
+#  - what the prologue and terminator mean
+#
+# 0x7f runs are erased flash: 0xFF under the 7-bit encoding. That is the
+# first confirmation of the encoding rule from the host->device direction.
+#
+# USB descriptors and control frames are EXCLUDED - string descriptors in a
+# raw capture carry the device serial (kb/12). Raw captures stay out of the
+# repo. Verified: 0 occurrences of the serial here, ASCII or UTF-16.
+
+f82a  host->dev  len=0x08  02 2f 1a 00 4b 07 00 00
+f82b  dev->host  len=0x09  03 62 1a 00 02 45 47 00 00
+f82a  host->dev  len=0x3b  35 2e 1e 00 00 01 00 00 00 2b 60 0a 00 11 08 40 20 03 60 00 00 00 00 20 00 04 00 02 00 00 00 00 08 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 45 76 00
+f82a  host->dev  len=0x3c  36 5a 1e 58 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 02 40 01 72 74 22 51 6c 35 2c 13 02 70 04 00 0f 76 00 40 10 00 64 0c 02 5c 0c 00 00 04 22
+f82a  host->dev  len=0x3c  36 5a 1e 70 02 05 66 14 00 21 00 60 3c 00 00 00 07 44 03 20 10 00 01 48 5a 40 3a 72 08 0a 0e 3f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 60 4c 67
+f82a  host->dev  len=0x3c  36 5a 1e 48 04 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7c 05 00 03 01 4a 17 2b 15 66 74 67 00 10 00 3f 58 02 00 40 03 10 30 06 34 30 00 05 66 04 00 19 00 60 00 00 00 00 1a 4b
+f82a  host->dev  len=0x3c  36 5a 1e 60 05 00 1e 10 07 00 40 00 06 22 40 00 0c 00 20 0d 50 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 7f 60 6b 7a
+f82a  host->dev  len=0x33  2d 3a 1e 78 06 7f 7f 7f 7f 78 0a 00 0d 3d 11 0a 47 31 55 30 4c 16 50 6d 46 2b 05 5d 35 00 20 00 7f 33 00 13 00 06 20 60 1a 08 60 00 0b 4c 00 19 3e 00 00
+f82a  host->dev  len=0x09  03 03 18 00 06 23 54 00 00
+f82b  dev->host  len=0x09  03 62 18 00 08 68 71 00 00
+f82a  host->dev  len=0x0a  04 2a 1c 00 40 20 78 2a 00 00
