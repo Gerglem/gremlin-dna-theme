@@ -5,21 +5,33 @@ Files are named for their version, in the original v1.0 format:
 - `gremlin_v<version>_theme.ecigtheme` — the theme on its own
 - `gremlin_v<version>.ecig` — the theme plus the four Divine Tribe profiles and their materials
 
-The current release is **v2.2**. (v2.3 was withdrawn the day it was published — see below.) Older versions stay in this folder, so a link to a specific version keeps working.
+The current release is **v2.3.01**. (A v2.3.00 was published and withdrawn the same day — see below.) Older versions stay in this folder, so a link to a specific version keeps working.
 
 The High Contrast theme is a separate build on its own version track — see [`../high-contrast/RELEASE-NOTES.md`](../high-contrast/RELEASE-NOTES.md).
 
 ---
 
-## v2.3 — withdrawn
+## v2.3
 
-Released and pulled the same day, 2026-10-30. It moved the low-battery warning onto its own layer to
-protect it from a display limit, and testing showed two things: the new arrangement made the warning
-flash and disappear, and the limit was never reaching the warning in the first place. It was a fix
-for a problem that did not exist, and it broke something that worked.
+**Not yet tested on hardware.**
 
-The files are removed. **v2.2 is the current release** and is unaffected — the low-battery warning
-behaves there exactly as it always has.
+**The resistance on the home screen keeps your theme's color again.** v2.2 had to give that up. The
+worn-cup warning needs a different limit per cup, and the only way to express that at the time was a
+stack of rules that cancelled each other out — the cancelling rule had to paint a color, so the
+resistance read plain white whenever a V5 XL was in its normal range, whichever theme you were on.
+
+The warning is now written as what it actually means — *red if the resistance is past 0.60Ω, or past
+0.41Ω on either QuestCup profile* — in a single rule rather than five. One rule leaves room for the
+theme colors to come back, so the number reads cyan on Retro, sand on Desert, and so on, right up
+until the cup is genuinely worn, and then it goes red.
+
+Nothing else changes. Same thresholds, same cups, same behavior on every other screen, and the
+profiles and materials in the `.ecig` are identical to v2.2 — no reload needed if you are upgrading.
+
+**v2.3.00 never existed in practice.** It was published and withdrawn the same day: it rearranged the
+low-battery warning to protect it from a display limit, testing showed the rearrangement broke it,
+and further testing showed the limit was never reaching it. **v2.3.01 is the real v2.3** and shares
+none of that change.
 
 ---
 

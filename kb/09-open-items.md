@@ -14,7 +14,7 @@ Rewritten 2026-10-30 at the end of a long session. Everything below is current.
 **Repository is fully pushed.** `main` matches `origin/main`; nothing is held back. The earlier
 instruction to keep work local was discharged on 2026-10-30.
 
-**Current builds:** Color Themes **`v2.2.05`** (v2.3.00 withdrawn, see below), High Contrast **`v1.2.07`**. **Both proven on hardware.** **Neither has been on hardware.** `v2.3.00` carries the battery split (`18` A); `v1.2.06` carries the home-screen warning.
+**Current builds:** Color Themes **`v2.3.01`** (untested; `v2.2.05` is the proven fallback and `v2.3.00` was withdrawn), High Contrast **`v1.2.07`** (proven). **Neither has been on hardware.** `v2.3.00` carries the battery split (`18` A); `v1.2.06` carries the home-screen warning.
 
 | | State |
 |---|---|
@@ -506,6 +506,92 @@ cancel layers - the HC OHMS page and new-coil prompt, and the Color Themes home 
 **None of them is selectable** (all `ReadOnly`, no `Action`), so none can be drawn on the highlight and none
 is at risk. The rule is now mechanical in `tools/check-theme.py`, which fails `v1.2.06` and passes
 `v1.2.07`. Rewriting those four to the `18` B shape is therefore **cleanup, not a bug fix**.
+
+### RESULT, 2026-10-30: nesting works to depth 4, and nested operators are strictly BINARY
+
+Read with the **Retro theme on**, so the tinting was live throughout and did not interfere - the
+probes sit on their own 2-child controls with explicit colors.
+
+| Profile | Locked | `DEP2` depth 1 | `DEP3` depth 3 | `OR3` 3-child OR | `DEP4` depth 4 |
+|---|---|---|---|---|---|
+| 1 XL | 0.4637 | **orange** | grey | grey | grey |
+| 2 QUEST | 0.4504 | **orange** | **magenta** | **grey** | **green** |
+| 3 XL CLEAN | 0.6500 | **orange** | grey | **grey** | **green** |
+| 4 Q CLEAN | 0.3141 | grey | grey | grey | grey |
+
+**Two findings, and the second was not on the card as a possibility.**
+
+**1. Nesting resolves to at least depth 4.** `DEP3` fired on profile 2 only, exactly as registered, and
+`DEP4` fired on profiles 2 and 3 and nowhere else - which is the entire per-cup replace warning,
+correct, **in a single variant**.
+
+**2. `Operator="65"` (and by implication `64`) takes exactly TWO children. A third kills it.**
+`OR3` never lit on any profile. That is not "the third child was ignored": with three children
+`OR(ohms > 0.6, AND(…p==2), AND(…p==4))`, dropping *any* one of them still leaves a form that is true
+on profile 2 or profile 3, and it was grey on both. So the compare does not partially evaluate - **it
+fails outright**. `64` and `65` are binary operators, not n-ary lists, and the only way to combine
+three conditions is to nest a second operator. That is worth knowing before anyone writes one by hand
+in Theme Designer and wonders why a condition never fires.
+
+`10` updated with both.
+
+### What this buys
+
+The warning now fits in **one** variant, so the Color Themes ohms row can be
+`1 default + 6 tints + 1 variant = 8 children` - and 8 is confirmed to render. **The compromise
+`07` #24 accepted is over:** the home-screen resistance gets its theme color back across a V5 XL's
+healthy range, instead of reading white.
+
+The shape to use everywhere, all operators and the depth confirmed on-device:
+
+```xml
+<Compare Operator="65">
+  <Compare Operator="2" Field="<ohms>" RefValue="0.6" />
+  <Compare Operator="64">
+    <Compare Operator="2" Field="<ohms>" RefValue="0.41" />
+    <Compare Operator="65">
+      <Compare Operator="4" Field="262151" RefValue="2" />
+      <Compare Operator="4" Field="262151" RefValue="4" />
+    </Compare>
+  </Compare>
+</Compare>
+```
+
+Read aloud: *red if the resistance is past 0.6, or past 0.41 on either QuestCup profile.* The XL needs
+no rule of its own because 0.6 is already past the Quest's limit, and the cleaning profiles stop being
+a special case because they are just members of their cup's family.
+
+## Registered: v2.3.01 - the single-variant warning, with the tint back - WRITTEN BEFORE RUNNING
+
+`Downloads\BENCH-CT-v2301.ecig`, the four standard locked resistances. **Do not fire.**
+
+Two controls changed and nothing else, verified by diffing every control in all eleven screens:
+
+| Screen | Control | Before | After |
+|---|---|---|---|
+| Main | `(16, 88)` cold ohms | 5 children, no tints | **8** - default, six tints, one warning |
+| New coil | `(32, 24)` pending reading | 5 children | **2** - default, one warning |
+
+### Expected
+
+| Profile | Locked | Home-screen ohms |
+|---|---|---|
+| 1 XL | 0.4637 | **theme color** - cyan on Retro, not white and not red |
+| 2 QUEST | 0.4504 | **RED** |
+| 3 XL CLEAN | 0.6500 | **RED** |
+| 4 Q CLEAN | 0.3141 | **theme color** |
+
+**The thing to look at is profile 1.** On `v2.2.05` that row reads white; it should now take whichever
+theme is on. Switch themes under MENU -> THEMES and it should follow. That is the whole point of the
+release - everything else behaves exactly as `v2.2.05` did.
+
+- **theme / RED / RED / theme** - ships.
+- **Profile 1 red** - the `OR(p==2, p==4)` arm is matching when it should not. Contradicts `DEP4`.
+- **Profile 2 or 3 not red** - the warning lost to a tint, meaning it is not last or is being
+  truncated at child 8. Count the children before anything else.
+- **Profile 1 white rather than themed** - the tints are not matching on that control; compare their
+  `Compare` fields against the live-ohms row they were copied from.
+- **Nothing themed anywhere** - the theme toggle is off; not a result.
 
 ## Registered: how deep can nesting go, and is OR n-ary? - WRITTEN BEFORE RUNNING, 2026-10-30
 

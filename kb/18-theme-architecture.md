@@ -68,7 +68,7 @@ Shipped as `v2.3.00`, found to flash and vanish, then found to have been fixing 
 evaluated and the LOW BATTERY banner has always rendered (`09`). Build files removed, `v2.2.05`
 restored as the release. The only durable output is `tools/check-theme.py` and a measured ceiling.
 
-### B. Rewrite the replace warning as real conditions  — shape VALIDATED on hardware
+### B. Rewrite the replace warning as real conditions  — DONE (HC v1.2.07, CT v2.3.01)
 
 > Applied to the High Contrast home screen as `v1.2.07` and **confirmed on a DNA100C** (`09`): the `AND` fires correctly per profile, and the flat `ohms > 0.6` covers the XL family with no profile test. The three remaining controls - the HC OHMS page, the HC new-coil prompt and the Color Themes home screen - still carry the old five-layer chains.
 
@@ -101,7 +101,7 @@ disappear with it.
 Four children instead of five, and - more to the point - **no cancels, no cleaning-profile special
 case, and the intent is legible**. `09`'s deferred "collapse to two layers" item is superseded by this.
 
-### C. The one question that decides the theme tint — REOPENED, and now worth testing
+### C. The one question that decides the theme tint — ANSWERED. Depth 4 works; the tint is back in v2.3.01
 
 At four children the ohms row cannot carry the six tints (4 + 6 = 10, over the ceiling), so it **keeps
 reading white** - the compromise `07` #24 accepted.
