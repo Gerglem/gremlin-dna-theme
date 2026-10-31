@@ -11,6 +11,8 @@ The current release is **v1.2.08**. The color theme has its own notes in [`../re
 
 ## v1.2.08
 
+Profile settings only — the screens are identical to v1.2.07.
+
 Profile settings only — the theme is byte-identical to v1.2.07.
 
 Same four profiles as the Color Themes release: **385°F** and **120 s** on DTv5XL and Quest, 38 W /

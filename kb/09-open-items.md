@@ -11,9 +11,9 @@ Rewritten 2026-10-30 at the end of a long session. Everything below is current.
 | | Version | State |
 |---|---|---|
 | Color Themes | **`v2.3.03`** | daily driver. Warning chains, theme tint, profile settings, new-coil screen and setpoint all confirmed |
-| High Contrast | **`v1.2.08`** | theme proven as `v1.2.07`; `.08` adds the same profile settings and changes no screens |
+| High Contrast | **`v1.2.08`** | theme proven as `v1.2.07`; `.08` adds the same profile settings and changes no screens. Both formats verified screen-for-screen identical |
 
-`release/` holds only these plus `v2.2.05` (the last build before the v2.3 work, kept as a fallback)
+`release/` and `high-contrast/files/` hold only these plus `v2.2.05` (the last build before the v2.3 work, kept as a fallback)
 and `v1.0` (archive). The intermediate `v2.3.00` / `.01` / `.02` builds were removed - `.00` was
 withdrawn the day it shipped and the others are superseded by `.03`.
 
