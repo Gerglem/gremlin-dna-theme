@@ -8,6 +8,11 @@ The copy this document was written from: **EScribe INT, build 2026-05-14** (`Edi
 
 ---
 
+> **Screen captures of the EScribe app** are committed under
+> [`../images/escribe/`](../images/escribe/README.md) - the General tab with Upload Settings to
+> Device, the Research tab, and the Serial Output Format dropdown that switches between plain text
+> and CSV.
+
 ## What's in the tree
 
 | Path | What it is | Useful? |

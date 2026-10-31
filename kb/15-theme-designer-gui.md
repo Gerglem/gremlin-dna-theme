@@ -6,6 +6,9 @@ Built from screenshots, 2026-10-30. **Incomplete** — tabs and dialogs are adde
 
 ---
 
+> **Screen captures** for everything below are committed under
+> [`../images/escribe/`](../images/escribe/README.md), with an index of what each one shows.
+
 ## Window
 
 **Menus:** File · Edit · Options · Tools · Help
@@ -133,9 +136,11 @@ switching looks are the whole point.
 
 Neither has been tried. Both are worth a look before the next feature gets squeezed into an existing screen.
 
-**The dropdown in this build offers only three.** `en.po` carries exactly three `tdUsage` strings -
-Lock Screen, Main Screen, New Atomizer. `Power Lock` and `Theme Change` are real (shipped themes use
-them) but the GUI will not set them, so both have to be written into the XML by hand.
+**Correction, 2026-10-30:** an earlier version of this file claimed the dropdown offered only three,
+inferred from `en.po` carrying three `tdUsage` strings. **That was wrong.** The screen capture
+(`../images/escribe/escribe-td-screens-special-usage-dropdown.png`) shows all six - None, Lock Screen,
+Main Screen, New Atomizer, **Power Lock**, **Theme Change**. The GUI sets them directly; the `.po` file
+is simply an incomplete translation list, as its own header says.
 
 ### The preview strip does not evaluate conditions
 
