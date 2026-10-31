@@ -20,7 +20,7 @@ instruction to keep work local was discharged on 2026-10-30.
 |---|---|
 | Replace warning, Color Themes | **Works. Proven on hardware** - `plain / RED / RED / plain` across four locked profiles |
 | Replace warning, High Contrast (OHMS page) | **Works. Proven on hardware** - same four readings |
-| Replace warning on the HC home screen (v1.2.06) | **Built, NOT tested.** The profile name carries it; `BENCH-HC-v06.ecig` is ready |
+| Replace warning on the HC home screen (v1.2.06) | **Built, NOT tested.** The profile name carries it. **Test registered and bench file built 2026-10-30** - `Downloads\BENCH-HC-HOME-WARNING.ecig`, card below |
 | 380F starting temperature | **Confirmed on hardware** |
 | Omega OHMS screen (HC) | **Confirmed working** - glyph, child screen, LOCK, MEASURE, BACK all render |
 | New-coil `LOCK?` row hidden until measured | Confirmed on High Contrast; **not retested on Color Themes** |
@@ -69,7 +69,8 @@ board. `tools/probe_pyb.py` is inert and ready to run in Device Monitor.
 
 ### What is genuinely untested
 
-1. **v1.2.06** - the High Contrast home-screen warning. Built and verified by inspection only.
+1. **v1.2.06** - the High Contrast home-screen warning. Built and verified by inspection only; the
+   test is **registered and the bench file built** (card below), awaiting a sitting with the mod.
 2. **`ResampleOhms` from a child screen** - the MEASURE button on the HC OHMS page is present but was
    never pressed.
 3. **The new-coil screen on Color Themes** - the hidden `LOCK?` row was only confirmed on High Contrast.
@@ -167,6 +168,58 @@ transfer framing is already decoded from a passive capture (`16`,
   Readings: MEASURE cyan but value white → operator 2 is the problem, and the warning should be rebuilt inverted on operator 3 (default red, white below the limit). Value red but LOCKED white → the AND is the problem. Nothing colored → cold ohms cannot be used in a `Compare`, and the warning needs a different source field or has to be dropped.
 
   **Read on the XL profile at 0.464:** the value went **red** (`ohms > 0.4`, flat) and MEASURE went **cyan** (`ohms < 0.9`, flat), but LOCKED stayed yellow (`AND(profile == 1, ohms > 0.4)`). So **operator 2 works, operator 3 works, and the field is readable in a `Compare`** — only the nested AND fails. **Rebuilt 2026-10-30** as five layered flat variants instead (`07` #24); the layering is now the untested part, though every operator in it is confirmed on-device. `10` corrected: operator 2 promoted to confirmed, operator 64 marked as not working on this firmware.
+
+## Registered: the HC home-screen replace warning (v1.2.06) - WRITTEN BEFORE RUNNING, 2026-10-30
+
+The last untested piece of either shipping build. `v1.2.06` moved the replace warning onto the High
+Contrast **home screen** by coloring the profile name, because ohms is not on that screen (corrected
+after the v1.2.05 run, below). Verified by inspection only until now.
+
+**Bench file:** `Downloads\BENCH-HC-HOME-WARNING.ecig` - the `v1.2.06` theme plus four locked
+resistances, so one upload exercises every layer. **Do not fire on it. Reload the real config after.**
+
+### The chain, read out of the built file
+
+Screen index 1 (design ID 2), the profile-name control at `(0, 24)`, **6 children** - inside the
+ceiling of 8 (`07` #26), which was checked first this time:
+
+    default (no Color) -> red if ohms > 0.41 -> white if profile == 1
+            -> white if profile == 3 -> red if ohms > 0.6 -> Hidden while firing
+
+Only operators **2** and **4** appear, both confirmed on-device. The final `<Hidden>` is gated on
+`17825798` (Firing), so it should never match while the mod is idle - but note it is the **last**
+child, so under last-match-wins it would blank the name if it ever did.
+
+### Expected, decided before running
+
+| Profile | Name | Locked | Layers that match | Expected |
+|---|---|---|---|---|
+| 1 | XL | 0.4637 | red(>0.41), white(p==1) | **white** |
+| 2 | QUEST | 0.4504 | red(>0.41) | **RED** |
+| 3 | XL CLEAN | 0.6500 | red(>0.41), white(p==3), red(>0.6) | **RED** |
+| 4 | Q CLEAN | 0.3141 | none | **white** (the default) |
+
+### What each failure would mean, decided in advance
+
+- **white / RED / RED / white** - it works. `v1.2.06` ships, and every chain in both themes is proven.
+- **Profile 1 RED** - the `p == 1` cancel is not winning on this screen, although the identical chain
+  wins on the OHMS page. Suspect the trailing `<Hidden>` child interfering with precedence; test by
+  moving it to the front.
+- **Profile 3 white** - the `> 0.6` layer is not winning. Contradicts the proven OHMS-page chain.
+- **Profile 4 RED** - something matches unconditionally; suspect the default child.
+- **No profile name at all** - the `<Hidden>` on `17825798` matches when not firing, so Firing reads
+  non-zero at idle. Invert it or drop it.
+
+### Riding along in the same sitting, both free
+
+- **`ResampleOhms` from a child screen.** MENU -> `Omega OHMS` -> press **MEASURE**. The button has
+  never been pressed. Expected: the resistance re-reads. This is the only way to find out whether an
+  action works from a child screen.
+- **The OHMS page chain re-confirmed.** Same four profiles, same expected column, already proven on
+  `v1.2.05`. Free regression check.
+
+**Not covered by this upload:** the Color Themes new-coil `LOCK?` row, which needs a Color Themes
+config. That stays open.
 
 ## HISTORY: the replace-warning investigation, 2026-10-30
 
