@@ -652,6 +652,28 @@ Blocking constraint: the home-screen controls at `(0, 0)` on designs 1 and 2 are
 8-child ceiling** (`18`), and `tools/check-theme.py` warns. Adding a condition to an existing
 control is free; adding a variant is not.
 
+**The config confirms the diagnosis independently, and names the field to condition on.**
+Reading `release/gremlin_v2.3.03.ecig` directly:
+
+| idx | profile | power | temp | `EvolvPSTemperatureOff` |
+|---|---|---|---|---|
+| 0 | DTv5XL | 36 | 385 | 0 |
+| 1 | Quest | 25 | 385 | 0 |
+| 2 | **DTv5XL-Clean** | 38 | 450 | **1** |
+| 3 | **Quest-Clean** | 35 | 450 | **1** |
+| 4-7 | Titanium, SS 316, SS 430, Replay | 20 | 450 | 0 |
+
+**Both Clean profiles ship with `EvolvPSTemperatureOff = 1`.** The config has said all along that
+these profiles have temperature off - the behaviour on the device is correct, and the theme is
+simply not reading it.
+
+**Open question, and the gate on the fix:** `EvolvPSTemperatureOff` is a *config* feature (`10`).
+Whether it is also exposed as a **theme-visible field ID** that `<Compare>` can test is **not
+recorded in `05` and not verified.** If it is, the fix is one condition on the existing control
+and costs no child slots. If it is not, the condition has to be approximated - most likely on
+profile index, which means per-profile constants and is uglier. **Check `05` and Theme Designer's
+field picker before designing the fix.**
+
 ## Tracked: a board over-temperature warning
 
 Jake's request, 2026-10-30. Not designed, not built.
