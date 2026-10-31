@@ -14,7 +14,7 @@ Rewritten 2026-10-30 at the end of a long session. Everything below is current.
 **Repository is fully pushed.** `main` matches `origin/main`; nothing is held back. The earlier
 instruction to keep work local was discharged on 2026-10-30.
 
-**Current builds:** Color Themes **`v2.3.02`**, High Contrast **`v1.2.08`**. **Both proven on hardware**, both carrying Jake's own profile settings. Every control in either build has now been seen working except the new-coil prompt, **which is the one gate left before v2.3 is final**. **Neither has been on hardware.** `v2.3.00` carries the battery split (`18` A); `v1.2.06` carries the home-screen warning.
+**Current builds:** Color Themes **`v2.3.03`**, High Contrast **`v1.2.08`**. **Both proven on hardware**, both carrying Jake's own profile settings. Every control in either build has now been seen working except the new-coil prompt, **which is the one gate left before v2.3 is final**. **Neither has been on hardware.** `v2.3.00` carries the battery split (`18` A); `v1.2.06` carries the home-screen warning.
 
 | | State |
 |---|---|
@@ -1290,7 +1290,42 @@ did not.**
 So item 1 is closed and item 2 is the gate. Everything about it now hinges on one observation nobody
 has written down: **after pressing YES, NEW - does the prompt stay on screen?**
 
-### A suspected `SET` legibility bug, and why it was NOT recorded as one
+### RESOLVED: the `SET` value was blank, and `InitiallyHighlighted` is why
+
+The suspicion was nearly dismissed as a camera artefact. It was measured instead: a hard contrast
+stretch of the photograph recovers `SET` and the `385F` above it as clean letterforms, while the
+value box stays **uniformly saturated with no glyph structure at all**. Grey text on a white
+highlight would sit about 97 levels below the background and would have come straight out. The box
+is genuinely empty.
+
+**Why this one control and not the seventeen others sharing its colour:** the home-screen setpoint
+carries **`InitiallyHighlighted="1"`**. It is on the white highlight from the moment the screen
+draws, permanently. The menu value fields use the same `(0.62, 0.62, 0.62, 1)` and are perfectly
+readable, because a menu value is highlighted only while you are on that row.
+
+That also explains why the earlier attempt to widen `check-theme.py` produced 18 errors against a
+build that works: the colour was never the whole condition.
+
+**The fix is to remove the colour, not to darken it.** No fixed value can be right in both states -
+the grey works on the dark background and fails on the highlight; a dark colour would do exactly the
+reverse. Every *other* editable control on that screen - the profile name, watts, session time,
+every toggle, and all of High Contrast - already has no `Color` at all, and the firmware inverts
+them correctly against whichever background they land on. `v2.3.03` makes the setpoint match its
+siblings.
+
+**This is pre-existing, not a v2.3 regression** - the same control and colour are in `v2.2.05`.
+
+`check-theme.py` now encodes the real rule: pure white fails on any selectable control, and a merely
+pale colour fails where the highlight is permanent. That is one hit on `v2.3.02`, not eighteen.
+
+### Also found: the theme-only release had fallen a version behind
+
+There was no `v2.3.02_theme.ecigtheme`. The profile-settings pass only touched `.ecig` files, which
+is correct - a `.ecigtheme` carries no profiles - but it meant the published pair had drifted apart,
+with the theme-only file still at `v2.3.01`. Both are now `v2.3.03`. **Worth a standing check: the
+two formats must be bumped together even when a change only applies to one of them.**
+
+### Superseded: the first pass, which nearly called it a camera artefact
 
 One photograph of the Color Themes home screen shows `SET` followed by a blank white box where the
 setpoint should be; another, with the highlight elsewhere, reads `SET 385F` normally. The setpoint

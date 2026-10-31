@@ -61,18 +61,35 @@ WHITE = "(1, 1, 1, 1)"
 
 
 def is_pale(color):
-    """True only for pure white.
+    """Colours that vanish on the white selection highlight.
 
-    A wider rule was tried on 2026-10-30 and withdrawn the same hour. It
-    flagged anything with all channels >= 0.55, which fired on
-    `(0.62, 0.62, 0.62, 1)` - the menu-row value grey used since `v1.0` on 18
-    controls that have worked in service the whole time. One over-exposed
-    photograph of a highlighted setpoint is not evidence against a year of
-    use, and a check that reports 18 false positives gets ignored, which is
-    worse than not having it. Pure white is the only case actually proven
-    invisible (High Contrast `v1.2.06`, `kb/07`).
+    Pure white always does. A light grey does too, but **only on a control
+    that is actually sitting on the highlight** - which is why this pairs with
+    `is_always_highlighted` below rather than with `is_selectable`.
+
+    The distinction was measured on 2026-10-30. `(0.62, 0.62, 0.62, 1)` is the
+    menu-row value grey, used on 18 controls since `v1.0` and perfectly
+    readable on all of them - because a menu value is highlighted only while
+    you are on that row. The *same* grey on the home-screen setpoint is
+    invisible, because that control carries `InitiallyHighlighted="1"` and is
+    therefore highlighted permanently. One control broken, seventeen fine,
+    same colour.
     """
-    return color == WHITE
+    if not color:
+        return False
+    if color == WHITE:
+        return True
+    try:
+        parts = [float(x) for x in color.strip("() ").split(",")]
+    except ValueError:
+        return False
+    return len(parts) >= 3 and min(parts[:3]) >= 0.55
+
+
+def is_always_highlighted(ctl):
+    """`InitiallyHighlighted="1"` - drawn on the white highlight from the moment
+    the screen appears, so a pale colour on it is never readable."""
+    return ctl.get("InitiallyHighlighted") == "1"
 
 
 def is_selectable(ctl):
@@ -105,12 +122,15 @@ def check(path):
             if is_selectable(ctl):
                 for i, k in enumerate(kids, 1):
                     col = k.get("Color")
-                    if is_pale(col):
-                        errors.append(f"{where}: child {i} paints pure white on a selectable "
-                                      f"control, which is drawn on a white highlight - it will be "
-                                      f"invisible (kb/07). Omit the color so the firmware inverts "
-                                      f"it against the highlight, or state the condition so the "
-                                      f"default is never overridden")
+                    # pure white fails on any selectable control; a lighter
+                    # shade only fails where the highlight is permanent
+                    if col == WHITE or (is_always_highlighted(ctl) and is_pale(col)):
+                        why = ("is permanently highlighted (InitiallyHighlighted)"
+                               if is_always_highlighted(ctl) else "is selectable")
+                        errors.append(f"{where}: child {i} paints {col} on a control that {why}, "
+                                      f"so it sits on the white highlight and will be unreadable "
+                                      f"(kb/07). Omit the color so the firmware inverts it against "
+                                      f"the highlight")
             if len(kids) > CEILING:
                 errors.append(f"{where}: {len(kids)} children, over the ceiling of {CEILING} "
                               f"- the last {len(kids) - CEILING} are dropped silently (kb/07 #26)")

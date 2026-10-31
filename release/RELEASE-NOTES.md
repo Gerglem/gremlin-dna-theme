@@ -5,9 +5,20 @@ Files are named for their version, in the original v1.0 format:
 - `gremlin_v<version>_theme.ecigtheme` — the theme on its own
 - `gremlin_v<version>.ecig` — the theme plus the four Divine Tribe profiles and their materials
 
-The current release is **v2.3.02**. (v2.3 is not final: the new-atomizer screen is still being verified — see the knowledge base.) (A v2.3.00 was published and withdrawn the same day — see below.) Older versions stay in this folder, so a link to a specific version keeps working.
+The current release is **v2.3.03**. (v2.3 is not final: the new-atomizer screen is still being verified — see the knowledge base.) (A v2.3.00 was published and withdrawn the same day — see below.) Older versions stay in this folder, so a link to a specific version keeps working.
 
 The High Contrast theme is a separate build on its own version track — see [`../high-contrast/RELEASE-NOTES.md`](../high-contrast/RELEASE-NOTES.md).
+
+---
+
+## v2.3.03
+
+**The set temperature is readable again.** On the home screen the `SET` value sits on the white
+selection bar permanently, and it was being drawn in a light grey — which on white is nothing at
+all. It now takes whatever colour contrasts with the bar, the way every other adjustable value on
+that screen already did. This was not new in v2.3; it has been that way for a while.
+
+Nothing else changed.
 
 ---
 
