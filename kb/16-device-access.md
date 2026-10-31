@@ -9,7 +9,7 @@
 > |---|---|
 > | **Reading and driving the mod** | **SOLVED.** `tools/dna-hid.py`, vendor HID, no EScribe, no COM port, no driver |
 > | **The flash layout** | **SOLVED.** Evolv's own code produces it on request, no device attached - `UWB.FE(ggq)` -> `A.WIA` -> `JSL` -> `PYB.PE()` |
-> | **Building a Programmer that has that layout** | Next, and still device-free: `PYB.UE(func, int)` |
+> | **Building a Programmer that has that layout** | Next, and still device-free: `PYB.UE(func, int)` - `tools/probe_programmer.py`. The open unknown is what its `Func<>` argument wants; the probe prints the signature before trying |
 > | **Writing a config** | **Untried.** Needs a link, the `dontUpload` dry run first, and Jake's explicit go-ahead |
 >
 > **Everything before "SOLVED: the real flash layout" is the investigation that got there**, including
