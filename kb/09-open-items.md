@@ -45,7 +45,7 @@ Three earlier beliefs in this repo were wrong. The current, evidence-backed posi
 | **Last match wins** | **Confirmed on-device.** Two always-true variants, the second took effect. `04` and `10` were right all along; a mid-session claim of first-match-wins was wrong |
 | **Operator 4 = equality** | **Confirmed on-device.** An isolated variant on `profile == 4` fired on exactly profile 4 |
 | **Operator 129** | **Untested, not disproved.** It was blamed for the warning failure and that was premature. EScribe does zero the `RefValue` of any `129` compare it round-trips, so prefer 4 |
-| **Operator 64 (AND)** | **Contested, and the evidence against it is confounded.** Every AND ever uploaded had operator `129` inside it, whose `RefValue` EScribe zeroes - so the AND could not have fired regardless. `10` rates it confirmed because Theme Designer emits it for `and`. Untested fairly; see the audit below |
+| **Operator 64 (AND)** / **65 (OR)** | **Both confirmed on-device 2026-10-30**, nesting operators `2` and `4`, on a four-profile truth table. The earlier "does not work" verdict was confounded by operator `129` inside every AND ever uploaded. **Nesting depth 2 is proven; depth 3 is not** |
 
 ### Device access: read and control are solved
 
@@ -238,7 +238,7 @@ device containing an `Operator="64"` had **operator 129 inside it**:
 
 `129` is the operator EScribe **zeroes the `RefValue` of** on round-trip (`10`), so those compares read
 `profile == 0`, which never matches - the AND could not have fired whatever operator 64 does. **The
-on-device evidence against operator 64 is confounded, and the three-colour probe that produced the
+on-device evidence against operator 64 is confounded, and the three-color probe that produced the
 verdict predates the discovery that the tool emits `4` for equality, so it almost certainly used `129`
 too.**
 
@@ -250,7 +250,7 @@ any ceiling. Independent support: Copyman's third-party theme uses `Operator="65
 
 **This one test decides the shape of v3.** If the AND resolves, all four replace-warning chains
 collapse from five children to two, the cancel layers disappear, the Color Themes home screen gets its
-theme colour back across an XL's healthy range, and the cleaning-profile special case goes away.
+theme color back across an XL's healthy range, and the cleaning-profile special case goes away.
 
 ## Registered: does operator 64 (AND) actually work? - WRITTEN BEFORE RUNNING, 2026-10-30
 
@@ -273,7 +273,7 @@ child ceiling cannot confound anything, and each using **only operators confirme
 the nesting. Each reads dark grey `(0.3, 0.3, 0.3, 1)` when its condition is false, so an unmatched
 probe is still legible and cannot be mistaken for a missing control.
 
-| Row | Replaces | Condition | Colour when true |
+| Row | Replaces | Condition | Color when true |
 |---|---|---|---|
 | `AND1` | the big temperature, `(0, 24)` | `AND(ohms > 0.41, profile == 1)` | **green** |
 | `AND2` | the SET label, `(0, 50)` | `AND(ohms > 0.41, profile == 2)` | **magenta** |
@@ -300,7 +300,7 @@ and one false on the *same* two fields, so an AND that merely ignores its second
 ### What each result means, fixed in advance
 
 - **The table as printed** - operators 64 and 65 both work. v3 collapses all four warning chains to two
-  children, drops the cancel layers, restores the home-screen theme colour on the ohms row, and uses
+  children, drops the cancel layers, restores the home-screen theme color on the ohms row, and uses
   `OR` for the cleaning profiles. `09`'s deferred simplification is live and `10` line 183 is vindicated.
 - **`FLAT` lights, `AND1` never does** - operator 64 does not resolve. Keep the five-layer chains; mark
   64 dead in `10` with evidence this time, and close the contradiction the other way.
@@ -312,6 +312,34 @@ and one false on the *same* two fields, so an AND that merely ignores its second
 - **`FLAT` grey on every profile** - void, not negative. The upload did not take or the locks did not
   land; check MENU -> PROFILE shows a non-zero resistance and re-run.
 - **A row missing entirely** - a layout or font problem in the probe, not a logic result. Re-cut it.
+
+### RESULT, 2026-10-30: the table exactly as registered. Operators 64 and 65 both work.
+
+Read with the **Retro theme enabled**, which the earlier precedence probes were not - so the tinting
+was live throughout and did not interfere.
+
+| Profile | Locked | `AND1` | `AND2` | `OR13` | `FLAT` | Ohms readout |
+|---|---|---|---|---|---|---|
+| 1 DTv5XL | 0.4637 | **GREEN** | grey | **CYAN** | **YELLOW** | 0.464 white |
+| 2 QuestCup | 0.4504 | grey | **MAGENTA** | grey | **YELLOW** | 0.450 **RED** |
+| 3 DTv5XL-Clean | 0.6500 | grey | grey | **CYAN** | **YELLOW** | 0.650 **RED** |
+| 4 QuestCup-Clean | 0.3141 | grey | grey | grey | grey | 0.314 plain |
+
+**All sixteen cells match.** Green appears on profile 1 only and magenta on profile 2 only - the two
+cells that cannot both be right unless the AND is evaluating *both* of its children. Profile 4 is
+entirely dark, so nothing matches unconditionally. `FLAT` lights on 1-3 and not 4, so the run is valid.
+
+**`Operator="64"` is a true AND and `Operator="65"` is a true OR**, with operators `2` and `4` nested
+inside, on this firmware. `10` line 183 was right; the `09` entry calling 64 dead was wrong, and the
+cause was exactly the confound identified in the audit - every previous AND had operator `129` inside
+it, whose `RefValue` EScribe zeroes.
+
+**Free regression in the same run:** the `v2.2.05` replace warning read white / RED / RED / plain
+across the four profiles, matching the result it shipped on, this time with a theme active.
+
+**Proven depth is 2** - one `Compare` nested inside one `Compare`. Three levels (an `OR` inside an
+`AND`) is **not** tested, and `18` explains why that specific question decides whether the ohms row
+can have its theme color back.
 
 ## Registered: the HC home-screen replace warning (v1.2.06) - WRITTEN BEFORE RUNNING, 2026-10-30
 
@@ -571,7 +599,7 @@ Counting every control in the theme:
 **The ohms control is the only one in the theme above 8 children.** With a ceiling of 8 (a default
 plus seven variants) the v.04 order loses its last three entries:
 
-    1 default | 2-7 six theme colours | 8 red>0.41 | 9 white p==1 X | 10 white p==3 X | 11 red>0.6 X
+    1 default | 2-7 six theme colors | 8 red>0.41 | 9 white p==1 X | 10 white p==3 X | 11 red>0.6 X
 
 leaving `red > 0.41` as the only threshold - which is precisely the behavior seen in every run so far,
 under both operators. It also explains why changing 129 to 4 made no difference: the variants carrying
