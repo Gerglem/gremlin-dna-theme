@@ -11,7 +11,7 @@
 > | **The flash layout** | **SOLVED.** Evolv's own code produces it on request, no device attached - `UWB.FE(ggq)` -> `A.WIA` -> `JSL` -> `PYB.PE()` |
 > | **Opening a link** | **SOLVED.** `BGQ.FE(port, vid, pid, ver, OpenConfiguration, 1, enum0) -> POT`, with the port string derived from WMI - no hand-made file |
 > | **Building a Programmer** | **SOLVED.** `PYB.UE(func, n)` with **n >= 128** - the Int32 is an address whose high bit must be set |
-> | **Reading the settings image** | **`AX()` times out.** Suspects, in order: the Programmer has no `UserModeVersion`, `AX`'s `Boolean[]` was null, and HID contention with Device Monitor |
+> | **Reading the settings image** | **`AX()` times out.** The `Boolean[]` is ruled out; the version has still never actually been set (wrong type passed); HID contention with Device Monitor is the remaining suspect |
 > | **Writing a config** | **Untried.** Needs the read working first, then the `dontUpload` dry run, then Jake's explicit go-ahead |
 >
 > **Everything before "SOLVED: the real flash layout" is the investigation that got there**, including
@@ -654,6 +654,37 @@ If the version and the flags both fail to explain the timeout, contention is the
 
 **At most two `AX` attempts per run from now on** - each timeout costs real wall-clock time on the
 operator's bench.
+
+### Step 3 run 3: flags ruled out; two of my own errors corrected
+
+    Programmer: A.ECC        Stream = POT        UserModeVersion = None
+    set UserModeVersion      FAILED  UInt32 cannot convert to Nullable<Int32>
+    AX(None, Boolean[3] all true)    TimeoutException
+    AX(None, Boolean[0])             TimeoutException
+
+**Genuinely ruled out: `AX`'s `Boolean[]`.** Both a full array and an empty one time out
+identically, so the null passed in run 2 was never the cause.
+
+**Two things that read like findings and were not.**
+
+1. *"`UserModeVersion` could not be set."* It is a **`Nullable<Int32>`** and I passed a `UInt32`,
+   so the conversion was rejected and **the version was never actually set.** The leading
+   hypothesis - that the Programmer hangs because it does not know what it is talking to - remains
+   completely untested.
+2. *"The Programmer exposes no layout."* The dump showed only `Stream` and `UserModeVersion`, which
+   I read as the layout being absent. It is not evidence: **`GetProperties` does not return
+   non-public members inherited from a base class**, and `A.ECC` derives from `OCC`, which is
+   exactly where this file found `IE : LogicalLayout` exposed as `NM`. The dump was an artefact of
+   how I asked for it.
+
+`tools/probe_read3.py` corrects both - it walks the full type chain with `DeclaredOnly` at each
+level so inherited private members appear, sets the version as an `Int32`, and calls `Initialize()`
+**after** the version rather than before, since the handshake is what we are standing in for. **One
+`AX` attempt**, because each timeout costs bench time.
+
+If it still times out with the version genuinely set, the last suspect is **HID contention**: the
+probe runs inside Device Monitor, which polls the board itself, and this file already records that a
+second handle makes replies interleave.
 
 ### Where this leaves a push — SUPERSEDED, kept for the reasoning
 
