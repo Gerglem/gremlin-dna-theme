@@ -181,6 +181,46 @@ route over reimplementing the protocol.
 - `QMQ` from `HLF.XK()` does **not** implement `NHW`, so it is not the SHA-1 cache argument. The only
   implementor is `A.DHW`, which does have a parameterless constructor.
 
+### The construction chain, traced 2026-10-30
+
+All of this came from reflection and IL alone, with the device idle. It is the recipe for getting a
+Programmer that actually has a layout.
+
+    .ecig root element  ->  GGQ  ->  DWB.JSL(?, ggq, null)  ->  PYB  ->  PYB.UE(func, int)  ->  OCC
+
+| Step | Detail |
+|---|---|
+| `A.GGQ` | `DimensionEngineering.Common`. Two public constructors: `(Int32, Int32, DDT)` and **`(XElement)`**. Carries two ints (`LE`, `VE`) and a `DDT` |
+| The XML it parses | **Every `.ecig` opens with `<DESabertooth Device="109" Version="1" SWVersion="1.3.77.0">`** - and the debug log calls this board *device code 109.1*. So `GGQ` is the board identity, and it is sitting in our own config files |
+| `DWB.JSL(Object, GGQ, Nullable<T>)` -> `PYB` | the only constructor of a `PYB` in `DEScribe.Core` |
+| `FWB.get_DE()` -> `PYB` | an instance accessor - the likely home of EScribe's live document |
+| `PYB.UE(Func<>, Int32)` -> `OCC` | the configured Programmer |
+
+`DESabertooth` is a leftover from Dimension Engineering's motor-controller line, which is also why
+Device Monitor's scripting API can drive Sabertooth hardware (`14`). The settings container is shared
+across their products.
+
+**This is the path to try next**, and it needs no new capture: build a `GGQ` from a `.ecig` root,
+get a `PYB`, take the Programmer from `UE()`, and only then call `AX()`.
+
+### What the captured payload is, and is not
+
+Decoding work on `tools/samples/hid-upload-capture.log`, 2026-10-30:
+
+- **It is not the settings image.** Six candidate decodings - raw, 8-into-7 LSB and MSB first,
+  high-bit-group (sysex style), and the two per-frame variants - were searched for `DTv5XL`,
+  `QuestCup`, `Gremlin`, `Clean`, `Nickel`, `Watts`. **No hits in any of them.**
+- **It is not hashes either**, which was the earlier guess. Entropy is **5.38 bits/byte**; a hash
+  stream over a 7-bit alphabet would sit near 7.0. The data is structured.
+- The **first data byte carries only 2.61 bits of entropy**, so there is a small opcode alphabet
+  there - `0x72` dominates, then `0x5b`, `0x5e`, `0x77`, `0x2f`.
+- 204 of 207 frames are distinct; the only repeats are four one-byte `3a` frames.
+- No two-byte periodicity: odd and even positions have near-identical distributions, so it is not a
+  simple value/tag interleave.
+
+Conclusion: the device-to-PC half is a structured command and response stream, not bulk content. The
+image itself goes the other way, which a passive HID handle cannot see.
+
 ### Where this leaves a push
 
 **Further away than it looked, and deliberately not attempted.** Driving `PerformUpload` with a
