@@ -28,7 +28,7 @@ Both themes are released and tested on a DNA100C. Memory on the DNA75C (the tigh
 | `11-high-contrast-design-spec.md` | High Contrast theme: screens, fonts, layout rules |
 | `12-release-and-privacy-checklist.md` | **How to publish safely**: naming, sanitizing `.ecig` exports, PII rules, commit identity |
 | `13-escribe-suite.md` | What EScribe's install directory holds: firmware, the automatic config backups, third-party themes to learn from, how the mod connects |
-| `18-v3-design.md` | **The v3 spec.** What the audit of v2.2.05 found, the two principles that follow from the child ceiling and the AND result, and the changes in build order |
+| `18-theme-architecture.md` | **How a theme has to be built, and the v2.3 plan.** The child ceiling, what hardware proved and disproved about overlays and nesting, and the changes in build order |
 | `17-serial-command-interface.md` | **The mod is a command console.** Plain-text commands over its USB serial port, verified table, no EScribe needed |
 | `16-device-access.md` | **Driving the mod from a CLI**: the HID route via EScribe's own .NET assemblies, the serial fallback, and where the risk boundary is |
 | `15-theme-designer-gui.md` | Theme Designer's interface mapped onto the XML, and the settings it exposes that we have no XML for |

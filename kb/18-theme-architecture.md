@@ -1,9 +1,18 @@
-# 18 – Gremlin v3 design
+# 18 – Theme architecture, and the v2.3 design
 
-Written 2026-10-30, after the structural audit of `v2.2.05` (`09`) and the operator-64 result (`09`,
-`10`). **Nothing here is built yet.** This is the spec; `06` stays the record of what shipped.
+Written 2026-10-30 after the structural audit of `v2.2.05`, then substantially corrected the same day
+by hardware. **This is theme-file work only.** The version numbers that matter are set in `09`:
 
-## Why there is a v3 at all
+| | |
+|---|---|
+| **v2.3** | this document - the theme's own structure |
+| **v3.0** | Claude pushes configs to the device directly (`16`) |
+| **v4.0** | Bluetooth (`09`) |
+
+So nothing here is "v3" any more; an earlier draft of this file called it that, before those two
+milestones were named.
+
+## Why there is a v2.3 at all
 
 `v2` works. Both replace-warning chains are proven on hardware and the themes look right. But the
 audit found that **the way v2 is built is one theme away from breaking silently**, and the operator
@@ -20,7 +29,7 @@ Two facts set the whole design:
 
 ### 1. ~~Cosmetic and functional variants never share a control~~ — WRONG, withdrawn 2026-10-30
 
-This was the centrepiece of the v3 design and **hardware refuted it twice in one sitting.**
+This was the centrepiece of the v2.3 design and **hardware refuted it twice in one sitting.**
 
 The idea was that a warning has to be the *last* matching variant to beat a tint, so every warning on
 a tinted control sits on the ceiling by construction - and the fix was to split it onto its own
@@ -154,12 +163,12 @@ Session screen `(16, 104)` shows field **1048642**, which `05` records as *reads
 and 0 during the first session after power-on* (`09`, audit). Either guard it - now expressible as
 `AND(not firing, value != 0)` - or give the space to something honest.
 
-## Deliberately not in v3
+## Deliberately not in v2.3
 
 - **New screens.** The puff `Chart`, Power Lock (`Usage=4`) and Theme Change (`Usage=5`) are all
-  available and none has been attempted (`09`). They are additions, and v3 is about making the
+  available and none has been attempted (`09`). They are additions, and v2.3 is about making the
   foundation safe; mixing the two makes a regression impossible to attribute.
-- **A seventh color theme.** Off-board memory is at 93.6% (`06`) and images are the constraint. v3
+- **A seventh color theme.** Off-board memory is at 93.6% (`06`) and images are the constraint. v2.3
   makes a seventh theme *safe* to add, which is the prerequisite, not the thing itself.
 - **Anything needing the normalized-ohms field ID** until that ID is actually captured. E depends on
   it and should not be guessed.

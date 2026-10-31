@@ -507,6 +507,54 @@ cancel layers - the HC OHMS page and new-coil prompt, and the Color Themes home 
 is at risk. The rule is now mechanical in `tools/check-theme.py`, which fails `v1.2.06` and passes
 `v1.2.07`. Rewriting those four to the `18` B shape is therefore **cleanup, not a bug fix**.
 
+## Registered: how deep can nesting go, and is OR n-ary? - WRITTEN BEFORE RUNNING, 2026-10-30
+
+**This decides what `v2.3` contains.** Section B of `18` - stating the replace warning as real
+conditions - is proven and ships regardless. What is open is whether the warning can collapse to a
+**single** variant, because `1 default + 6 tints + 1 variant = 8`, and 8 is now confirmed to render.
+A single variant is therefore the difference between the Color Themes ohms row keeping its theme
+color and staying white, which is the one user-visible thing `v2.3` could deliver.
+
+`Downloads\PROBE-DEPTH.ecig`, built from `v2.2.05` with the four standard locked resistances. Four
+probes on the main screen, each on its own **2-child** control. **Do not fire.**
+
+| Row | Colour | Condition | Nesting |
+|---|---|---|---|
+| `DEP2` | orange | `ohms > 0.41` | depth 1 - the positive control, already proven |
+| `DEP3` | magenta | `AND(ohms > 0.41, OR(p==2, p==4))` | **depth 3** - an OR inside an AND |
+| `OR3` | cyan | `OR(ohms > 0.6, AND(>0.41, p==2), AND(>0.41, p==4))` | depth 3, but the **OR has three children** |
+| `DEP4` | green | `OR(ohms > 0.6, AND(>0.41, OR(p==2, p==4)))` | **depth 4** |
+
+`OR3` and `DEP4` express the *same* rule two ways - the whole per-cup warning in one variant. Either
+one working is enough.
+
+### Expected, decided before running
+
+| Profile | Locked | `DEP2` | `DEP3` | `OR3` | `DEP4` |
+|---|---|---|---|---|---|
+| 1 XL | 0.4637 | **orange** | grey | grey | grey |
+| 2 QUEST | 0.4504 | **orange** | **magenta** | **cyan** | **green** |
+| 3 XL CLEAN | 0.6500 | **orange** | grey | **cyan** | **green** |
+| 4 Q CLEAN | 0.3141 | grey | grey | grey | grey |
+
+The `OR3`/`DEP4` column is exactly the replace warning's intended behaviour, which is the point: if
+those two light on profiles 2 and 3 and nowhere else, the rule fits in one variant.
+
+Note `DEP3` is deliberately *not* the full rule - it omits the `> 0.6` case, so it should fire on
+profile 2 only. That is what separates "depth 3 works" from "the rule is expressible".
+
+### What each result means, fixed in advance
+
+- **`OR3` or `DEP4` correct** → the warning collapses to one variant. `v2.3` ships section B **and**
+  restores the ohms theme color on the Color Themes home screen, undoing the compromise `07` #24
+  accepted. Record the working depth in `10`.
+- **Both wrong, `DEP3` correct** → depth 3 works but the rule needs two variants, which is
+  `2 + 6 + 1 = 9` and over the ceiling. `v2.3` ships section B only; the ohms row stays white.
+- **`DEP3` also wrong** → nesting stops at depth 2. Same outcome, and `10` gets a measured limit.
+- **`DEP2` grey anywhere it should be orange** → void, not negative. The upload or the locks did not
+  land; re-run.
+- **Anything lit on profile 4** → something matches unconditionally; suspect the default child.
+
 ## Registered: does operator 64 (AND) actually work? - WRITTEN BEFORE RUNNING, 2026-10-30
 
 Settles the contradiction in the audit above, and decides whether v3's replace warning is two layers or
@@ -978,27 +1026,50 @@ to fire, but **whether it tells the user anything** is the open question - and i
 line, a theme could make it unmissable. Worth checking what the chip does at temperature before building
 anything, so the theme is not warning about a condition the firmware has already handled silently.
 
-## Tracked: bring the device up to 2026 standards
+## The roadmap, and what each version means
 
-Jake's stated goal for the whole device-access effort, recorded 2026-10-30 so the pieces are not
-mistaken for ends in themselves.
+Set by Jake 2026-10-30. The point of the device-access work is not the protocol; it is these two
+releases, and everything in `16` and `17` is in service of them.
 
-### 1. A phone app that designs the UI on a touchscreen
+| Version | Ships when | State |
+|---|---|---|
+| **v2.3** | the theme's own structure is right | in progress - `18` |
+| **v3.0** | **Claude can push edits straight to the device** | blocked on one thing, below |
+| **v4.0** | **Bluetooth** | not started; needs v3.0's work first |
 
-**The most tractable piece, and it needs no device work at all.** A theme is XML this repo has fully
-mapped - screens, controls, conditions, fonts, field IDs (`04`, `10`, `15`). An app that drags
-controls on a phone-sized canvas and emits a `.ecigtheme` can be built and tested against EScribe's
-own Theme Installer long before any new transport exists. Pushing the result is a separate problem,
-solved by whichever transport is ready first.
+### v3.0 - direct device push
 
-### 2. Programmatic push
+This is the one that changes how the project is worked on. Today every change is: build a file, hand
+it over, upload it by hand in EScribe, photograph the screen. With a push, the loop closes.
 
-In progress, `16`. Read and control are solved over HID; writing a config is not.
+**Reading and driving the mod is already solved** - `tools/dna-hid.py` talks to the board over the
+vendor HID interface with no EScribe, no COM port and no driver install (`16`, `17`).
 
-### 3. Bluetooth - a bridge, not a dongle
+**Writing a config is not**, and the blocker is specific and known. The chain is
 
-**A USB-C Bluetooth dongle plugged into the mod will not work.** The DNA's USB is a *device* port; its
-OTG support is for power-bank output, not for acting as a USB host, so the board cannot enumerate a
+    .ecig root -> GGQ -> DWB.JSL(?, ggq, null) -> PYB -> PYB.UE(func, int) -> Programmer
+
+and it stops at **obtaining a live `PYB`**: `DWB` is abstract, so it cannot be constructed out of
+process, and the flash layout is **derived per config from feature IDs** rather than declared per
+board - which is exactly why a layout must not be hand-built (`16`). Writing to a guessed offset is
+writing to live flash at an address nobody verified.
+
+**The next action is one script.** `tools/probe_pyb.py` is inert and ready: run it from EScribe's
+Device Monitor -> Diagnostics -> Advanced -> Run Script. It walks EScribe's own statics for a live
+`PYB` or `FWB` and dumps `PE()` - the real region sizes, offsets, paging and read-only flags. **One
+report settles whether this route is viable.** If it is not, the fallback is a USB capture of a real
+upload; the device-to-PC half is already decoded (`16`, `tools/samples/hid-upload-capture.log`) and
+only the PC-to-device direction is missing.
+
+The safety gates to preserve are inventoried in `16` - pre-upload backup, device identity check,
+firmware handshake, per-frame CRC, differential hashing, the write transaction, and the `dontUpload`
+dry run. Calling Evolv's own uploader keeps all of them by construction, which is the whole reason
+that route was chosen over reimplementing the protocol.
+
+### v4.0 - Bluetooth
+
+**A USB-C Bluetooth dongle plugged into the mod will not work.** The DNA's USB is a *device* port;
+its OTG support is for power-bank output, not for acting as a host, so the board cannot enumerate a
 dongle and nothing in firmware would see it.
 
 What works is a **bridge**: a small board that is a USB host on one side and BLE on the other -
@@ -1006,15 +1077,22 @@ ESP32-S3 or nRF52840 both qualify - which plugs into the mod, speaks the HID fra
 exposes BLE to a phone.
 
 Most of the hard part is already done: the framing (`01 | DE | len | payload`), the command table
-(`17`) and the report geometry (63 in, 63 out) are all known. The bridge is largely transcription.
+(`17`) and the report geometry (63 in, 63 out) are all known, so the bridge is largely transcription.
 
-**Scope it properly before buying anything.** Open questions: whether the mod supplies enough current
-to run the bridge or the bridge must carry its own power; whether a bridge can hold the link while the
-mod is in use; and whether the settings-transfer protocol (`16`, unsolved) matters for a first version
-or whether read-and-control is enough to be useful on its own. Likely it is - a phone that shows live
-ohms, puff count and board temperature needs nothing further.
+**Scope it before buying anything.** Open questions: whether the mod supplies enough current to run
+the bridge or it must carry its own power; whether a bridge can hold the link while the mod is in
+use; and whether the settings-transfer protocol matters for a first version, or whether read-and-
+control is enough to be useful on its own. Likely it is - a phone showing live ohms, puff count and
+board temperature needs nothing further. **Do this last.** It is the only piece needing hardware that
+is not already on the bench.
 
-Do this one last. It is the only piece needing hardware that is not already on the bench.
+### Not versioned: a phone app that designs the UI on a touchscreen
+
+Jake's other stated goal, and **the most tractable piece - it needs no device work at all.** A theme
+is XML this repo has fully mapped: screens, controls, conditions, fonts, field IDs (`04`, `05`, `10`,
+`15`, `18`). An app that drags controls on a phone-sized canvas and emits a `.ecigtheme` can be built
+and tested against EScribe's own Theme Installer long before any new transport exists. Pushing the
+result is a separate problem, solved by whichever of v3.0 or v4.0 lands first.
 
 ## Ideas
 - ~~**User toggles** as a new discovery.~~ **We already use them.** The six Color Themes are exactly
