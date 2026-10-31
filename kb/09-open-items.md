@@ -80,7 +80,7 @@ all. Cheap, and worth doing next time the mod is connected.
 - New-coil screen **OLD** value (field 1048835). It only appears with ohm lock off.
 - ~~**Ohm-lock toggle on the new-coil screen.**~~ **Confirmed on a DNA100C 2026-10-30 (Color Themes):** toggling the lock while the NEW COIL? prompt is up latches the **new** reading, and `NewCoilAccept` does not dismiss the screen before the toggle can be reached. High Contrast prompted correctly but could not be confirmed at the time — it had no resistance readout, which is what the OHMS screen below now adds. **Then found the same day:** locking on the prompt can leave **0** locked — not because of the order of the presses, but because the lock is a flag and the configs ship cold ohms at 0 until a reading is committed (`07` #22). **Confirmed on High Contrast with the guard in place, 2026-10-30:** LOCK then YES locks the new value.
 - **Lock guarded on committed resistance, both new-coil screens.** default `<Hidden/>` with the real element carrying `<Compare Operator="1" Field="17825794" RefValue="0" />` on an `UpdateLive` control, so the label and padlock appear only once cold ohms is non-zero. **Confirmed 2026-10-30 (High Contrast), against the earlier 1048579 guard:** the prompt appeared with the padlock reachable and the lock took the new value, so a guard on that screen does resolve and the Toggle works from the prompt. **The decisive open question for the cold-ohms guard is whether the prompt survives `NewCoilAccept`.** On a fresh setup cold ohms is 0, so the lock row is hidden until YES commits a reading: if the screen stays up, the row appears and can be pressed; if YES dismisses it, the row is only reachable on a swap where a previous resistance is already stored, and a first lock has to be done from the OHMS page (High Contrast) or PROFILE (Color Themes). Either way nothing can lock 0. **Guard confirmed hiding the control 2026-10-30:** on a fresh High Contrast upload (cold ohms 0) the new-coil screen showed YES, NO and MEASURE with no LOCK? row, which is the condition resolving correctly. Still untested: the same screen on Color Themes, and whether the row appears after YES (the open question above). **Also found:** MEASURE on the High Contrast prompt looked dead because that screen displayed no resistance — `NewCoilResample` updates 1048579 and nothing was showing it. The screen now has the readout and MEASURE has been removed from it (`11`).
-- **High Contrast Ω / OHMS screen** (v1.2). The menu's ohms row and the child screen behind it have not been exercised on hardware: whether the `Ω` label renders from codepoint 937 at FontStyle 0, whether `ChildScreen Screen="4"` reaches the new screen, and whether `ResampleOhms` works from a child screen (the color theme calls it from PROFILE, so it should).
+- ~~**High Contrast Ω / OHMS screen** (v1.2).~~ **Confirmed working 2026-10-30.** The `Ω` renders from codepoint 937 at FontStyle 0, `ChildScreen` reaches it from the menu, and LOCKED, the value, the LOCK toggle, MEASURE and BACK all display. `ResampleOhms` from a child screen is still unexercised - the button is there but was not pressed.
 - **Theme Designer has a `Screenshot` button** on the Screens tab (`15`), which should render a screen straight to an image. That is very likely the fix for the stale screenshots below, without photographing the mod. Untried.
 - **Power Lock (`Usage=4`) and Theme Change (`Usage=5`) screens** exist and we have never built either (`15`). Theme Change is the interesting one for Color Themes, where switching looks is the whole feature.
 - **High Contrast screenshots are stale.** `../high-contrast/images/menu-screen.png` and `new-coil-screen.png` predate the ohms row; there is no screenshot of the OHMS screen yet.
@@ -353,9 +353,24 @@ assuming it.
 | 3 | XL CLEAN | 0.6500 | **RED** |
 | 4 | Q CLEAN | 0.3141 | **plain** |
 
-Anything other than `plain / RED / RED / plain` means the HC chains differ from the Color Themes ones
-in some way inspection missed, and HC needs its own diagnosis rather than a re-application of the
-same fix.
+### RESULT: plain / RED / RED / plain - High Contrast passes
+
+| Profile | Locked | Observed |
+|---|---|---|
+| 1 XL | 0.4637 | plain |
+| 2 QUEST | 0.4504 | **RED** |
+| 3 XL CLEAN | 0.6500 | **RED** |
+| 4 Q CLEAN | 0.3141 | plain |
+
+**Both themes are now proven on hardware.**
+
+**Also confirmed in the same run: the Omega OHMS screen works.** The omega glyph renders from
+codepoint 937 at FontStyle 0, the child screen opens from the menu, and LOCKED, the value, the LOCK
+toggle, MEASURE and BACK all display. That had been untested since v1.2 (`09`, Untested).
+
+**Correction to the instructions, not the build:** ohms is **not** on the High Contrast home screen -
+it lives only on the OHMS page and the new-coil prompt. The test instruction said home screen and was
+wrong.
 
 Worth checking in the same pass, both outstanding from the original card: the new-atomizer screen
 shows **no `LOCK?` row** until a resistance is committed, and the **Omega OHMS** row opens its child
