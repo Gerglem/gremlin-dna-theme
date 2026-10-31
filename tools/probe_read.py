@@ -131,18 +131,54 @@ def main():
             say("  Is the mod plugged in? kb/16: all four interfaces read Present: False when it is not.")
             raise _Done()
 
+    # The opener takes SEVEN arguments, not four - an earlier version of this
+    # probe searched for a 4-parameter FE and found nothing. The working call
+    # is the one probe_open_link.py proved:
+    #   BGQ.FE(port, vid, pid, ver, OpenConfiguration, 1, enum0) -> POT
+    # CSH and IGI are HidSharp types. The assembly is present and named
+    # HidSharp, but its *types* are obfuscated (kb/16), which is why they are
+    # located by reflection rather than imported.
     pot = None
     try:
+        from System import Activator, Enum
+        hid = None
+        for a in AppDomain.CurrentDomain.GetAssemblies():
+            try:
+                if a.GetName().Name == "HidSharp": hid = a
+            except: pass
+        CSH = IGI = None
+        if hid is not None:
+            for t in types_of(hid):
+                if t.Name == "CSH": CSH = t
+                if t.Name == "IGI": IGI = t
+        say("  BGQ=%s CSH=%s IGI=%s"
+            % (T.get("BGQ") is not None, CSH is not None, IGI is not None))
+
         fe2 = None
-        for t in (T.get("BGQ"), T.get("POT")):
-            if t is None: continue
-            for m in t.GetMethods(FLAGS):
-                if m.Name == "FE" and m.IsStatic and len(m.GetParameters()) == 4:
-                    fe2 = m
+        if T.get("BGQ") is not None:
+            for m in T["BGQ"].GetMethods(FLAGS):
+                if m.Name == "FE" and m.ReturnType.Name == "POT":
+                    fe2 = m; break
         if fe2 is None:
-            say("  the 4-argument FE opener was not found"); raise _Done()
-        pot = fe2.Invoke(None, Array[Object]([port, 9867, 1075, 0]))
-        say("  link -> %s" % (pot.GetType().FullName if pot else "None"))
+            say("  BGQ.FE returning POT was not found"); raise _Done()
+        say("  FE(%s)" % ", ".join(x.ParameterType.Name for x in fe2.GetParameters()))
+
+        cfg = Activator.CreateInstance(CSH) if CSH is not None else None
+        igi0 = Enum.ToObject(IGI, 0) if IGI is not None else None
+        for vid, pid, ver in ((9867, 1075, 0), (9867, 1075, 257), (0, 0, 0)):
+            try:
+                pot = fe2.Invoke(None, Array[Object]([port, vid, pid, ver, cfg, 1, igi0]))
+                say("  FE(port, %d, %d, %d) -> %s"
+                    % (vid, pid, ver, pot.GetType().FullName if pot else "None"))
+                if pot is not None: break
+            except Exception, e:
+                inner = None
+                try: inner = e.clsException.InnerException
+                except: pass
+                say("  FE(port, %d, %d, %d) threw: %s"
+                    % (vid, pid, ver, inner.Message if inner else e))
+        if pot is None:
+            say("  no link"); raise _Done()
     except _Done:
         raise
     except Exception, e:
