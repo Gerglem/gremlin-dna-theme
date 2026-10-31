@@ -278,6 +278,67 @@ settings channel.
 before any replay - "the device is silent unless asked" is about traffic, not handle ownership,
 and conflating the two cost a cycle here.
 
+---
+
+## WRITING TO THE DEVICE FROM PYTHON WORKS (2026-10-31)
+
+**Outcome A, and then some.** Settings were written to the device with no EScribe running, and
+verified by reading them back.
+
+Device before: `P=GET SP` 36.00 W, `T=GET SP` 385.00 F.
+Device after:  `P=GET SP` **40.00 W**, `T=GET SP` **420.00 F** - exactly the values encoded in
+the replayed group. The screen came back on as the device applied them.
+
+### An upload is three phases in ONE HID session
+
+| Phase | Frames | Replies | Sample |
+|---|---|---|---|
+| 1. Connect-and-download handshake | 207 | 207 | `tools/samples/handshake.hex` |
+| 2. Write group | 8 | 2, incl. the group ACK | `tools/samples/replay-420.hex` |
+| 3. Post-group verify / commit | 199 | 198 | `tools/samples/post-group.hex` |
+
+Run with `tools/replay-session.py`, which holds one handle across all three.
+
+### The two findings that made it work
+
+**The handshake is a replayable prefix.** All 207 frames replayed cold got all 207 replies. It is
+not challenge/response and carries no nonce - a captured handshake can simply be re-sent.
+
+**An ACK is not a commit.** Phase 2 alone is ACKed (`03 62 18 00 08 68 71`) and the device still
+reports the OLD values. That is what happened on the first attempt here: the group was ACKed and
+nothing changed, which reads as success and is not. **Phase 3 is what applies the write** - 199
+small read-shaped frames after the group. Verify by reading the value back, never by the ACK.
+
+### What this unblocks, and the one thing it does not
+
+Reading and writing the device from Python are both solved. `v3.0` - direct device editing from
+Claude with no EScribe - is reachable.
+
+**Still blocked: composing a group with arbitrary values.** Everything above replays *captured*
+bytes. To set a value that was never captured, the 341-byte block has to be rebuilt, which needs:
+
+- the checksum at the frame tail (still underived - the replay never tested it, because replayed
+  bytes carry their original checksum), and
+- the rest of the field map beyond power and temperature.
+
+So the checksum is still the gate, exactly as registered - it was just never reachable until the
+session context was understood. The `--flip` test in `tools/replay-group.py` can now actually run,
+inside a session, and will finally mean something.
+
+### Registered test: is the frame tail validated? (set 2026-10-31, NOT YET RUN)
+
+`python tools/replay-session.py handshake.hex replay-420.hex post-group.hex --send` but with one
+padding byte of the group flipped (`replay-group.py --flip` targets report offset 14 of frame 4,
+inside a 0x7f run).
+
+| Outcome | What it means |
+|---|---|
+| **A** - group not ACKed, or readback unchanged | The tail is validated; derive it before composing |
+| **B** - ACKed and readback changes as normal | The tail is not a checksum over the payload, or is not checked; composing is close |
+
+Set the device to known values first and read back after, because **the ACK cannot be trusted** -
+that is the lesson above.
+
 **Blocking issue regardless of outcome:** nothing composed locally can be uploaded until the
 checksum at offsets 56-57 is understood. Reproducing the block is not enough if the device
 rejects it.
