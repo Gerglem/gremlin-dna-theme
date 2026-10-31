@@ -553,6 +553,63 @@ The script and method are sound: the control run minutes earlier fired cleanly a
 fire. Outcome A plus a blanking row means the condition is wrong; outcome B plus a blanking row is
 consistent and the row is merely the most visible symptom.
 
+---
+
+## ANSWERED 2026-10-31: outcome B. The Clean profile is not in temperature control.
+
+A valid run on the Clean profile (`Power Set` 38 W, `Temperature Set` 450 F - matching the
+photographed Clean profile exactly) against the control run on vaping profile 1:
+
+| | Clean profile | Vaping profile (control) |
+|---|---|---|
+| `Temperature`, idle | **`NaN`** | reported |
+| `Temperature`, firing | **`NaN`** | climbed to **212.49 F** |
+| `Temperature Set` | 450 F | 380 F |
+| `Cold Ohms` | 0.462 | 0.458 |
+| `Live Ohms`, firing | 0.500 -> 0.528 | 0.506 |
+| `Power`, firing | 37.93 - 38.02 W of 38 set | 39.82 W of 40 set |
+
+**The device reports no temperature for this profile at all.** Not a flat value, not a mirror of
+the setpoint - the variable is simply absent. Everything else reports normally in the same
+samples: power is regulated, voltage and current are live, and `Live Ohms` rises 0.500 -> 0.528
+as the coil heats. So this is not a reporting failure. There is no regulated temperature because
+the profile runs in **wattage mode**.
+
+`Temperature Set` still reads 450 F. **It is a stored number with nothing behind it.**
+
+### This answers both of the original questions, as one bug
+
+1. **Should a Clean profile show temperature controls?** No. There is no temperature to show.
+2. **Why does the live row vanish exactly when it is useful?** It does not vanish *despite*
+   firing - it vanishes *because* of it. Field `16778242` with `UpdateLive` + `ReadOnly` is
+   documented in `05` as showing the setpoint when idle and the **live** temperature while
+   firing. On a wattage profile the live value does not exist, so the control draws the stored
+   setpoint at idle and blanks under fire. **The field is behaving exactly as specified.**
+
+The bug is placement, not behaviour: **the temperature controls are not conditioned on the profile
+actually being in temperature control.**
+
+### What this retires
+
+The evidence that had argued for the profile sensing temperature - the idle frame reading cold
+0.524 against live 0.874 - does not survive. `Live Ohms` reads `NaN` at idle on this profile and
+only appears under load. That 0.874 was a stale reading from a recent fire, which was the stated
+alternative explanation all along.
+
+### The fix, and its cost
+
+**Condition the temperature controls on temperature control**, rather than fixing the live row's
+condition alone. Fixing only the row would leave `SET 450F` displayed on a profile that cannot
+honour it.
+
+Blocking constraint: the home-screen controls at `(0, 0)` on designs 1 and 2 are **already at the
+8-child ceiling** (`18`), and `tools/check-theme.py` warns about it. Adding a condition to an
+existing control is free; adding a variant is not. Work out which before editing.
+
+**Still outstanding:** a photograph of the Clean profile's screen during a fire, to confirm the
+blank row matches this data rather than something else being wrong. The data says what the device
+reports; only the screen says what the theme drew.
+
 ## Tracked: a board over-temperature warning
 
 Jake's request, 2026-10-30. Not designed, not built.
