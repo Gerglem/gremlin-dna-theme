@@ -6,7 +6,7 @@
 | Item | Version | Where |
 |---|---|---|
 | **Gremlin - Color Themes** (main theme) | **v2.2.05** (internal) | `../release/gremlin_v2.2.05_theme.ecigtheme`, full setup `../release/gremlin_v2.2.05.ecig` |
-| **Gremlin High Contrast - Large Text** (low vision) | **v1.2.05** (internal) | `../high-contrast/` (landing page `README.md`, files `files/gremlin_high_contrast_v1.2.05_theme.ecigtheme` and `files/gremlin_high_contrast_v1.2.05.ecig`) |
+| **Gremlin High Contrast - Large Text** (low vision) | **v1.2.06** (internal) | `../high-contrast/` (landing page `README.md`, files `files/gremlin_high_contrast_v1.2.06_theme.ecigtheme` and `files/gremlin_high_contrast_v1.2.06.ecig`) |
 | Gremlin v1.0 (legacy) | v1.0 | `../release/gremlin_v1.0_theme.ecigtheme`, `gremlin_v1.0.ecig` |
 | Guides | current | `../guides/chip-swap-thelema-solo-dna100c.md`, `../guides/setup-gremlin-theme-profiles-calibration.md` (old `../reddit/` paths are pointer files kept for a live Reddit link; don't delete) |
 

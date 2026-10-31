@@ -5,7 +5,7 @@
 Updated 2026-10-30, late in a long session. **41 commits are local and unpushed**, by instruction.
 Nothing in this stretch has gone to GitHub.
 
-**Builds:** Color Themes `v2.2.05`, High Contrast `v1.2.05`. **The replace warning works, proven on hardware 2026-10-30** (`plain / RED / RED / plain` across four locked profiles). The cause was a per-control child limit, not the operator
+**Builds:** Color Themes `v2.2.05`, High Contrast `v1.2.06`. **The replace warning works, proven on hardware 2026-10-30** (`plain / RED / RED / plain` across four locked profiles). The cause was a per-control child limit, not the operator
 since the replace warning was rebuilt. That is the gate on pushing anything.
 
 **Solved today, and large:** the mod is a plain-text command console over its USB serial port (`17`),
@@ -28,7 +28,7 @@ deferred simplifications below.
 ## Tracked: the new-atomizer screen
 
 Reworked repeatedly on 2026-10-30 and **never tested as it now stands**. Both themes changed; load
-`gremlin_v2.2.05.ecig` and `gremlin_high_contrast_v1.2.05.ecig`, and remember a full `.ecig` load
+`gremlin_v2.2.05.ecig` and `gremlin_high_contrast_v1.2.06.ecig`, and remember a full `.ecig` load
 zeroes cold ohms, so a cup has to be re-locked before anything resistance-driven can show.
 
 What is unverified, in the order a single swap would exercise it:
@@ -333,7 +333,7 @@ last-match-wins order:
 **The design was right all along; the control was simply overfull.** Profile 1 reads white at 0.4637,
 the Quest reds at 0.4504, the XL reds at 0.6500, and the Quest-Clean stays plain at 0.3141.
 
-Shipped as **v2.2.05 / v1.2.05**, with all four chains rewritten to five children in last-match-wins
+Shipped as **v2.2.05 / v1.2.06**, with all four chains rewritten to five children in last-match-wins
 order and explicit white on both cancels. Largest control in either theme is now 8.
 
 The cost either way: that row loses its theme tint, which `07` #24 already accepted.

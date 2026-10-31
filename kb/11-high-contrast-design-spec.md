@@ -1,6 +1,6 @@
 # 11 – Gremlin High Contrast - Large Text v1.2: Design Spec
 
-Current internal build: `../high-contrast/files/gremlin_high_contrast_v1.2.05_theme.ecigtheme` (theme title "Gremlin High Contrast - Large Text"). User landing page: `../high-contrast/README.md`.
+Current internal build: `../high-contrast/files/gremlin_high_contrast_v1.2.06_theme.ecigtheme` (theme title "Gremlin High Contrast - Large Text"). User landing page: `../high-contrast/README.md`.
 
 ## Goals
 Built for low vision. Large text, maximum contrast, only what's needed on each screen. Everything else stays at defaults and is changed in EScribe.
@@ -36,3 +36,32 @@ Black background. White text; yellow `(1, 0.92, 0)` for labels and the live temp
 
 ## Version history
 v0.1 first build · v0.2 stop SET/watts wrapping, MENU moved to top · v0.3 firing takeover via hide-all · v0.4–v0.5 two-line profile name, simplified menu · v0.6 status line back in its own row, watts moved to menu · **v1.0 release** · **v1.1** lock screen shows unlock instructions; full setup ships auto-lock off; LED sequences stripped · **v1.2** ohm-lock toggle on the new-coil screen; the menu's fourth row became an `Ω OHMS` link to a new OHMS child screen carrying the locked resistance, the lock toggle and MEASURE; the new-coil lock label reads **LOCK?**; menu re-packed to fit; both vaping profiles start at 380°F; the new-coil reading and the OHMS page value turn red `(1, 0.24, 0.16)` past the per-cup replace threshold, as four appended variants (default → red if `ohms > 0.41` → white if `profile == 1` → white if `profile == 3` → red if `ohms > 0.6`) — the nested AND this originally used does not work (`07` #24). Nothing competes for color on either control here, so the cancel layers restore plain white, which is the default anyway (limits in `02`).
+
+
+## The replace warning on the home screen (v1.2.06)
+
+High Contrast has **no ohms readout on its home screen** - resistance lives only on the OHMS page and
+the new-coil prompt. That made the replace warning invisible in normal use, since it required
+navigating to see it.
+
+Adding an ohms row was rejected: the home screen is **full to the pixel**, 160 of 160 used, and the
+only space available would come out of the 44px profile name or the SET line. Shrinking large text is
+the one thing this theme exists not to do.
+
+Instead **the profile name itself carries the warning.** It is already the largest always-visible text
+on the screen, and on this theme the profile name *is* the cup name - `XL`, `QUEST`, `XL CLEAN`,
+`Q CLEAN` - so a red cup name reads as "this cup needs replacing" rather than as something arbitrary.
+Zero layout change, zero space cost.
+
+The control takes the same chain as the ohms readout, giving six children:
+
+    default -> red if ohms > 0.41 -> white if profile == 1 -> white if profile == 3
+            -> red if ohms > 0.6 -> Hidden while firing
+
+**The `<Hidden>` must stay last.** It blanks the name during a puff, and under last-match-wins
+(`07` #26) a warning variant placed after it would override that and leave the name on screen while
+firing.
+
+Known trade: red normally reads as "something is wrong with this profile" rather than "with this
+coil". Accepted because it is the same red-means-replace convention the Color Themes home screen
+uses, and the exact resistance stays one button away on the OHMS page.

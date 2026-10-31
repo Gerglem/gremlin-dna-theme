@@ -57,7 +57,7 @@ A copy of EScribe's installed files lives at `G:\My Drive\Equipment\Thelema\EScr
 - Slot 3 **DTv5XL-Clean** (Watts, 38W, 120s), slot 4 **QuestCup-Clean** (Watts, 35W, 45s)
 - Slots 5–8 hidden. Cold resistance 0 and unlocked on all slots. Battery soft cutoff 3.0V. Color theme switches off (Classic).
 
-**Gremlin High Contrast v1.2** (`../high-contrast/files/gremlin_high_contrast_v1.2.05.ecig`):
+**Gremlin High Contrast v1.2** (`../high-contrast/files/gremlin_high_contrast_v1.2.06.ecig`):
 - Same settings with short names **XL / QUEST / XL CLEAN / Q CLEAN**, both vaping profiles at 380°F, and **auto-lock off** (`EvolvXAutoLock=0`).
 
 Notes:
