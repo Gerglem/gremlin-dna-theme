@@ -23,7 +23,7 @@ instruction to keep work local was discharged on 2026-10-30.
 | Replace warning on the HC home screen | **Works. Proven on hardware** - `v1.2.07` reads dark / RED / RED / dark with the highlight on. `v1.2.06` had the right logic in an invisible color. Old entry: The profile name carries it. **Test registered and bench file built 2026-10-30** - `Downloads\BENCH-HC-HOME-WARNING.ecig`, card below |
 | 380F starting temperature | **Confirmed on hardware** |
 | Omega OHMS screen (HC) | **Confirmed working** - glyph, child screen, LOCK, MEASURE, BACK all render |
-| New-coil screen, both themes | **The least-tested thing in either build.** One item half-confirmed, three open - see the section below |
+| New-coil screen | **Works, proven on Color Themes.** The guard hides `LOCK?` at cold ohms 0, YES commits and closes the prompt, so the first lock is done from MENU -> PROFILE |
 
 ### The big result: a per-control child limit
 
@@ -1278,7 +1278,41 @@ Fixed in place: the probe now `clr.AddReference`s WinForms before enumerating (f
 thread, and would itself be the finding. **A second empty result will mean something; the first one
 did not.**
 
-### New-atomizer gate, run 1 - 2026-10-30
+### GATE CLOSED, 2026-10-30: the new-atomizer screen works, and the prompt does not survive YES
+
+Run on `v2.3.03`, fresh `.ecig` load so cold ohms started at 0.
+
+| | Result |
+|---|---|
+| 1. No `LOCK?` row at cold ohms 0, Color Themes | **CONFIRMED.** `NEW 0.461 / OLD 0.0000`, YES, NO, MEASURE, no `LOCK?` row |
+| 2. Does the prompt survive `NewCoilAccept`? | **ANSWERED: no.** Pressing YES, NEW returns straight to the home screen |
+| YES commits the reading | **CONFIRMED.** Home screen then shows `0.461` with the lock still open |
+| 4. Red warning on the prompt | 0.461 on profile 1 is under its own 0.6 limit, so correctly **not** red - consistent, but not a positive test |
+
+**So the `LOCK?` toggle is not reachable on a first setup.** With cold ohms at 0 the guard hides it,
+YES commits the reading and closes the screen, and there is no moment at which the row is both
+present and on screen. **The first lock has to be done from MENU -> PROFILE.**
+
+On a *later* swap the guard passes, because cold ohms then holds the previous reading - so the row
+should appear and the toggle should be usable without leaving the prompt. **That half is inferred
+from the guard condition, not observed**; it needs a real cup swap, since the same cup re-fitted
+reads the same resistance and raises no prompt.
+
+**This is the outcome the card predicted as "decides documentation, not correctness."** Nothing is
+broken: the guard does exactly what it was built to do, nothing can ever lock a 0, and the toggle
+earns its place from the second swap onward. The release notes now say to lock from the menu the
+first time.
+
+### The `SET` fix is confirmed
+
+Same run, home screen: `SET 385°F` reads clearly as dark text inside the white highlight bar, where
+`v2.3.02` showed an empty white box. Removing the explicit grey and letting the firmware invert
+against the highlight was the right fix, and `InitiallyHighlighted` was the right diagnosis.
+
+`v2.3.03` is therefore **proven on hardware in full** - warning chains, theme tint, profile settings,
+new-coil screen and the setpoint.
+
+### Superseded: gate run 1, before YES was pressed
 
 | Item | Result |
 |---|---|
@@ -1384,7 +1418,7 @@ releases, and everything in `16` and `17` is in service of them.
 
 | Version | Ships when | State |
 |---|---|---|
-| **v2.3** | the theme is right **and the new-atomizer screen works** | theme done and proven; new-coil prompt is the remaining gate |
+| **v2.3** | the theme is right **and the new-atomizer screen works** | **DONE.** `v2.3.03` proven on hardware end to end |
 | **v3.0** | **Claude can push edits straight to the device** | blocked on one thing, below |
 | **v4.0** | **Bluetooth** | not started; needs v3.0's work first |
 
