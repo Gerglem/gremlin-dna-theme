@@ -391,6 +391,38 @@ helper called once per frame. Reading it off is faster and less error-prone than
 offline by predicting the tail of a captured frame and comparing - a correct algorithm reproduces
 every captured tail exactly, with no device involved.
 
+#### First pass: no match (2026-10-31)
+
+Run offline against the five staircase frames, so nothing was risked. **Zero exact matches.**
+
+Material - only the temperature frame's tail varies; the other five frames in a group are
+byte-identical across all five steps, so they contribute nothing:
+
+| Setting | Tail bytes | as `lo\|hi<<7` | as `hi<<7\|lo` |
+|---|---|---|---|
+| 380 F | `0a 6c` | 13834 | 1388 |
+| 390 F | `07 20` | 4103 | 928 |
+| 400 F | `44 5e` | 12100 | 8798 |
+| 410 F | `4b 58` | 11339 | 9688 |
+| 420 F | `26 66` | 13094 | 4966 |
+
+Ruled out, across five regions (`pay[:56]`, `pay[5:56]`, `pay[3:56]`, and the 7-bit-unpacked
+stream with skip 0 and 5) and four tail readings (7-bit lo/hi both ways, plain LE16, BE16):
+
+- sum, sum masked to 14 bits, XOR, Fletcher-16
+- CRC-16 with polys `1021, 8005, 3D65, A001, 0589, C867`, inits `0000, FFFF, 1D0F`, reflected
+  and not, final XOR `0000` and `FFFF`
+
+Note the tail is **not monotonic** in temperature - 390 F gives the smallest value of the five.
+So it is a genuine digest, not a derived field, and guessing is unlikely to be cheap.
+
+**This strengthens the recommendation above: read it out of EScribe's IL rather than searching.**
+The search space left is large (region boundaries, bit alignment, whether the frame header or a
+session value is mixed in), and the IL already has the answer written down. Possibilities not yet
+excluded, for whoever resumes: the tail may cover the frame header or sub-header, may be computed
+over the data *before* 7-bit packing, or may be seeded with something from the handshake - which
+would explain why it is not a pure function of the frame.
+
 **Blocking issue regardless of outcome:** nothing composed locally can be uploaded until the
 checksum at offsets 56-57 is understood. Reproducing the block is not enough if the device
 rejects it.
