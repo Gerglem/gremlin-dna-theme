@@ -492,6 +492,40 @@ transfer - and cannot write. `Initialize()` sends `get version`; `AX()` is the d
 same thing EScribe does for *Download Settings from Device*. **No `PerformUpload`, no write, no
 erase.**
 
+### Step 3 run 1: the link opens, but `UE` fails before it uses it
+
+    A. build the PYB            OK    GGQ [109.1] -> WIA -> PYB
+    B. find the device          OK    4 USB entries, port string 36 chars (from WMI)
+       open the link            OK    FE(String, Int32, Int32, Int32, CSH, Int32, IGI)
+                                      FE(port, 9867, 1075, 0) -> A.POT
+    C. PYB.UE(factory, 0..3)    FAIL  ArgumentOutOfRangeException: address
+
+**The link is up.** `BGQ.FE` takes **seven** arguments, not four - an earlier attempt searched for a
+4-parameter overload and reported "not found" after getting everything else right. `CSH` and `IGI`
+are HidSharp types found by reflection, because the assembly loads under its own name but its
+*types* are obfuscated - which is also why `from HidSharp import ...` fails outright.
+
+**The port string no longer needs a hand-made file.** WMI (`Win32_PnPEntity`, skipping the `MI_`
+interface children) gives the composite parent's serial, and the string comes out at the same 36
+characters the old `dna-port.txt` held. The serial stays in memory (`12`).
+
+**`UE` is the remaining blocker, and the Func is not the cause.** It throws the *same*
+`ArgumentOutOfRangeException("address")` whether it is handed a null delegate or one returning a
+live `POT`, so it fails before the factory is ever called. The stack is
+
+    A.DDY..ctor(Byte address, NDY) <- A.TCC.Initialize() <- A.SRB.EE <- A.PYB.UE
+
+so a `Byte` address is computed from something and comes out invalid. The `Int32` is innocent too -
+0, 1, 2, 3, 109 and the version all give the identical error.
+
+That leaves the PYB's own state. The suspect is **`JSL`'s first argument, which we pass as `None`**:
+`PE()` returns a layout without it, because the flash map is per board, but `UE` builds a Programmer
+and may need the settings document the null is standing in for.
+
+`tools/probe_pyb_state.py` tests exactly that - it dumps every member of `PYB`, reads `KE()`, and
+rebuilds with `None`, an `XElement` and an `XDocument` as the first argument, trying `UE` after each.
+Device-free.
+
 ### Where this leaves a push — SUPERSEDED, kept for the reasoning
 
 > **Overtaken 2026-10-30 by the section above.** Its second branch - *"or by constructing one once
