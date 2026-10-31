@@ -2,28 +2,78 @@
 
 ## Where this effort stands
 
-Updated 2026-10-30, late in a long session. **41 commits are local and unpushed**, by instruction.
-Nothing in this stretch has gone to GitHub.
+Rewritten 2026-10-30 at the end of a long session. Everything below is current.
 
-**Builds:** Color Themes `v2.2.05`, High Contrast `v1.2.06`. **The replace warning works, proven on hardware 2026-10-30** (`plain / RED / RED / plain` across four locked profiles). The cause was a per-control child limit, not the operator
-since the replace warning was rebuilt. That is the gate on pushing anything.
+### Read this first if you are picking up cold
 
-**Solved today, and large:** the mod is a plain-text command console over its USB serial port (`17`),
-with `tools/dna-query.ps1` and `tools/dna-stream.ps1` working. The TCR curve is now **verified against
-the hardware** to 0.04 F (`02`). Settings and themes are confirmed unreachable over serial - encrypted
-binary, EScribe only (`16`), so the HID effort is only worth resuming for *writing* a config.
+> **The mod may still be carrying a bench config.** The last thing uploaded to it in this session was
+> `BENCH-HC-v06.ecig` (or `-v05`), which **locks fake resistances on all four profiles** - 0.4637,
+> 0.4504, 0.6500, 0.3141 - so the replace warning could be exercised. Those do not match the cup in
+> the deck. **Reload the real config before using the device.** Do not fire on a bench config.
 
-**Device state:** on COM4. Serial Output Format was switched to CSV for the stream test and **switched
-back to Plain Text Serial**, so the query tool works as-is. The cup is locked at 0.464 ohm.
+**Repository is fully pushed.** `main` matches `origin/main`; nothing is held back. The earlier
+instruction to keep work local was discharged on 2026-10-30.
 
-**Theme Designer mapping** (`15`) is most of the way done: Appearance, Screens, the condition editor,
-Memo, Chart and most of Field. The checklist there says exactly where to resume - Field's Source
-`Options` and `Type...` dialogs.
+**Current builds:** Color Themes **`v2.2.05`**, High Contrast **`v1.2.06`**.
 
-**The one correction worth remembering:** conditions are authored as expressions and compiled to the
-`<Compare>` XML we hand-write. Operator 64 *is* AND; the bug was using 129 for equality where the tool
-emits 4 (`07` #25). Several things in this repo are built around the wrong belief and are listed under
-deferred simplifications below.
+| | State |
+|---|---|
+| Replace warning, Color Themes | **Works. Proven on hardware** - `plain / RED / RED / plain` across four locked profiles |
+| Replace warning, High Contrast (OHMS page) | **Works. Proven on hardware** - same four readings |
+| Replace warning on the HC home screen (v1.2.06) | **Built, NOT tested.** The profile name carries it; `BENCH-HC-v06.ecig` is ready |
+| 380F starting temperature | **Confirmed on hardware** |
+| Omega OHMS screen (HC) | **Confirmed working** - glyph, child screen, LOCK, MEASURE, BACK all render |
+| New-coil `LOCK?` row hidden until measured | Confirmed on High Contrast; **not retested on Color Themes** |
+
+### The big result: a per-control child limit
+
+The replace warning failed all day and cost three wrong diagnoses. The cause was **not** any operator.
+**A control may hold at most 8 children; extras are silently dropped.** The ohms readout had 11 - a
+default, six theme colors and four threshold variants - and was the only control in either theme above
+8. Its last three were never evaluated, so both cancels and the 0.6 threshold did nothing, and
+swapping operator 129 for 4 changed nothing because **those variants were not being read at all**.
+
+Full write-up in `07` #26. The ceiling of 8 is **inferred** from where every other control in the
+theme stops, not measured - what is proven is that the chain works at five children.
+
+### Operator facts, corrected
+
+Three earlier beliefs in this repo were wrong. The current, evidence-backed position:
+
+| | Status |
+|---|---|
+| **Last match wins** | **Confirmed on-device.** Two always-true variants, the second took effect. `04` and `10` were right all along; a mid-session claim of first-match-wins was wrong |
+| **Operator 4 = equality** | **Confirmed on-device.** An isolated variant on `profile == 4` fired on exactly profile 4 |
+| **Operator 129** | **Untested, not disproved.** It was blamed for the warning failure and that was premature. EScribe does zero the `RefValue` of any `129` compare it round-trips, so prefer 4 |
+| **Operator 64 (AND)** | Does not work on this firmware (`10`). Unchanged |
+
+### Device access: read and control are solved
+
+`tools/dna-hid.py` talks to the board over the **vendor HID interface** - no EScribe, no COM port, no
+driver install, just `pip install hidapi` (installed). Framing and traps in `16`; the command table is
+`17` and applies to both transports. `tools/dna-query.ps1` does the same over serial, and
+`tools/dna-stream.ps1` captures the 64 Hz CSV.
+
+**Writing a config is not solved.** The architecture is mapped as far as reflection can take it
+(`16`): the chain is `.ecig root -> GGQ -> DWB.JSL -> PYB -> PYB.UE -> Programmer`, and it is blocked
+on obtaining a live `PYB`, because the flash layout is **derived per config** rather than declared per
+board. `probe_pyb.py` sits in Downloads, inert, ready to run in Device Monitor.
+
+### Device and environment state
+
+- Mod on **COM4**, HID interface `MI_00` present. Serial Output Format is **Plain Text Serial**.
+- `hidapi` installed into Python 3.14.
+- `gh auth setup-git` has been run, so git push works from the terminal.
+- **Claude can now push this repo itself** - a scoped rule in `~/.claude/settings.json` allows
+  `git -C "<repo path>" push:*` for this repository only.
+
+### What is genuinely untested
+
+1. **v1.2.06** - the High Contrast home-screen warning. Built and verified by inspection only.
+2. **`ResampleOhms` from a child screen** - the MEASURE button on the HC OHMS page is present but was
+   never pressed.
+3. **The new-coil screen on Color Themes** - the hidden `LOCK?` row was only confirmed on High Contrast.
+4. Whether the 8-child ceiling is exactly 8.
 
 ## Tracked: the new-atomizer screen
 
@@ -50,24 +100,37 @@ past a threshold and watch the screen. That tests the layering far faster than s
 
 ## Tracked: programmatic device access
 
-Scoped in `16`, not working yet. The goal is reading and writing the mod from a command line so a change
-can be uploaded and checked without the GUI in the loop.
+Detail in `16`. Rewritten 2026-10-30 - the previous version of this section listed four next steps
+that are all now answered.
 
-**HID is the target** - it is how every config this project has shipped reached the mod. Next steps, in
-order:
+### Done: read and control
 
-1. Find how the device **stream** is opened and handed to the programmer object. Likely an enumeration
-   API in `DEScribe.Core` or `DimensionEngineering.Common`, neither of which reflects cleanly yet.
-2. Work out how to construct the `NHW` cache argument that `CreateForDNAColor()` wants.
-3. Identify the **read** path. `AX(IProgressMonitor, bool[])` is the candidate.
-4. Only then consider a write - dry-run flag first, with a known-good backup to hand.
+`tools/dna-hid.py` drives the board over the **vendor HID interface** with no EScribe, no COM port and
+no driver install. The framing is `report id 0x01 | magic 0xDE | length | payload`, the payload is the
+same plain-text protocol as the serial console (`17`), and it works on macOS where the CDC port does
+not. `tools/dna-query.ps1` is the serial equivalent.
 
-If obfuscation makes that too slow, **USB capture** of EScribe doing a real transfer gives the protocol
-exactly and cannot fail; it just needs USBPcap or similar installed.
+### Not done: writing a config
 
-**The serial port is the fallback** (`13`, `16`). A listen-only probe is written and has never been run -
-it needs the mod plugged in, writes nothing, and would tell us whether that port is a text console at
-all. Cheap, and worth doing next time the mod is connected.
+The architecture is mapped as far as reflection goes:
+
+    .ecig root element -> GGQ -> DWB.JSL(?, ggq, null) -> PYB -> PYB.UE(func, int) -> Programmer
+
+- `GGQ` is the board identity and comes straight out of our own files - every `.ecig` opens with
+  `<DESabertooth Device="109" Version="1">`, which is the *device code 109.1* in EScribe's debug log.
+- **Blocked on obtaining a live `PYB`.** `DWB` is abstract, so it cannot be constructed out of process,
+  and EScribe's device layer does not initialize outside its own process.
+- **Do not hand-build a `LogicalLayout`.** The flash map is *derived per config* from feature IDs, not
+  declared per board (`16`), so inventing offsets is inventing where to write live flash. The
+  `dontUpload` dry-run validates the plan it is given, not whether that plan fits the board.
+
+**Next step:** run `probe_pyb.py` (in Downloads, inert) from Device Monitor. It walks EScribe's own
+statics for a live `PYB` or `FWB` and dumps `PE()` - the real region sizes, offsets and paging. One
+report settles whether this route is viable.
+
+If that fails, the fallback is a **USB capture** of a real upload. Much of the groundwork exists: the
+transfer framing is already decoded from a passive capture (`16`,
+`tools/samples/hid-upload-capture.log`), and only the PC-to-device direction is missing.
 
 ## Firmware limitations (not fixable in a theme)
 - No "at temperature" indicator: Heating Time Done (353173506) is rejected by the DNA100C firmware.
@@ -86,7 +149,7 @@ all. Cheap, and worth doing next time the mod is connected.
 - **High Contrast screenshots are stale.** `../high-contrast/images/menu-screen.png` and `new-coil-screen.png` predate the ohms row; there is no screenshot of the OHMS screen yet.
 - Whether every chip warning (e.g., "Temp Protected") appears in the status line.
 
-- **Replace-the-cup color warning** (both themes, 2026-10-30). Two things unverified: `<Compare Operator="2">` (greater-than) is listed **H**, not confirmed, and this is its first use in either theme — if it does not resolve, the number simply never turns red; and the thresholds rest on a **single** observed failure (0.43 → 0.61Ω), scaled to the Quest by ratio rather than measured. Limits and derivation in `02`.
+- ~~**Replace-the-cup color warning**~~ **RESOLVED 2026-10-30 - it works on both themes.** The cause was the 8-child ceiling (`07` #26), not any operator. The investigation below is kept as history. Original entry: two things unverified: `<Compare Operator="2">` (greater-than) is listed **H**, not confirmed, and this is its first use in either theme — if it does not resolve, the number simply never turns red; and the thresholds rest on a **single** observed failure (0.43 → 0.61Ω), scaled to the Quest by ratio rather than measured. Limits and derivation in `02`.
 
   **Registered test design, 2026-10-30 — RESULT: neither went red.** Throwaway test themes were built with deliberately wrong limits — profile 1 (XL) **0.40**, profile 2 (QUEST) **0.90** — against known-good locked readings of XL 0.4637Ω and Quest 0.3141Ω. **Revised method:** neither cup was locked on the mod and the loose `.ecigprofile` files all carry `ColdResistance2 = 0`, so a theme-only test could not fire at all. The test configs instead **pre-lock both cups** (`EvolvWDColdOhms` 256/257 set to the readings above, `EvolvWDOhmLock` 1) so the test is self-contained and independent of device state. They lock a resistance that may not match the fitted cup, so they are bench tests: do not fire, and reload the real config afterwards. Published configs keep cold ohms 0 per `12`. Three outcomes, decided before running:
   - XL red, Quest white → operator 2 **and** the AND gating both work, as designed.
@@ -105,10 +168,17 @@ all. Cheap, and worth doing next time the mod is connected.
 
   **Read on the XL profile at 0.464:** the value went **red** (`ohms > 0.4`, flat) and MEASURE went **cyan** (`ohms < 0.9`, flat), but LOCKED stayed yellow (`AND(profile == 1, ohms > 0.4)`). So **operator 2 works, operator 3 works, and the field is readable in a `Compare`** — only the nested AND fails. **Rebuilt 2026-10-30** as five layered flat variants instead (`07` #24); the layering is now the untested part, though every operator in it is confirmed on-device. `10` corrected: operator 2 promoted to confirmed, operator 64 marked as not working on this firmware.
 
-## Registered test card: v2.2.03 / v1.2.03 - WRITTEN BEFORE RUNNING, 2026-10-30
+## HISTORY: the replace-warning investigation, 2026-10-30
+
+> Everything from here to *High Contrast bench test* is the **record of how the bug was found**, kept
+> because the wrong turns are instructive and because each test was registered before it ran. It
+> contains conclusions that were later overturned - they are marked where they appear. **For the
+> settled answer, read the top of this file and `07` #26.**
+
+### Registered test card: v2.2.03 / v1.2.03 - WRITTEN BEFORE RUNNING
 
 Neither build has been on hardware since the replace warning was rebuilt as layered flat variants.
-This is the gate on pushing. Designed first, outcomes fixed before the run, per the rule that a verdict
+Designed first, outcomes fixed before the run, per the rule that a verdict
 is not recorded until it has been waited out.
 
 ### What is actually at risk
@@ -174,7 +244,7 @@ dismisses the screen, the lock row is only reachable on a later swap, and a firs
 from the OHMS page (HC) or PROFILE (CT). Either way nothing can lock 0, so this decides documentation,
 not correctness.
 
-### Result - RUN 2026-10-30: operator 129 is dead
+### Result - RUN 2026-10-30 (conclusion later OVERTURNED: the operator was not the cause)
 
 | Profile | Locked | Expected | Observed |
 |---|---|---|---|

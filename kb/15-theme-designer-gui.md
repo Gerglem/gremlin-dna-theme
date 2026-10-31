@@ -392,18 +392,28 @@ wanted source on a throwaway screen, and a single save yields them all.
 Worked from screenshots. Each item says **what to capture** and **what it would settle**, so this can be
 picked up cold. Tick them off here as they land.
 
-### 1. The `and` encoding - do this first
+### 1. The `and` encoding - still open, but no longer urgent
 
-Not mapping, an experiment, and it is worth more than the rest combined.
+**Downgraded 2026-10-30.** This was listed as worth more than the rest combined, because the replace
+warning was failing and a real AND looked like the fix. It was not: the cause was the 8-child ceiling
+(`07` #26), and the warning now works with layered flat variants.
 
-**Capture:** in the GUI, add a condition to any control using two measurements joined by `and` - for
-example cold ohms above a number `and` profile equals 1. Save the theme to a file.
+Still worth doing eventually - a real AND would let the four-variant chain collapse to two, and
+`09` tracks that as a deferred simplification.
 
-**Settles:** how the tool compiles `and`. Our `<Compare Operator="64">` guess does not work on hardware
-(`09`), so every multi-term condition in this repo is currently written as a chain of single-term variants
-that emulate one (`07` #24). With the real encoding, the per-cup replace warning collapses from five
-layers to one condition. While doing it, also try an expression comparing **two measurements** to see
-whether field-to-field comparison compiles.
+**Capture:** add a condition joining two measurements with `and` - cold ohms above a number `and`
+profile equals 1 - and save the theme.
+
+**Settles:** what the tool compiles `and` to. Our `<Compare Operator="64">` does not work on this
+firmware. While there, try comparing **two measurements** to re-confirm the editor rejects it
+("Must be a number!").
+
+### A thing this GUI will not tell you
+
+**A control may hold at most 8 children.** Theme Designer does not warn, the preview does not show it,
+and the mod silently ignores the extras. Count children before debugging conditions - see `07` #26,
+which cost a full day. The ceiling is inferred from where every other control in our theme stops, not
+measured.
 
 ### 2. ~~Memo and Chart~~ - DONE
 
