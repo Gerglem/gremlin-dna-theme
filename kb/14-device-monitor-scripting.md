@@ -2,7 +2,26 @@
 
 EScribe's **Device Monitor** embeds an IronPython interpreter that can read and write the mod's live state over USB. For this project it is the fastest way to test a theme condition and the only practical way to gather data on how a cup ages.
 
-Source: EScribe's own help, `%APPDATA%\Evolv\EScribe Suite\Help\dm_*.html`. See `13` for the rest of the install tree.
+Sources: EScribe's own help, `%APPDATA%\Evolv\EScribe Suite\Help\dm_*.html`, and **`EScribe.pdf`
+in the install root**, which documents the same API with Evolv's own worked examples. See `13` for
+the rest of the install tree.
+
+> **The PDF is old - treat its variable list as a floor, not a ceiling (noted 2026-10-31).** It
+> identifies itself as the **"EScribe 1.2 SP5 Manual"**, which predates this install
+> (build 2026-05-14) by roughly a decade. The API it documents is still correct as far as it goes -
+> `ECig.Puff()`, the indexer, `Recorder`, `Serial.Open` all match - but **the list of variables
+> cannot be assumed complete.**
+>
+> This matters for one tracked item specifically. `09` records the board over-temperature warning
+> as blocked because `Board Temperature` is not a Device Monitor variable, so firing and reading
+> board temperature cannot happen at once (EScribe holds the HID handle exclusively, `16`). That
+> conclusion rests on this decade-old list. **Check the live UI before accepting it:** Device
+> Monitor's graph has a checkbox per available variable, and that list is authoritative for the
+> build actually installed. If `Board Temperature` is there now, the item is not blocked at all.
+>
+> The firmware changelog (`13`) shows the exposed set did grow - SP9 added "Expose Board and Room
+> Temperature in terms of Celsius" for DNA 60 and DNA 250 - so the old list is demonstrably
+> incomplete for later devices.
 
 ---
 
@@ -164,4 +183,7 @@ Run it whenever a cup is locked and the thresholds stop being an extrapolation. 
 
 - Device Monitor talks to the **live device over USB**. It reads and writes running state, not the stored config — it is not a way to edit a `.ecig`.
 - It exposes no theme or screen state, so it cannot report which variant the firmware chose. It changes the inputs; you still read the answer off the screen.
-- The variable list above is everything it offers. Anything else a theme can display has to be tested the slow way.
+- The variable list above is everything the **1.2 SP5 manual** offers, and that manual is a decade
+  older than this install (see the note at the top). Verify against Device Monitor's own graph
+  checkboxes before concluding a variable is unavailable. Anything genuinely absent has to be
+  tested the slow way.

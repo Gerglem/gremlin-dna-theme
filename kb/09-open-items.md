@@ -463,7 +463,9 @@ rejects it.
 >   whole comparison can be scripted today - see `14` and the method below.
 > - **Board over-temperature is blocked, but on reading, not firing.** `Board Temperature` is
 >   **not** in Device Monitor's variable list (`14` -> Limits: "the variable list above is
->   everything it offers"). `tools/dna-hid.py` does read it, as `T=GET BOARD` - 106.59 F during
+>   everything it offers" - **but that list comes from a decade-old manual, so check Device
+>   Monitor's own graph checkboxes before accepting this; see the note at the top of `14`).
+>   `tools/dna-hid.py` does read it, as `T=GET BOARD` - 106.59 F during
 >   today's session - but EScribe holds the HID handle **exclusively** (established today), so
 >   Device Monitor cannot be firing while `dna-hid.py` reads. That contention is the real
 >   obstacle, and `tools/probe_contention.py` is the existing work on it.
