@@ -24,6 +24,13 @@ OUT = _HERE
 # Both variants carry the SAME wattage so that an A -> B upload has only the
 # temperature left to write. Changing two fields at once makes the capture
 # uninterpretable - that mistake cost a round on 2026-10-31.
+#
+# WARNING: loading these ZEROES the profile's locked cold resistance. The
+# source profile has no <ColdResistance2> element, and kb/03 is explicit that
+# "loading a profile does not lock ohms". A profile showing Cold Ohms 0.000
+# WILL NOT FIRE, so a profile used for these probes is unusable for firing
+# tests until its ohms are measured and locked again. Do not run them on a
+# profile you want to vape or fire on - that cost a void run on 2026-10-31.
 VARIANTS = [
     ("A", "40", "380"),
     ("B", "40", "420"),

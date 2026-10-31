@@ -530,6 +530,24 @@ That is unambiguous temperature sensing, and it is what a Clean profile gets com
 | **B** - `Temperature` flat, or equal to `Temperature Set` | The profile is in wattage mode and the temperature controls are **not conditioned on TC** | Larger: condition the controls, do not just fix the row |
 | **C** - no movement in `Power` or `Current` either | The puff never fired; the run is void | Re-run, check the atomizer and that the profile allows firing |
 
+**First attempt, 2026-10-31: outcome C, void, for two setup reasons.** Every live value read
+`NaN`. Neither cause is about the protocol or the script:
+
+- The mod was **`Charging, Locked`**. A locked device does not fire, so `ECig.Puff()` did nothing.
+- It ran on **profile 2**, one of the `tools/probes/` profiles, whose **`Cold Ohms` read 0.000**.
+  Loading a probe profile **zeroes the locked cold resistance** - the source profile carries no
+  `<ColdResistance2>` and `03` says plainly that loading a profile does not lock ohms. A profile
+  with no locked ohms will not fire.
+
+**Checklist before any firing run:**
+
+1. Mod **unlocked** (the status bar must not say `Locked`).
+2. **`Cold Ohms` non-zero** in Device Monitor.
+3. A profile **not overwritten by a probe** - profiles 1 and 2 were, on 2026-10-31.
+
+The script and method are sound: the control run minutes earlier fired cleanly at
+`Cold Ohms 0.458`, reaching 212.49 F.
+
 **The screen question is separate and stays separate.** Device Monitor exposes no theme state
 (`14`), so none of this explains why the live row *blanks*. That still needs a photograph during a
 fire. Outcome A plus a blanking row means the condition is wrong; outcome B plus a blanking row is
