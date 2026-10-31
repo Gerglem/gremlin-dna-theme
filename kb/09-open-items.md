@@ -606,9 +606,51 @@ Blocking constraint: the home-screen controls at `(0, 0)` on designs 1 and 2 are
 8-child ceiling** (`18`), and `tools/check-theme.py` warns about it. Adding a condition to an
 existing control is free; adding a variant is not. Work out which before editing.
 
-**Still outstanding:** a photograph of the Clean profile's screen during a fire, to confirm the
-blank row matches this data rather than something else being wrong. The data says what the device
-reports; only the screen says what the theme drew.
+### Confirmed on screen, 2026-10-31. The item is CLOSED.
+
+Photographs of `DTv5XL-Clean` before and during a fire:
+
+| | Idle | Firing |
+|---|---|---|
+| Live temperature row | **`450F`** (large) | **absent** |
+| `SET` row | `SET 450F` | `SET 450F` |
+| Power / time | 37W / 120s | 37W / 120s |
+| Ohms rows | `0.462` / `0.527` | `0.522` / `0.522` |
+| Status box | - | `Firing` |
+
+**The idle row reads `450F`, identical to the `SET 450F` row immediately beneath it.** The large
+row is drawing the *setpoint*, duplicating the row below it. On firing it switches to the live
+value, finds none, and blanks. Jake: **"It takes about a second for the temp to disappear after
+clocking the fire button"** - that delay is the `UpdateLive` transition from setpoint to live.
+
+So the mechanism is confirmed end to end, from both sides: the device reports no temperature
+(CSV), and the control behaves exactly as `05` specifies for field `16778242` given that
+(screen). Nothing else is wrong.
+
+**Two further observations from the same photographs:**
+
+1. **The idle display is redundant even when it "works".** `450F` directly above `SET 450F` tells
+   the user the same number twice. Even on a profile that *was* in temperature control, the large
+   row would be duplicate information whenever the device is idle.
+2. **The live-ohms row holds a stale value at idle.** The screen shows `0.527` while Device
+   Monitor reports `Live Ohms = NaN` for the same state. The theme is drawing the last reading
+   from the previous fire. **This is the artifact that misled the 2026-10-30 analysis** - the
+   idle `cold 0.524 / live 0.874` pair that looked like evidence of temperature sensing was a
+   stale post-fire reading, now caught directly.
+
+   Minor open question, not worth a build on its own: while firing, both ohm rows read `0.522`,
+   where the upper row shows locked cold ohms `0.462` at idle. Worth checking what the upper row
+   is bound to when the next theme change is made anyway.
+
+### The fix
+
+**Condition the temperature controls on the profile being in temperature control.** Fixing only
+the live row would leave `SET 450F` on a profile that cannot honour it, and would leave the
+duplicate-at-idle problem untouched.
+
+Blocking constraint: the home-screen controls at `(0, 0)` on designs 1 and 2 are **already at the
+8-child ceiling** (`18`), and `tools/check-theme.py` warns. Adding a condition to an existing
+control is free; adding a variant is not.
 
 ## Tracked: a board over-temperature warning
 
