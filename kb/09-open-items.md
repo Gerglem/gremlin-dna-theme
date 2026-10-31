@@ -563,7 +563,7 @@ a special case because they are just members of their cup's family.
 
 ## Registered: v2.3.01 - the single-variant warning, with the tint back - WRITTEN BEFORE RUNNING
 
-`Downloads\BENCH-CT-v2301.ecig`, the four standard locked resistances. **Do not fire.**
+`Downloads\BENCH-CT-v2302.ecig`, the four standard locked resistances. Rebuilt from `v2.3.02` so the bench config carries the same profile settings as the release; the theme is unchanged from `v2.3.01`, so the expected results below stand. **Do not fire.**
 
 Two controls changed and nothing else, verified by diffing every control in all eleven screens:
 
