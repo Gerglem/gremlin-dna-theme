@@ -62,6 +62,61 @@ If that is right it has consequences — stale screens would still occupy memory
 
 ---
 
+## There is a Linux build, and it ships the SAME assemblies (2026-10-31)
+
+Evolv publishes a Linux build of the suite - `SetupEScribe2_SP77_INT.run`, announced by James
+(Evolv) on the forum in 2017 and maintained since. It runs on **Mono + GTK**.
+
+**The assemblies are byte-identical to the Windows install.** Verified by SHA-256 on the three
+that matter:
+
+| Assembly | Bytes | Linux vs Windows |
+|---|---|---|
+| `DimensionEngineering.dll` | 192,016 | **identical** |
+| `Evolv.DNA.dll` | 55,664 | **identical** |
+| `DEScribe.Upload.dll` | 76,872 | **identical** |
+
+**Why this matters.** Everything in `16` about the protocol layer - `A.ICT` (CRC-16/CCITT-FALSE)
+and `A.DQT` (the framed `Stream`) - is pure managed code with no Windows-specific half. It can be
+loaded and driven from **any** .NET or Mono host, headless, including a Raspberry Pi (the
+installer ships `aarch64` and `armhf` platform binaries alongside x86-64).
+
+That is the natural home for the `v4.0` Bluetooth bridge: a small Linux host running Mono can
+drive Evolv's own transport directly, instead of reimplementing the framing and the CRC.
+
+### Getting the assemblies without installing
+
+The `.run` is a **Makeself 2.3.1** archive wrapping **MojoSetup**. The payload is a plain
+(uncompressed) tar appended after the shell header, so it extracts without executing anything:
+
+    TOTAL=$(stat -c%s SetupEScribe2_SP77_INT.run)     # 48,940,445
+    tail -c 48926720 SetupEScribe2_SP77_INT.run > payload.tar
+    tar xf payload.tar ./common/data/escribe-suite.zip
+    unzip escribe-suite.zip
+
+`filesizes=` in the header gives the payload length; the offset is total minus that. The app is
+`common/data/escribe-suite.zip`; `ecigstats.zip` and the two launcher zips sit beside it.
+
+### Running it, from the forum thread
+
+| | |
+|---|---|
+| Dependencies | `mono-complete`, `ca-certificates-mono`, `libgtk-3-0` (Debian/Ubuntu names) |
+| Installs to | `~/.local/opt/evolv/escribe-suite`, launcher `launch-escribe-suite` |
+| **Do not use sudo** | it creates a root-owned `~/.local/opt` and the installer then fails for the real user. Later versions error out if run under sudo |
+| Device permissions | Linux does not know what a DNA is, so only root may open it by default |
+
+The udev rule, all on one line, as `/etc/udev/rules.d/10-local.rules`:
+
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="268b", MODE:="0666"
+
+Newer builds offer to create this themselves when they cannot reach the device. Note the rule
+keys on **vendor 268b**, the same VID this repo uses throughout.
+
+Without the certificate store the suite still runs, but Get Information, Restore Defaults and
+ECigStats sync - anything reaching Evolv's servers - will not work. That is fine for protocol
+work, which needs none of it.
+
 ## The Production Utility - a second way onto the device
 
 `Production Utility - Evolv DNA 100 Color` is a separate application in the suite, not a mode of
