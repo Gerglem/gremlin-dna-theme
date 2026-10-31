@@ -1,7 +1,8 @@
 # Step 3: open a link, get a Programmer that HAS the layout, and READ.
 #
 # Run: Device Monitor -> Diagnostics -> Advanced -> Run Script.
-# Needs `dna-port.txt` beside EScribe's working directory (see PORT_FILE).
+# **Plug the mod in.** The port string is derived from the connected device;
+# `dna-port.txt` is only a fallback if enumeration fails.
 #
 # ---------------------------------------------------------------------------
 # WHY A READ AND NOT THE DRY RUN
@@ -96,13 +97,37 @@ except Exception, e:
 say("")
 say("=== B. open the HID link ===")
 pot = None
+# Build the port string from the connected device rather than from a file.
+# kb/16: "HID:" + base64 of "<vid_decimal>'<pid_decimal>'<serial>". Deriving it
+# here means no setup step, and the serial stays in memory - it is never
+# written to disk, printed, or put anywhere near the repo (kb/12).
+port = None
 try:
-    port = open(PORT_FILE).read().strip()
-    say("  port string: %d chars, starts %r  (serial not printed)" % (len(port), port[:4]))
+    clr.AddReference("HidSharp")
+    from HidSharp import DeviceList
+    from System import Convert
+    from System.Text import Encoding
+    devs = [d for d in DeviceList.Local.GetHidDevices(0x268B, 0x0433)]
+    say("  HID devices matching VID_268B/PID_0433: %d" % len(devs))
+    for d in devs:
+        try: serial = d.GetSerialNumber()
+        except Exception: serial = None
+        if not serial: continue
+        raw = "%d'%d'%s" % (9867, 1075, serial)
+        port = "HID:" + Convert.ToBase64String(Encoding.UTF8.GetBytes(raw))
+        say("  built the port string from the live device (%d chars, serial not printed)" % len(port))
+        break
 except Exception, e:
-    say("  cannot read %s: %s" % (PORT_FILE, e))
-    say("  Create it with one line: HID: plus the base64 described in kb/16.")
-    _write(); raise SystemExit
+    say("  could not enumerate HID devices: %s" % e)
+
+if port is None:
+    try:
+        port = open(PORT_FILE).read().strip()
+        say("  fell back to %s (%d chars)" % (PORT_FILE, len(port)))
+    except Exception, e:
+        say("  no port string: enumeration found nothing and %s is absent (%s)" % (PORT_FILE, e))
+        say("  Is the mod plugged in? kb/16: all four interfaces read Present: False when it is not.")
+        _write(); raise SystemExit
 try:
     fe2 = None
     for t in (T.get("BGQ"), T.get("POT")):
