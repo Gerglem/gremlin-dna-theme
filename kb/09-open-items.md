@@ -14,7 +14,7 @@ Rewritten 2026-10-30 at the end of a long session. Everything below is current.
 **Repository is fully pushed.** `main` matches `origin/main`; nothing is held back. The earlier
 instruction to keep work local was discharged on 2026-10-30.
 
-**Current builds:** Color Themes **`v2.3.00` - DO NOT RELY ON IT**, the low-battery red flashes and is painted over (below); High Contrast **`v1.2.07`**, untested. **Neither has been on hardware.** `v2.3.00` carries the battery split (`18` A); `v1.2.06` carries the home-screen warning.
+**Current builds:** Color Themes **`v2.2.05`** (v2.3.00 withdrawn, see below), High Contrast **`v1.2.07`**, untested. **Neither has been on hardware.** `v2.3.00` carries the battery split (`18` A); `v1.2.06` carries the home-screen warning.
 
 | | State |
 |---|---|
@@ -71,12 +71,12 @@ board. `tools/probe_pyb.py` is inert and ready to run in Device Monitor.
 
 1. **v1.2.06** - the High Contrast home-screen warning. Built and verified by inspection only; the
    test is **registered and the bench file built** (card below), awaiting a sitting with the mod.
-1b. **v2.3.00** - the battery split. Needs the pack under 15%, or the level written from Device
-   Monitor (`14`), to confirm the red bar still appears. Nothing else in that build changed.
+1b. ~~**v2.3.00** - the battery split.~~ **Answered 2026-10-30:** child 8 works, the split was
+   unnecessary, and the build is withdrawn.
 2. ~~**`ResampleOhms` from a child screen.**~~ **Confirmed 2026-10-30** - MEASURE on the HC OHMS page
    re-reads the current value. `Action` works from a child screen.
 3. **The new-coil screen on Color Themes** - the hidden `LOCK?` row was only confirmed on High Contrast.
-4. Whether the 8-child ceiling is exactly 8.
+4. Where the child ceiling actually falls. **8 renders and 11 truncates**, both observed; 9 and 10 are unmeasured.
 
 ## Tracked: the new-atomizer screen
 
@@ -195,7 +195,12 @@ Themes spends 6 of its 8 slots on tinting**: 27 controls carry a default plus th
 are mutually exclusive), but they leave **one usable slot** on any tinted control, which is the real
 structural limit of the v2 design.
 
-### Defect 1: the low-battery warning sits on the ceiling - FIXED in v2.3.00, untested
+### Defect 1: the low-battery warning sits on the ceiling - WITHDRAWN, it was never broken
+
+> **Overturned on hardware 2026-10-30.** Child 8 is evaluated; the banner renders and persists. The
+> analysis below is correct that the warning *sits* on the ceiling and wrong that the ceiling cuts
+> below it. `v2.3.00`, which "fixed" it, is withdrawn as a regression. Kept as the record of how a
+> plausible inference became a shipped build.
 
 > Split per `18` principle 1 on 2026-10-30 and shipped as `v2.3.00`. The red `Picture` now sits on its own
 > 2-child control over the same rect, next in both file order and `ZOrder`. Verified off-device: the only
@@ -423,6 +428,52 @@ shape on purpose, and the failure is the tool working, not a defect in the bench
 
 The battery **percentage text** on the lock screen is the positive control, as before: it is a plain
 2-child control that was never at risk, so it going red proves the upload landed.
+
+### RESULT, 2026-10-30: child 8 works. The defect was not a defect, and v2.3.00 is withdrawn
+
+| Screen | Construction | Observed |
+|---|---|---|
+| **Main** (design 2) | `v2.2.05` shape - LOW BATTERY banner as child **8** | **Red, and it stays.** Operator: *"It stays like this"* |
+| **Lock** (design 1) | split, overlay is a **live red `Meter`** | **Red, and it renders** - banner plus the 99% in red |
+
+**Child 8 is evaluated.** The ceiling is at least 8, so the control that the audit called a live
+defect was working the whole time. The low-battery warning has never been broken.
+
+That makes **`v2.3.00` a regression introduced to fix nothing**, and it is withdrawn: the build files
+are removed and `release/RELEASE-NOTES.md` says so. `v2.2.05` is the Color Themes release again.
+
+**What the ceiling actually is:** 8 renders, 11 truncates (`07` #26). The cutoff is somewhere in 9..10
+and still unmeasured - but the number that matters for day-to-day work is that **8 is safe**, which is
+now observed rather than inferred.
+
+**Second confirmation of the repaint rule.** The live-`Meter` overlay on the lock screen *did* render,
+where `v2.3.00`'s static `Picture` overlay flashed and vanished. So an overlay survives if it has its
+own live source and is re-dirtied with the control beneath it. That is a real finding, and it is
+**not needed** - the single-control design is simpler, already shipping, and now proven.
+
+### The cost of this episode, recorded honestly
+
+Three builds and two bench uploads were spent fixing something that was not broken. The audit was
+right that child 8 *could* be truncated and wrong that it *was*, and the gap between those two is
+exactly the test that was never run. The 8-child ceiling from `07` #26 was inferred from where other
+controls happened to stop, and that inference got treated as a measurement for most of a day.
+
+**What was actually gained:** the ceiling is now measured at the only value anyone needed, the repaint
+rule is understood and written down, `tools/check-theme.py` exists and is correct, and `18`'s central
+principle was wrong in a way that would have been far more expensive to discover while rewriting all
+four replace-warning chains.
+
+### What this reopens
+
+With 8 confirmed, `1 default + 6 tints + 1 warning variant = 8` is **viable**, so `18` C is alive
+again - the ohms row could keep its theme color if the whole replace warning collapses to a *single*
+variant. That needs
+
+    red if OR( ohms > 0.6, AND( ohms > 0.41, OR(profile == 2, profile == 4) ) )
+
+which is **nesting depth 4**, and only depth 2 is proven (`09`, the operator-64 probe). One probe
+would settle it. The cheaper fallback, if deep nesting fails, is to drop one tint from that control
+and use two variants at depth 2 - one theme loses its ohms tint rather than all six.
 
 ## Registered: does operator 64 (AND) actually work? - WRITTEN BEFORE RUNNING, 2026-10-30
 

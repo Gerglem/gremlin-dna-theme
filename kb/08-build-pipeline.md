@@ -51,8 +51,7 @@ None of these are part of the build; they are how a build gets checked.
 | `dna-query.ps1` | The same read-out over the USB serial port |
 | `dna-stream.ps1` | Captures the 64 Hz CSV stream (switch EScribe to CSV first) |
 | `make-bench-config.py` | Builds a throwaway `.ecig` that pre-locks a chosen resistance on each profile. **The only way to exercise the replace warning**, since published configs ship cold ohms 0 (`12`). Do not fire on one; do not commit one |
-| `check-theme.py` | **Structural gate. Run before any release.** Fails a build where a control exceeds the child ceiling, where a condition sits in the last slot, or where theme tints and conditions share a control (`18` principle 1). Reads both `.ecigtheme` and `.ecig` |
-| `split-low-battery-warning.py` | The v2.3 migration: moves the low-battery red off the battery meter onto its own control. Idempotent, and a no-op on themes that do not need it. **Port this into the private kit** so the generator and the shipped files agree |
+| `check-theme.py` | **Structural gate. Run before any release.** Fails a build where any control exceeds the child ceiling of 8 (`07` #26, measured) and warns at exactly 8, where a seventh color theme would break it. Reads both `.ecigtheme` and `.ecig` |
 | `probe_pyb.py` | Inert IronPython probe for EScribe's Device Monitor. Hunts a live `PYB` and dumps the real flash layout - the next step for programmatic upload (`16`) |
 | `probe_open_link.py` | The proven recipe for opening a device link from inside EScribe and attaching it to a Programmer (`16`). Reads the port string from `dna-port.txt` |
 | `samples/` | A real puff recording, and the device-to-PC half of a settings upload |
@@ -76,9 +75,3 @@ Rebuilding an unchanged source tree gives a theme that is **not** byte-identical
 1. Make the change → build `Gremlin-v<next>.ecigtheme` → render a preview → present the file.
 2. Upload it to the mod, test, and photograph the screen.
 3. Bisect when something fails (test builds that remove one variable at a time).
-
-## The kit and the shipped files can now disagree
-
-`v2.3` is the first release **edited from the previous release's XML rather than generated** - the build kit is private and not in this repo, and `08` already names a released theme plus the format docs as the supported fallback. The consequence is that the kit no longer reproduces what ships until the battery split is ported into `screens_skinned.py`. `tools/split-low-battery-warning.py` is the exact change, and `tools/check-theme.py` will fail the kit's output until it is made.
-
-Worth knowing while porting: **the `.ecigtheme` carries no `ZOrder` at all** on designs 1 and 2, while the `.ecig` carries `ZOrder` 1..n on design 1 and none on design 2. EScribe appears to add it on import. The migration therefore places the new control next in *file order* as well as next in `ZOrder`, so it is correct whichever one the firmware honours - `10` rates that question **H**, not confirmed.

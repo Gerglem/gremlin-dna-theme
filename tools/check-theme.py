@@ -1,25 +1,33 @@
-"""Structural checks a Gremlin theme must pass before it ships.
+"""Structural check a Gremlin theme must pass before it ships.
 
-Both bugs this project has had were invisible on inspection and cost a day
-each, so they are checked mechanically here rather than remembered:
+The one defect this catches is the one that cost a day: **a control holds a
+limited number of children and drops the rest silently** (`kb/07` #26). The
+ohms readout had 11 - a default, six theme tints and four threshold variants -
+and its last three were never evaluated, so the replace warning failed under
+every operator anyone tried.
 
-  * a control holds at most ~8 children and **drops the rest silently**
-    (`kb/07` #26) - which is how the replace warning failed;
-  * a warning has to be the *last* matching variant to beat a theme tint, so
-    putting both on one control parks the warning on that ceiling
-    (`kb/09` audit, `kb/18` principle 1) - which is how the low-battery red
-    ended up at child 8 of 8.
+**8 children is confirmed working on hardware** (2026-10-30): the LOW BATTERY
+banner is the 8th child of the battery meter, and it renders and persists. So
+the cutoff is somewhere in 9..10. A control at 8 is safe but has no room left,
+which matters - adding a seventh color theme would push 27 controls to 8 and
+the two already at 8 to 9.
 
 Works on a `.ecigtheme` (screens are base64 in `UIDesign@Data`) or a `.ecig`
 (screens are escaped XML in `Feature Name="EvolvUIDesign"`).
 
-    python check-theme.py ../release/gremlin_v2.3.00_theme.ecigtheme
+    python check-theme.py ../release/gremlin_v2.2.05_theme.ecigtheme
     python check-theme.py ../release/*.ecig          # exit 1 if anything fails
 
-Point it at the build you are about to ship. Run over the whole `release/`
-folder it will also fail **superseded** builds that are kept for their links -
-`v2.2.05` carries exactly the defect this tool exists to catch - and that is
-the right answer, not a false positive.
+Point it at the build you are about to ship.
+
+**What this deliberately does NOT flag:** a control carrying both theme tints
+and a conditional variant. An earlier version failed that combination, on the
+theory that a warning belongs on its own control at a higher `ZOrder`. Hardware
+disagreed twice. The overlay draws once and is then painted over, because the
+control beneath is bound to a live value and repaints while the static overlay
+above it is never re-dirtied. Mixing is the **correct** construction for a live
+readout - a repainting control re-evaluates its whole variant list and re-picks
+its winning child every frame - and the only real rule is the child count.
 """
 
 import base64
@@ -27,12 +35,11 @@ import sys
 import zipfile
 import xml.etree.ElementTree as ET
 
-# The six Color Theme User Toggles (`kb/09`). A variant gated on one of these
-# with Operator="1" against 0 is cosmetic: at most one can match at a time.
+# The six Color Theme User Toggles (`kb/09`), kept only to label the report.
 TINT_FIELDS = {"10", "266", "778", "1034", "1290", "1546"}
 
-CEILING = 8       # inferred, not measured (`kb/07` #26)
-HEADROOM = 7      # a control above this has no room for another theme
+CEILING = 8       # confirmed working on hardware; 11 is known to truncate
+HEADROOM = 7      # above this, one more theme breaks the control
 
 
 def screens(path):
@@ -50,15 +57,10 @@ def screens(path):
                 yield str(int(f.get("Index")) + 1), ET.fromstring(f.text)
 
 
-def kind(child):
-    """'default', 'tint' or 'functional'."""
-    cmp_ = child.find("Compare")
-    if cmp_ is None:
-        return "default"
-    if (cmp_.get("Operator") == "1" and cmp_.get("Field") in TINT_FIELDS
-            and cmp_.get("RefValue") == "0" and not list(cmp_)):
-        return "tint"
-    return "functional"
+def is_tint(child):
+    c = child.find("Compare")
+    return (c is not None and c.get("Operator") == "1" and c.get("Field") in TINT_FIELDS
+            and c.get("RefValue") == "0" and not list(c))
 
 
 def check(path):
@@ -66,26 +68,14 @@ def check(path):
     for did, screen in screens(path):
         for ctl in screen.iter("Control"):
             kids = list(ctl)
-            kinds = [kind(k) for k in kids]
             where = f"design {did} control at {ctl.get('Location')}"
-
             if len(kids) > CEILING:
                 errors.append(f"{where}: {len(kids)} children, over the ceiling of {CEILING} "
                               f"- the last {len(kids) - CEILING} are dropped silently (kb/07 #26)")
-
-            if "tint" in kinds and "functional" in kinds:
-                pos = [i + 1 for i, k in enumerate(kinds) if k == "functional"]
-                errors.append(f"{where}: mixes theme tints with conditions at child {pos} of "
-                              f"{len(kids)} - split them by ZOrder (kb/18 principle 1)")
-
-            for i, k in enumerate(kinds):
-                if k == "functional" and i + 1 > HEADROOM:
-                    errors.append(f"{where}: a condition sits at child {i + 1} of {len(kids)}, "
-                                  f"one theme away from being dropped")
-
-            if len(kids) > HEADROOM and not errors[-1:] or len(kids) == CEILING:
-                if len(kids) >= CEILING:
-                    warnings.append(f"{where}: {len(kids)} children, no headroom left")
+            elif len(kids) > HEADROOM:
+                tints = sum(1 for k in kids if is_tint(k))
+                warnings.append(f"{where}: {len(kids)} children ({tints} theme tints), at the "
+                                f"ceiling - a seventh theme would break this control")
     return errors, warnings
 
 

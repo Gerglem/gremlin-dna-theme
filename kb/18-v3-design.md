@@ -18,26 +18,32 @@ Two facts set the whole design:
 
 ## The two principles
 
-### 1. Cosmetic and functional variants never share a control
+### 1. ~~Cosmetic and functional variants never share a control~~ — WRONG, withdrawn 2026-10-30
 
-This is the real lesson of both bugs this project has had. A warning has to be the **last** matching
-variant to beat a tint, and last is exactly where truncation happens - so every warning on a tinted
-control sits on the ceiling by construction.
+This was the centrepiece of the v3 design and **hardware refuted it twice in one sitting.**
 
-> **Rule: a control carries tints, or it carries conditions. Not both.**
+The idea was that a warning has to be the *last* matching variant to beat a tint, so every warning on
+a tinted control sits on the ceiling by construction - and the fix was to split it onto its own
+control over the same rectangle, ordered by `ZOrder`. Shipped as `v2.3.00` for the battery meter.
+
+**What actually happens:** the overlay draws on the first paint and is then painted over. The meters
+beneath it are bound to the live battery level, so they repaint; the static overlay above them is
+never re-dirtied, so it is never redrawn (`09`).
+
+And the premise was false anyway. **Child 8 is evaluated** - the single-control design was working
+the whole time, and `v2.3.00` is withdrawn as a regression.
+
+> **The rule that replaces it: keep every control at 8 children or fewer, and put conditions in the
+> same control as the tints.**
 >
-> **Qualified 2026-10-30, on hardware: this only works over a control that does not repaint.**
-> The battery split drew correctly and was then painted over, because the meters under it are
-> bound to the live battery level and the static overlay above them was never re-dirtied
-> (`09`). A control that repaints re-evaluates its whole variant list, which is exactly why the
-> single-control design works on a live value. An overlay needs its own live source to survive
-> - untested - or the control has to give up its tints. **Do not apply this principle to a live
-> readout until that is settled.**
-> Where both are wanted, split them into two controls over the same rectangle, ordered by `ZOrder`,
-> and keep each one small.
-
-The payoff is that **adding a seventh color theme can never again silently kill a warning** - the
-failure mode that is currently live on the battery meter.
+> A control that repaints re-evaluates its whole variant list and re-picks its winning child every
+> frame, which is exactly what makes the single-control design correct on a live readout. Splitting
+> is not a tool for getting around the ceiling; the ceiling is a hard budget, and the only way to
+> spend less of it is to write fewer variants - which is what principle 2 is for.
+>
+> An overlay *can* work if it carries its own live source and is re-dirtied alongside the control
+> beneath it (the lock-screen `Meter` did render). That is a curiosity, not a technique: it is more
+> fragile than the thing it replaces.
 
 ### 2. Conditions are written as conditions
 
@@ -47,24 +53,11 @@ limitation that turned out not to exist.
 
 ## Changes, in the order they should be built
 
-### A. Split the battery meter — ⚠️ SHIPPED IN v2.3.00 AND FOUND BROKEN ON HARDWARE
+### A. ~~Split the battery meter~~ — WITHDRAWN. It was never broken
 
-The only functional variant above position 5 in the whole theme is the low-battery red, at **child 8
-of 8** on both the home and session screens (`09`, audit). In `v1.0` it was child 2 of 2.
-
-Leave the seven tint `Meter`s where they are. Move the red `Picture` to its own control over the same
-rect at the next `ZOrder`, with a default `<Hidden/>` ahead of it:
-
-```xml
-<Control Location="(0, 0)" Size="(80, 7)" ZOrder="1">   <!-- unchanged: default + 6 tints -->
-<Control Location="(0, 0)" Size="(80, 7)" ZOrder="2">
-  <Hidden />
-  <Picture …><Compare Operator="3" Field="65537" RefValue="15" /></Picture>
-</Control>
-```
-
-Two children, **no new images** - the child is already a `Picture`. Largest control in the theme drops
-from 8 to 7. Do this one first; it is the only change that fixes something currently broken-or-nearly.
+Shipped as `v2.3.00`, found to flash and vanish, then found to have been fixing nothing: child 8 is
+evaluated and the LOW BATTERY banner has always rendered (`09`). Build files removed, `v2.2.05`
+restored as the release. The only durable output is `tools/check-theme.py` and a measured ceiling.
 
 ### B. Rewrite the replace warning as real conditions
 
@@ -97,40 +90,32 @@ disappear with it.
 Four children instead of five, and - more to the point - **no cancels, no cleaning-profile special
 case, and the intent is legible**. `09`'s deferred "collapse to two layers" item is superseded by this.
 
-### C. The one question that decides the theme tint  ⚠️ in doubt — the ohms row is live too, see A
+### C. The one question that decides the theme tint — REOPENED, and now worth testing
 
 At four children the ohms row cannot carry the six tints (4 + 6 = 10, over the ceiling), so it **keeps
 reading white** - the compromise `07` #24 accepted.
 
-**Collapsing the condition does not solve this, and an earlier draft of this section was wrong to say
-it did.** Even a single warning variant gives `1 default + 6 tints + 1 variant = 8` - the exact number
-the ceiling is inferred to be and the one principle 1 exists to stay away from. Folding the Quest
-rules together with an `OR` inside an `AND` is therefore not worth testing for this purpose: the best
-case still lands on the ceiling.
-
-**The route that does work is principle 1 - split the control**, the same shape as the battery fix:
+**Since 8 is now confirmed to render, `1 default + 6 tints + 1 variant = 8` is viable.** An earlier
+draft called this dead on the grounds that 8 was the untrusted ceiling; it is no longer untrusted.
+So the tint can come back **if the whole warning collapses to a single variant**:
 
 ```xml
-<Control Location="(16, 88)" … ZOrder="n">     <!-- default + 6 tints = 7 children -->
-<Control Location="(16, 88)" … ZOrder="n+1">   <!-- 2 children -->
-  <Hidden />
-  <Field … Color="(1, 0.24, 0.16, 1)">  <the warning condition>  </Field>
-</Control>
+<Compare Operator="65">
+  <Compare Operator="2" Field="<ohms>" RefValue="0.6" />
+  <Compare Operator="64">
+    <Compare Operator="2" Field="<ohms>" RefValue="0.41" />
+    <Compare Operator="65">
+      <Compare Operator="4" Field="262151" RefValue="2" />
+      <Compare Operator="4" Field="262151" RefValue="4" />
+    </Compare>
+  </Compare>
+</Compare>
 ```
 
-Below the limit the overlay is hidden and the tinted value shows. Over it, the red `Field` draws the
-**same value, same font, same position** on top of the tinted one.
-
-**The open question is whether that double-draw is clean.** Two controls painting identical glyphs at
-identical coordinates should coincide exactly - the fonts are bitmaps with no anti-aliasing (`07`) -
-but nothing in either theme has ever drawn text over text, so it is unproven. If it renders cleanly,
-**every tinted control in the theme can carry a warning**, and the ceiling stops constraining the
-design at all. If it smears, the ohms row keeps its white compromise and nothing else changes.
-
-Note the battery fix (A) is the *easy* case of the same question - a `Picture` over a `Meter`, where
-the overlay covers its rect opaquely, and there is already precedent: the firing indicator at
-`(2, 118)` on the session screen is a `Hidden` + `Picture` control overlaying the status line, and it
-ships and works. Text over text is the case with no precedent.
+That is **nesting depth 4, and only depth 2 is proven.** One probe settles it, built like the
+operator-64 probe: its own small control, a flat positive control beside it, registered first.
+**Fallback if deep nesting fails:** drop one tint from that control and use two variants at depth 2,
+so one theme loses its ohms tint instead of all six.
 
 ### D. Make the ceiling mechanical, not remembered  ✅ DONE - `tools/check-theme.py`
 
