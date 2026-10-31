@@ -101,7 +101,7 @@ disappear with it.
 Four children instead of five, and - more to the point - **no cancels, no cleaning-profile special
 case, and the intent is legible**. `09`'s deferred "collapse to two layers" item is superseded by this.
 
-### C. The one question that decides the theme tint — ANSWERED. Depth 4 works; the tint is back in v2.3.01
+### C. The one question that decides the theme tint — DONE. Depth 4 works; the tint is back and proven in v2.3.02
 
 At four children the ohms row cannot carry the six tints (4 + 6 = 10, over the ceiling), so it **keeps
 reading white** - the compromise `07` #24 accepted.

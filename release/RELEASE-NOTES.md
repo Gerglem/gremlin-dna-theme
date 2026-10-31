@@ -45,7 +45,8 @@ the mod measures your own coil the first time you fire it.
 
 ## v2.3
 
-**Not yet tested on hardware.**
+Tested on a DNA100C across all four profiles: the resistance reads in the active theme's
+color on both V5 XL profiles and red on both QuestCup profiles at resistances past their limits.
 
 **The resistance on the home screen keeps your theme's color again.** v2.2 had to give that up. The
 worn-cup warning needs a different limit per cup, and the only way to express that at the time was a

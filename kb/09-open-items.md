@@ -14,11 +14,11 @@ Rewritten 2026-10-30 at the end of a long session. Everything below is current.
 **Repository is fully pushed.** `main` matches `origin/main`; nothing is held back. The earlier
 instruction to keep work local was discharged on 2026-10-30.
 
-**Current builds:** Color Themes **`v2.3.02`**, High Contrast **`v1.2.08`**. Both carry Jake's own profile settings (below). The *themes* in them are `v2.3.01` (untested - `v2.2.05` is the proven fallback) and `v1.2.07` (proven on hardware). **Neither has been on hardware.** `v2.3.00` carries the battery split (`18` A); `v1.2.06` carries the home-screen warning.
+**Current builds:** Color Themes **`v2.3.02`**, High Contrast **`v1.2.08`**. **Both proven on hardware**, both carrying Jake's own profile settings. Every control in either build has now been seen working except the new-coil prompt, which is tracked below. **Neither has been on hardware.** `v2.3.00` carries the battery split (`18` A); `v1.2.06` carries the home-screen warning.
 
 | | State |
 |---|---|
-| Replace warning, Color Themes | **Works. Proven on hardware** - `plain / RED / RED / plain` across four locked profiles |
+| Replace warning, Color Themes | **Works. Proven on hardware** - `v2.3.02` reads theme / RED / RED / theme, one variant, tint intact |
 | Replace warning, High Contrast (OHMS page) | **Works. Proven on hardware** - same four readings |
 | Replace warning on the HC home screen | **Works. Proven on hardware** - `v1.2.07` reads dark / RED / RED / dark with the highlight on. `v1.2.06` had the right logic in an invisible color. Old entry: The profile name carries it. **Test registered and bench file built 2026-10-30** - `Downloads\BENCH-HC-HOME-WARNING.ecig`, card below |
 | 380F starting temperature | **Confirmed on hardware** |
@@ -621,6 +621,33 @@ release - everything else behaves exactly as `v2.2.05` did.
 - **Profile 1 white rather than themed** - the tints are not matching on that control; compare their
   `Compare` fields against the live-ohms row they were copied from.
 - **Nothing themed anywhere** - the theme toggle is off; not a result.
+
+### RESULT, 2026-10-30: theme / RED / RED / theme, exactly as registered. v2.3.02 passes
+
+| Profile | Locked | Expected | Observed |
+|---|---|---|---|
+| 1 DTv5XL | 0.4637 | theme color | **cyan** - the Retro resistance tint |
+| 2 Quest | 0.4504 | RED | **RED** |
+| 3 DTv5XL-Clean | 0.6500 | RED | **RED** |
+| 4 Quest-Clean | 0.3141 | theme color | **cyan** |
+
+**The tint is back.** On `v2.2.05` the cold-ohms row read white while the live-ohms row beneath it
+took the theme color; they now match, which is the visible proof that the compromise `07` #24
+accepted is over. One variant instead of five left room for the six tints, and the warning still wins
+because it is last.
+
+**Three things are settled by this run.**
+
+1. **The single-variant warning works in a shipping build.** `OR(ohms > 0.6, AND(ohms > 0.41,
+   OR(p==2, p==4)))` - nesting depth 4, operators 2, 4, 64 and 65 - fires on exactly the two profiles
+   it should. The depth-4 probe is confirmed outside a probe.
+2. **The theme tint and the warning coexist on one control at 8 children**, with the warning as child
+   8. That is the arrangement `18`'s withdrawn principle 1 said to avoid, and it is correct.
+3. **The profile settings landed.** Visible in the same photos: 385 F and 120 s on DTv5XL and Quest,
+   36 W / 25 W / 38 W / 35 W, 45 s on Quest-Clean, and the shorter **Quest** and **Quest-Clean** names.
+
+**Every control in both shipping builds is now proven on hardware** except the new-coil prompt, which
+is tracked separately below and was not exercised by this run.
 
 ## Registered: how deep can nesting go, and is OR n-ary? - WRITTEN BEFORE RUNNING, 2026-10-30
 
