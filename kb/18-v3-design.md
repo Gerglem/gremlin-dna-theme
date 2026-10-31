@@ -59,7 +59,9 @@ Shipped as `v2.3.00`, found to flash and vanish, then found to have been fixing 
 evaluated and the LOW BATTERY banner has always rendered (`09`). Build files removed, `v2.2.05`
 restored as the release. The only durable output is `tools/check-theme.py` and a measured ceiling.
 
-### B. Rewrite the replace warning as real conditions
+### B. Rewrite the replace warning as real conditions  — shape VALIDATED on hardware
+
+> Applied to the High Contrast home screen as `v1.2.07` and **confirmed on a DNA100C** (`09`): the `AND` fires correctly per profile, and the flat `ohms > 0.6` covers the XL family with no profile test. The three remaining controls - the HC OHMS page, the HC new-coil prompt and the Color Themes home screen - still carry the old five-layer chains.
 
 Four controls, both themes. The current five-layer chain becomes **three flat variants, all at nesting
 depth 2, every operator confirmed on-device**:

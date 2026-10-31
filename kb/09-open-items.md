@@ -14,13 +14,13 @@ Rewritten 2026-10-30 at the end of a long session. Everything below is current.
 **Repository is fully pushed.** `main` matches `origin/main`; nothing is held back. The earlier
 instruction to keep work local was discharged on 2026-10-30.
 
-**Current builds:** Color Themes **`v2.2.05`** (v2.3.00 withdrawn, see below), High Contrast **`v1.2.07`**, untested. **Neither has been on hardware.** `v2.3.00` carries the battery split (`18` A); `v1.2.06` carries the home-screen warning.
+**Current builds:** Color Themes **`v2.2.05`** (v2.3.00 withdrawn, see below), High Contrast **`v1.2.07`**. **Both proven on hardware.** **Neither has been on hardware.** `v2.3.00` carries the battery split (`18` A); `v1.2.06` carries the home-screen warning.
 
 | | State |
 |---|---|
 | Replace warning, Color Themes | **Works. Proven on hardware** - `plain / RED / RED / plain` across four locked profiles |
 | Replace warning, High Contrast (OHMS page) | **Works. Proven on hardware** - same four readings |
-| Replace warning on the HC home screen | **Logic proven on hardware 2026-10-30; v1.2.06 showed it in an invisible color.** Recut as `v1.2.07`, untested. Old entry: The profile name carries it. **Test registered and bench file built 2026-10-30** - `Downloads\BENCH-HC-HOME-WARNING.ecig`, card below |
+| Replace warning on the HC home screen | **Works. Proven on hardware** - `v1.2.07` reads dark / RED / RED / dark with the highlight on. `v1.2.06` had the right logic in an invisible color. Old entry: The profile name carries it. **Test registered and bench file built 2026-10-30** - `Downloads\BENCH-HC-HOME-WARNING.ecig`, card below |
 | 380F starting temperature | **Confirmed on hardware** |
 | Omega OHMS screen (HC) | **Confirmed working** - glyph, child screen, LOCK, MEASURE, BACK all render |
 | New-coil `LOCK?` row hidden until measured | Confirmed on High Contrast; **not retested on Color Themes** |
@@ -45,7 +45,7 @@ Three earlier beliefs in this repo were wrong. The current, evidence-backed posi
 | **Last match wins** | **Confirmed on-device.** Two always-true variants, the second took effect. `04` and `10` were right all along; a mid-session claim of first-match-wins was wrong |
 | **Operator 4 = equality** | **Confirmed on-device.** An isolated variant on `profile == 4` fired on exactly profile 4 |
 | **Operator 129** | **Untested, not disproved.** It was blamed for the warning failure and that was premature. EScribe does zero the `RefValue` of any `129` compare it round-trips, so prefer 4 |
-| **Operator 64 (AND)** / **65 (OR)** | **Both confirmed on-device 2026-10-30**, nesting operators `2` and `4`, on a four-profile truth table. The earlier "does not work" verdict was confounded by operator `129` inside every AND ever uploaded. **Nesting depth 2 is proven; depth 3 is not** |
+| **Operator 64 (AND)** / **65 (OR)** | **Both confirmed on-device 2026-10-30**, nesting operators `2` and `4`, on a four-profile truth table - and **64 is now proven in a shipping chain too**, on the `v1.2.07` home screen. The earlier "does not work" verdict was confounded by operator `129` inside every AND ever uploaded. **Nesting depth 2 is proven; depth 3 and 4 are not** |
 
 ### Device access: read and control are solved
 
@@ -69,8 +69,8 @@ board. `tools/probe_pyb.py` is inert and ready to run in Device Monitor.
 
 ### What is genuinely untested
 
-1. **v1.2.06** - the High Contrast home-screen warning. Built and verified by inspection only; the
-   test is **registered and the bench file built** (card below), awaiting a sitting with the mod.
+1. ~~**The High Contrast home-screen warning.**~~ **Confirmed 2026-10-30** - `v1.2.07` reads
+   dark / RED / RED / dark, with the menu item highlighted. `v1.2.06` is superseded.
 1b. ~~**v2.3.00** - the battery split.~~ **Answered 2026-10-30:** child 8 works, the split was
    unnecessary, and the build is withdrawn.
 2. ~~**`ResampleOhms` from a child screen.**~~ **Confirmed 2026-10-30** - MEASURE on the HC OHMS page
@@ -474,6 +474,32 @@ variant. That needs
 which is **nesting depth 4**, and only depth 2 is proven (`09`, the operator-64 probe). One probe
 would settle it. The cheaper fallback, if deep nesting fails, is to drop one tint from that control
 and use two variants at depth 2 - one theme loses its ohms tint rather than all six.
+
+### RESULT, 2026-10-30: dark / RED / RED / dark, exactly as registered. v1.2.07 passes
+
+| Profile | Locked | Expected | Observed |
+|---|---|---|---|
+| 1 XL | 0.4637 | dark | **dark and legible** |
+| 2 QUEST | 0.4504 | RED | **RED** |
+| 3 XL CLEAN | 0.6500 | RED | **RED** |
+| 4 Q CLEAN | 0.3141 | dark | **dark and legible** |
+
+Read **with the menu item highlighted**, which is the case that broke `v1.2.06` - so the fix is
+confirmed under the condition that caused the bug, not around it.
+
+**Three things are settled by this one run.**
+
+1. **The white-on-white bug is fixed.** Profile 1 reads like Q CLEAN always did. Deleting the cancel
+   layers was the right call: nothing but RED is ever set now, so the default is never overridden and
+   the highlight cannot swallow it.
+2. **Operator 64 works in a shipping chain**, not just on a 2-child probe control. Profiles 2 and 4
+   carry `AND(ohms > 0.41, profile == N)`; it fired on 2 at 0.4504 and correctly stayed silent on 4 at
+   0.3141, which is the AND evaluating *both* children in a real theme.
+3. **The flat `ohms > 0.6` covers the XL family** with no profile test at all - profile 3 reds from it
+   while profile 1 does not. That is what let the two cancel layers and the cleaning-profile special
+   case be deleted outright, and it is the shape `18` B prescribes for the remaining three controls.
+
+`v1.2.07` is the High Contrast release and is **proven on hardware**.
 
 ## Registered: does operator 64 (AND) actually work? - WRITTEN BEFORE RUNNING, 2026-10-30
 

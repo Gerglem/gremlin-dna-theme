@@ -11,8 +11,6 @@ The current release is **v1.2.07**. The color theme has its own notes in [`../re
 
 ## v1.2.07
 
-**Not yet tested on hardware.**
-
 **The worn-cup warning on the home screen now works.** v1.2.06 put it there — the profile name turns
 red once the fitted cup's resistance passes its replace limit — but on the one profile the warning is
 meant to leave alone, the name disappeared instead. The name sits on a white highlight band, and the
@@ -25,6 +23,10 @@ cleaning profile unless the cup is genuinely past its limit.
 
 Nothing else in the theme changed — the OHMS page, the new-coil prompt, and every other screen are
 identical to v1.2.06.
+
+Tested on a DNA100C across all four profiles with the menu item highlighted — the case that caused the
+v1.2.06 bug — and the name reads normally on both V5 XL profiles and red on both QuestCup profiles at
+the resistances that should trigger it.
 
 **Also confirmed in testing:** **MEASURE** on the Ω OHMS page re-reads the resistance. It has been on
 that screen since v1.2 and had never actually been pressed.
