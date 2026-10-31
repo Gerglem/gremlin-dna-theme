@@ -340,6 +340,23 @@ constructors, which is about as inert as a constructor gets, and **nothing in it
 so the worst realistic outcome is another EScribe restart (`07` #28). It deliberately **does not call
 `JSL`**; that is the next step and belongs in its own run once the right class is known.
 
+### Probe 5 result: the 25 subclasses are **stateless**
+
+All 25 constructed without a single failure - so those constructors are inert in fact, not just in
+theory, which is worth knowing before anything heavier is tried. But **none has a simple instance
+field**. The board identity is not stored on the `DWB`.
+
+That leaves two possibilities, and `tools/probe_dwb3.py` tests both in one run:
+
+- **a property returning a constant** - the natural idiom for a stateless descriptor, and the first
+  thing it checks;
+- **a dispatcher elsewhere** that maps a device code or a `GGQ` to the right subclass. Part 2 looks
+  for one by metadata: any method returning a `DWB`/`XWB`, or taking a `GGQ`. If that exists, the
+  subclass never needs identifying by hand - we ask for the right one.
+
+If neither turns anything up, the remaining option is to call `JSL` on each of the 25 with our own
+`GGQ` and keep whichever returns a usable `PYB` - crude, but decisive, and still device-free.
+
 ### Where this leaves a push
 
 **Further away than it looked, and deliberately not attempted.** Driving `PerformUpload` with a
