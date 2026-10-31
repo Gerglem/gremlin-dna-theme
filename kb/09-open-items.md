@@ -193,6 +193,40 @@ so that change works.
 **Fixed in v2.2.04 / v1.2.04** by switching the profile equality to **operator 4**, which is what
 Theme Designer compiles `=` to (`10`). Awaiting a re-run of this same card.
 
+## Registered probe: variant precedence - WRITTEN BEFORE RUNNING, 2026-10-30
+
+The v.04 retest returned **exactly the same four colors as v.03** - profile 1 still red at 0.464 - so
+**switching the operator changed nothing, and "operator 129 is dead" was a premature conclusion.** The
+operator may never have been the cause.
+
+Three candidates remain, and the earlier test cannot separate them:
+
+| | Hypothesis |
+|---|---|
+| **a** | **First matching variant wins**, not the last. `04` and `10` both assert last-match-wins and **neither cites evidence**. No shipped feature ever tested it: the six theme toggles and the low-battery bar can only have one variant true at a time, so the replace warning is the first control with two simultaneous matches |
+| **b** | **A matching variant with no `Color` paints nothing**, so the earlier red survives. The two cancel variants carry **no Color attribute at all** - `07` #24 claims they set an explicit color, and the built files disagree with the doc |
+| **c** | **Operator 4 does not match either** |
+
+### The probe
+
+`PROBE-variants.ecig`, built from v2.2.04 with the same four locked resistances, changes two things:
+
+- **A** - the two ohms cancel variants are given an explicit **white** `(1, 1, 1, 1)`.
+- **B** - the session-time field (top right, `60s`) gets a **green** variant on `profile == 4` with
+  operator 4 and **no competing variant**, isolating the operator.
+
+### Outcomes, fixed before running
+
+| Profile 1 ohms | Profile 4 session time | Conclusion |
+|---|---|---|
+| **white** | green | **b** - the missing color was the bug. Ship it: give every cancel layer an explicit color |
+| **red** | **green** | **a** - operator 4 works, so precedence is first-match-wins. `04` and `10` are wrong and the warning needs redesigning around it |
+| **red** | not green | **c** - operator 4 does not match either. Equality may be unavailable; fall back to a design using only `1`, `2`, `3` |
+| white | not green | contradictory - re-run before concluding anything |
+
+Note **b** and **a** are not exclusive in principle, but the probe separates what matters: whether a
+later variant can repaint at all.
+
 ## Deferred: known simplifications
 
 Things we know are now unnecessarily complicated, held back deliberately so they can be applied in one
