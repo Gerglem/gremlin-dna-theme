@@ -1256,6 +1256,25 @@ One safety change worth noting: probe 2 reads **fields only, never properties.**
 run arbitrary code; a field read cannot. Probe 1 read static properties, which was a small risk when
 the search was narrow and not one worth carrying into a wide walk.
 
+### Probe 3, run 1 - blind, not negative
+
+    === roots ===
+      could not enumerate forms: No module named Forms
+      global ECig / Device / Directories / UI / Script
+    objects visited: 277   finished the graph
+    === live PYB / FWB found: 0 ===
+
+**Device Monitor's IronPython host does not reference `System.Windows.Forms`.** So the probe never
+reached the form tree - the one place a document is actually likely to live - and walked only five
+shallow globals. 277 objects and the graph exhausted says those globals go nowhere, not that no `PYB`
+exists.
+
+Fixed in place: the probe now `clr.AddReference`s WinForms before enumerating (falling back to
+`AddReferenceByPartialName`), prints the full type of every root, and says explicitly if
+`OpenForms` comes back **empty** - which would mean the script host does not share EScribe's UI
+thread, and would itself be the finding. **A second empty result will mean something; the first one
+did not.**
+
 ## The roadmap, and what each version means
 
 Set by Jake 2026-10-30. The point of the device-access work is not the protocol; it is these two

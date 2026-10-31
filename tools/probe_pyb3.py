@@ -18,6 +18,11 @@
 # types are therefore already initialized - and walks instance fields from
 # there. No static constructor can fire as a result.
 #
+# Revised after its first run: Device Monitor's host does not reference
+# System.Windows.Forms, so the form tree was never reached. It now loads that
+# assembly explicitly and reports the type of every root, so a second empty
+# result means something rather than nothing.
+#
 # It is also interruptible: it sets Script.WillStopIfAsked and checks
 # Script.ShouldStop, so Device Monitor's Stop button works, and it gives up on
 # its own after TIME_BUDGET seconds. Probe 2 did neither, which is why Stop did
@@ -73,21 +78,42 @@ def out_of_time():
 # ---- roots: live objects only ----
 roots = []
 say("=== roots ===")
-try:
-    from System.Windows.Forms import Application
-    for f in Application.OpenForms:
-        try: nm = "%s(%r)" % (f.GetType().Name, f.Text)
-        except: nm = f.GetType().Name
-        say("  form " + nm)
-        roots.append((nm, f))
-except Exception, e:
-    say("  could not enumerate forms: %s" % e)
+
+# WinForms is NOT referenced by default in Device Monitor's host - the first
+# run of this probe reported "No module named Forms" and so never reached the
+# form tree at all, which is where a document actually lives. Load it first.
+Application = None
+for how in ("AddReference", "AddReferenceByPartialName"):
+    if Application is not None: break
+    try:
+        getattr(clr, how)("System.Windows.Forms")
+        from System.Windows.Forms import Application
+        say("  loaded System.Windows.Forms via clr.%s" % how)
+    except Exception, e:
+        say("  clr.%s failed: %s" % (how, e))
+
+if Application is not None:
+    try:
+        n = 0
+        for f in Application.OpenForms:
+            try: nm = "%s(%r)" % (f.GetType().Name, f.Text)
+            except: nm = f.GetType().Name
+            say("  form " + nm)
+            roots.append((nm, f))
+            n += 1
+        if n == 0:
+            say("  Application.OpenForms is EMPTY - the script host may not share"
+                " EScribe's UI thread, so forms are not a usable root here")
+    except Exception, e:
+        say("  enumerating OpenForms failed: %s" % e)
 
 for extra in ("ECig", "Device", "Directories", "UI", "Script"):
     try:
         v = eval(extra)
         if v is not None:
-            say("  global " + extra)
+            try: tn = "%s.%s" % (v.GetType().Namespace, v.GetType().Name)
+            except: tn = "?"
+            say("  global %-12s : %s" % (extra, tn))
             roots.append((extra, v))
     except:
         pass
