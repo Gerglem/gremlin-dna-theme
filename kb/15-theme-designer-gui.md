@@ -368,6 +368,48 @@ mark each group. Reconstructed:
 - **USB** - Connected (To a PC, As a Power Bank), Power Bank (Automatic, Capable)
 - **User** - Toggle N
 
+### The Atomizer section, transcribed from the dropdown itself
+
+`en.po` is an incomplete list - it says so in its own header - so the entries below were read off the
+open dropdown (`../images/escribe/escribe-td-setting-field-source-list.png`). This is the **visible
+portion only**, scrolled to the top; the list continues past `New Coil`. Entries marked * are in the
+GUI but **absent from `en.po`**, so the reconstructed tree above misses them.
+
+| Source | |
+|---|---|
+| `Atomizer -> Power` | |
+| `Atomizer -> Temperature` | |
+| `Atomizer -> Replay` | * |
+| `Atomizer -> Replay -> Warmth` | |
+| `Atomizer -> Temp Protect` | |
+| `Atomizer -> Temp Sensing Detect` | |
+| `Atomizer -> Temp Sensing Material` | |
+| `Atomizer -> Heating Time` | * |
+| `Atomizer -> Heating Time Done` | * - and note `07` #1: this field is rejected on upload |
+| `Atomizer -> Preheat/Boost -> Punch` | |
+| `Atomizer -> Preheat -> Enable` | |
+| `Atomizer -> Preheat -> Power` | |
+| `Atomizer -> Preheat -> Punch` | |
+| `Atomizer -> Preheat -> Temperature` | |
+| `Atomizer -> Boost -> Enable` | |
+| `Atomizer -> Boost -> Punch` | |
+| `Atomizer -> Session Mode -> Enable` | * |
+| `Atomizer -> Session Mode -> Time` | * |
+| `Atomizer -> Coil -> Cold Ohms` | field `17825794` |
+| `Atomizer -> Coil -> Cold Ohms @ 70F` | * - the drift-free input for the replace warning (`09`) |
+| `Atomizer -> Coil -> Cold Temperature` | |
+| `Atomizer -> Coil -> Material` | |
+| `Atomizer -> Coil -> Ohm Lock` | field `85196802` |
+| `Atomizer -> Can Boost` | |
+| `Atomizer -> Can Preheat` | |
+| `Atomizer -> Can Replay` | * |
+| `Atomizer -> Can Replay Now` | * |
+| `Atomizer -> New Coil -> Cold Ohms` | field `1048579` |
+| `Atomizer -> New Coil -> Cold Ohms @ 70F` | * |
+
+**The hierarchy is in the label text, not in the widget** - it is one flat list whose entries read
+`Atomizer -> Coil -> Cold Ohms`. There is no tree to expand.
+
 Three of these change what is possible, and are logged as ideas in `09`:
 
 - **`User -> Toggle N`** - user-defined on/off flags. The Language tab carries a `Toggles` section with
