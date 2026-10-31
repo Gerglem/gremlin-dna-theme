@@ -117,6 +117,27 @@ Without the certificate store the suite still runs, but Get Information, Restore
 ECigStats sync - anything reaching Evolv's servers - will not work. That is fine for protocol
 work, which needs none of it.
 
+### The platform split is visible in the install itself
+
+The Windows install already ships all three platform layers side by side:
+
+    DimensionEngineering.Common.Windows.dll     320 KB
+    DimensionEngineering.Common.MacOS.dll       258 KB
+    DimensionEngineering.Common.UnixGtk.dll     256 KB
+    DimensionEngineering.Common.Platform.dll     35 KB   <- the abstraction
+
+So the OS-specific code is isolated in `DimensionEngineering.Common.<Platform>.dll`, and
+everything above it - including the protocol layer in `16` - is shared. The byte-identical Linux
+assemblies confirm this from the other direction.
+
+**There is a macOS build too** (`SetupEScribe2_SP77_INT.pkg`). It is a **xar** archive: a
+gzipped XML table of contents after a 28-byte header, then a heap holding one gzipped **cpio**
+payload per component (`EScribe Suite.pkg` and `ECigStats.pkg`). The offsets in the TOC are
+relative to the end of the TOC. Its assemblies were **not** hash-compared - the Linux result and
+the platform split above already establish the point, so it was not worth the parser.
+
+
+
 ## The Production Utility - a second way onto the device
 
 `Production Utility - Evolv DNA 100 Color` is a separate application in the suite, not a mode of
