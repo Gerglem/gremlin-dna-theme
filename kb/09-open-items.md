@@ -1330,19 +1330,22 @@ it over, upload it by hand in EScribe, photograph the screen. With a push, the l
 **Reading and driving the mod is already solved** - `tools/dna-hid.py` talks to the board over the
 vendor HID interface with no EScribe, no COM port and no driver install (`16`, `17`).
 
-**Writing a config is not**, and the blocker is specific and known. The chain is
+**Writing a config is not yet - but the blocker is gone.** The chain, now walked end to end with no
+device attached (`16`):
 
-    .ecig root -> GGQ -> DWB.JSL(?, ggq, null) -> PYB -> PYB.UE(func, int) -> Programmer
+    XElement of an .ecig root -> GGQ [109.1] -> UWB.FE(ggq) -> A.WIA -> JSL(None, ggq, None) -> PYB
+    pyb.PE() -> LogicalLayout: 3 regions, 200,448 bytes used
 
-and it stops at **obtaining a live `PYB`**: `DWB` is abstract, so it cannot be constructed out of
-process, and the flash layout is **derived per config from feature IDs** rather than declared per
-board - which is exactly why a layout must not be hand-built (`16`). Writing to a guessed offset is
-writing to live flash at an address nobody verified.
+The flash layout is still **derived per config from feature IDs** rather than declared per board,
+and a hand-built one would still mean writing to live flash at an address nobody verified - that
+warning has not softened. The difference is that **it no longer has to be hand-built**: Evolv's own
+code hands it over on request, in-process, with the mod unplugged.
 
-**The next action is one script.** `tools/probe_pyb.py` is inert and ready: run it from EScribe's
-Device Monitor -> Diagnostics -> Advanced -> Run Script. It walks EScribe's own statics for a live
-`PYB` or `FWB` and dumps `PE()` - the real region sizes, offsets, paging and read-only flags. **One
-report settles whether this route is viable.** If it is not, the fallback is a USB capture of a real
+What is left is the write itself: `PYB.UE(func, int)` for a Programmer that carries this layout, a
+link, then the vendor's `dontUpload` dry run, then a real upload.
+
+**Done - seven probes on 2026-10-30, the last of which returned the layout (`16`).** The route is
+viable and proven. If it is not, the fallback is a USB capture of a real
 upload; the device-to-PC half is already decoded (`16`, `tools/samples/hid-upload-capture.log`) and
 only the PC-to-device direction is missing.
 

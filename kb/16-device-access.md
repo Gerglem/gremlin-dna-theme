@@ -1,5 +1,22 @@
 # 16 – Driving the mod programmatically
 
+> ## Where this stands, 2026-10-30
+>
+> This file is written in discovery order and is long. The conclusions, so a cold reader does not
+> have to reconstruct them from the chronology:
+>
+> | | |
+> |---|---|
+> | **Reading and driving the mod** | **SOLVED.** `tools/dna-hid.py`, vendor HID, no EScribe, no COM port, no driver |
+> | **The flash layout** | **SOLVED.** Evolv's own code produces it on request, no device attached - `UWB.FE(ggq)` -> `A.WIA` -> `JSL` -> `PYB.PE()` |
+> | **Building a Programmer that has that layout** | Next, and still device-free: `PYB.UE(func, int)` |
+> | **Writing a config** | **Untried.** Needs a link, the `dontUpload` dry run first, and Jake's explicit go-ahead |
+>
+> **Everything before "SOLVED: the real flash layout" is the investigation that got there**, including
+> several wrong turns kept on purpose. Where an older section is superseded it says so inline, but if
+> an older passage and a newer one disagree, **the newer one wins.**
+
+
 **Goal:** read and write the device from a command line, without EScribe's GUI in the loop — so a change can be uploaded and checked in seconds instead of by hand.
 
 Confirmed in Windows device enumeration, 2026-10-30:
@@ -452,7 +469,12 @@ pre-upload backup, device identity check, firmware handshake, per-frame CRC, dif
 the write transaction - all live above this layer and are the reason for going through Evolv's code
 rather than around it.
 
-### Where this leaves a push
+### Where this leaves a push — SUPERSEDED, kept for the reasoning
+
+> **Overtaken 2026-10-30 by the section above.** Its second branch - *"or by constructing one once
+> `GGQ` is identified"* - is exactly what happened, so the conclusion below ("further away than it
+> looked") no longer holds. The warning about hand-building a `LogicalLayout` stands and is the
+> reason the vendor route was worth the effort.
 
 **Further away than it looked, and deliberately not attempted.** Driving `PerformUpload` with a
 hand-built `LogicalLayout` would mean inventing region sizes, device offsets and paging for live
@@ -620,8 +642,10 @@ It returns an **`A.ECC`** - so `OCC` is the base and `ECC` the DNA Color impleme
 
 **`HLF.XK()` is not a device list.** It returns an `A.QMQ` holding two empty byte arrays and
 `XE = 256`, and `HLF.GK()` also returns 256. That is the hash chunk size, and `QMQ` is the SHA-1 chunk
-cache itself - i.e. **`CreateForDNAColor(HLF.XK())` is the intended call**, and `GK()` is not a device
-count as its shape suggested.
+cache itself. At the time this read as *"`CreateForDNAColor(HLF.XK())` is the intended call"*; **that is
+superseded** - the Programmer must come from `PYB.UE(...)` so it carries a layout, and
+`CreateForDNAColor` does not set one. What stands is the identification of `QMQ` as the SHA-1 chunk
+cache and `XE = 256` as the chunk size. `GK()` is not a device count as its shape suggested.
 
 **`HLF.AS` is null even inside Device Monitor**, with the mod connected and live. So the static
 current-device slot is not what Device Monitor's own connection uses, and finding the live link means
@@ -659,14 +683,20 @@ plainly moves binary settings across the same link, so either the tunnel carries
 upload uses its own report. **That question is now the crux, and it is the one thing reflection cannot
 answer.** It needs a capture.
 
-### The next experiment: read, not write
+### The next experiment: read, not write — CORRECTED 2026-10-30
+
+> **Step 2 below was wrong and following it reproduces the original failure.**
+> `Programmer.CreateForDNAColor` returns a Programmer with **no layout**, which is precisely why
+> `AX()` threw `NullReferenceException` every way it was tried (see *What fails, and why*). The
+> Programmer has to come from `PYB.UE(...)`, so that it carries the layout `PE()` now gives us.
 
 The read path exercises the entire chain - open HID, attach the stream, `Initialize()`, pull an
-image - with nothing written to the device. Order:
+image - with nothing written to the device. Corrected order:
 
-1. `BGQ.FE(hidPath, ...)` -> `POT`
-2. `Programmer.CreateForDNAColor(sha1Cache)` -> `OCC`
-3. assign `OCC.Stream`
+1. build the `PYB` with no device involved: `GGQ(XElement)` -> `UWB.FE(ggq)` -> `JSL(None, ggq, None)`
+2. **`pyb.UE(func, int)` -> `OCC`** - a Programmer that *has* the layout. **Not**
+   `Programmer.CreateForDNAColor`, which is the layout-less one
+3. `BGQ.FE(hidPath, ...)` -> `POT`, and assign it to `OCC.Stream`
 4. `OCC.Initialize()`, then read `UserModeVersion` - if it matches the `User mode version is ...` line
    in EScribe's debug log, the link is genuinely up
 5. `OCC.AX(progress, flags)` -> `TOC`, and compare its bytes against a `.ecig` downloaded by EScribe
