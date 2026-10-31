@@ -1325,13 +1325,59 @@ not start on byte boundaries, so one field can disturb several non-adjacent byte
 consistent with the 7-bit rule holding everywhere else in this protocol, but it is a
 **hypothesis, not a finding** - do not build on it.
 
+#### The block is a 7-bit packed bitstream, and two fields are decoded (2026-10-31)
+
+**Settled by a temperature staircase**: five uploads stepping profile 1 through
+`380, 390, 400, 410, 420 F`, wattage pinned at 40 W, each file differing from the previous in
+exactly one XML attribute (`tools/probes/make-step-profiles.py`). Every step wrote the same
+341-byte group, and **only frame 3 ever moved**.
+
+The raw payload bytes that moved were `9, 11, 18, 19` plus the trailing pair `56, 57`. Offset 11
+ran `5e 60 64 66 68` - monotonic, but stepping `+2, +4, +2, +2` for uniform +10 F increments,
+while offset 9 cycled `2c 2e 28 2a 2c`. Offset 9 wrapping is exactly where offset 11 takes its
+extra step: **a carry between non-adjacent bytes**, which no byte array does and a packed
+bitstream does.
+
+**The payload is 7-bit packed.** Each byte after the 5-byte frame header carries 7 significant
+bits. Concatenate those and re-read the stream in 8-bit groups to recover the real layout. This
+is why single-field changes scatter across non-adjacent bytes, and why no byte-aligned reading of
+the raw frame ever yielded a sensible number.
+
+Unpacked, frame 3 holds little-endian 16-bit fields:
+
+| Unpacked offset | Field | Encoding |
+|---|---|---|
+| 2 | Power | **watts x 32** |
+| 4 | Temperature | **degrees F x 32** |
+
+Exact on every capture, with no rounding:
+
+| Setting | LE16 @ 4 | / 32 |
+|---|---|---|
+| 380 F | 12,160 | 380 |
+| 390 F | 12,480 | 390 |
+| 400 F | 12,800 | 400 |
+| 410 F | 13,120 | 410 |
+| 420 F | 13,440 | 420 |
+
+Power cross-checks on the same stream: `1184 / 32 = 37 W` and `1280 / 32 = 40 W`, matching two
+captures taken for a different purpose.
+
+**Two independent confirmations that were not set up as tests.** A capture taken before the
+staircase unpacks to `385.00 F` - which is exactly what the EScribe UI showed in its Temperature
+field at the time. And two groups captured minutes apart with identical settings unpack
+byte-identical, so the encoding is deterministic.
+
+Tool: `tools/unpack7.py`, with a self-check over all five staircase frames (`--sample`).
+
 #### Still not decoded
 
-- The packing. Whether offsets 11/18/19 are one field in a 7-bit bitstream, or separate fields
-  that happen to move together. The test: a series of single-field uploads stepping one value
-  through known increments, watching which offsets move and by how much.
-- Which offsets hold which field. Only temperature has been isolated so far.
-- The checksum at offsets 56-57. Needed before any composed write will be accepted.
+- **The checksum.** The unpacked tail (around offsets 44-45, raw 56-57) moves on every change.
+  **Nothing composed locally can be uploaded until this is understood** - reproducing the block
+  correctly is not enough if the device rejects it. This is the gate on writing from Claude.
+- Which offsets hold the remaining fields. Only power and temperature are mapped.
+- Why `inner_len` is declared `0x3c` (60) when only **58** payload bytes are present; 5 header +
+  60 exceeds the 63-byte HID report.
 - Declared `inner_len` is `0x3c` (60) but only **58** payload bytes are present. 5 header + 60
   exceeds the 63-byte HID report, so the declared and carried lengths disagree. Reason unknown.
 - What the prologue and terminator exchanges mean.

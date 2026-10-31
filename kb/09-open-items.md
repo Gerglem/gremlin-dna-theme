@@ -183,6 +183,47 @@ group against the previous.
 
 The checksum at 56-57 will move in all three cases and tells us nothing by itself.
 
+**Result, 2026-10-31: outcome A. The block is a 7-bit packed bitstream.**
+
+All five steps wrote the same 341-byte group and **only frame 3 moved**. Raw offsets `9, 11, 18,
+19` moved plus the trailing pair. Offset 11 stepped `+2, +4, +2, +2` for uniform +10 F
+increments while offset 9 cycled and wrapped - and the wrap is exactly where 11 takes its extra
+step. That carry between non-adjacent bytes is the bitstream signature.
+
+Unpacking 7 bits per byte after the 5-byte frame header gives little-endian 16-bit fields:
+
+| Unpacked offset | Field | Encoding |
+|---|---|---|
+| 2 | Power | watts x 32 |
+| 4 | Temperature | degrees F x 32 |
+
+Exact on all five steps (12,160 / 12,480 / 12,800 / 13,120 / 13,440 = T x 32), and power
+cross-checks at 37 W and 40 W on captures taken for other reasons. A pre-staircase capture
+unpacks to 385 F, matching what EScribe displayed at the time - a confirmation nobody arranged.
+
+Tool: `tools/unpack7.py --sample`. Detail in `16` -> "The block is a 7-bit packed bitstream".
+
+### The checksum is now the gate on writing (set 2026-10-31)
+
+Reading the device is solved. Composing a write is not, and exactly one thing stands in the way:
+**the trailing bytes of each frame change on every edit and are almost certainly a checksum.**
+
+Everything else is in hand - the transport (`F8 2A`), the block (fixed, 341 bytes), the packing
+(7-bit), and two field encodings. None of it matters until a locally built block is accepted by
+the device.
+
+Approaches, cheapest first:
+1. **Brute-force the algorithm over captured pairs.** There are now many (payload, trailing
+   bytes) samples across `tools/samples/` and the staircase. Try the usual suspects - sum, XOR,
+   CRC-16 variants, Fletcher - against the unpacked and packed forms.
+2. **Look for it in EScribe's IL.** The chain in `16` already reaches the transfer code; the
+   checksum is computed somewhere near where the frame is assembled.
+3. **Probe the device.** Send a known-good captured group back verbatim and confirm it is
+   accepted, then flip one payload byte and see whether it is rejected. That confirms the
+   trailing bytes are validated at all before any effort goes into deriving them.
+
+Do (3) first - it is one replay and it tells us whether this is even a real gate.
+
 **Blocking issue regardless of outcome:** nothing composed locally can be uploaded until the
 checksum at offsets 56-57 is understood. Reproducing the block is not enough if the device
 rejects it.
