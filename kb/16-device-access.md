@@ -9,8 +9,10 @@
 > |---|---|
 > | **Reading and driving the mod** | **SOLVED.** `tools/dna-hid.py`, vendor HID, no EScribe, no COM port, no driver |
 > | **The flash layout** | **SOLVED.** Evolv's own code produces it on request, no device attached - `UWB.FE(ggq)` -> `A.WIA` -> `JSL` -> `PYB.PE()` |
-> | **Building a Programmer that has that layout** | Next, and still device-free: `PYB.UE(func, int)` - `tools/probe_programmer.py`. The open unknown is what its `Func<>` argument wants; the probe prints the signature before trying |
-> | **Writing a config** | **Untried.** Needs a link, the `dontUpload` dry run first, and Jake's explicit go-ahead |
+> | **Opening a link** | **SOLVED.** `BGQ.FE(port, vid, pid, ver, OpenConfiguration, 1, enum0) -> POT`, with the port string derived from WMI - no hand-made file |
+> | **Building a Programmer** | **SOLVED.** `PYB.UE(func, n)` with **n >= 128** - the Int32 is an address whose high bit must be set |
+> | **Reading the settings image** | **`AX()` times out.** Suspects, in order: the Programmer has no `UserModeVersion`, `AX`'s `Boolean[]` was null, and HID contention with Device Monitor |
+> | **Writing a config** | **Untried.** Needs the read working first, then the `dontUpload` dry run, then Jake's explicit go-ahead |
 >
 > **Everything before "SOLVED: the real flash layout" is the investigation that got there**, including
 > several wrong turns kept on purpose. Where an older section is superseded it says so inline, but if
@@ -616,6 +618,42 @@ What is still unverified is whether that `OCC` **carries the layout** - the thin
 `CreateForDNAColor` never set and the reason `AX()` threw every way it was tried. `probe_read.py`
 now builds with 128, 129, 160 and 255, compares the layout each returns, and only then opens a link
 for `Initialize()` and `AX()`.
+
+### Step 3 run 2: a Programmer with a live link, and the read times out
+
+    A. build the PYB                 OK
+    B. port string from WMI          OK   36 chars
+       BGQ.FE(port, 9867, 1075, 0)   OK   -> A.POT
+    C. UE(factory, 128)              OK   -> A.ECC
+       does it carry the layout?     unknown - see below
+    D. Initialize()                  OK   returned, no exception
+       UserModeVersion               None
+    E. AX(IProgressMonitor, Boolean[])   TimeoutException
+
+**`A.ECC` is the Programmer**, built with a factory returning our live link. Everything up to and
+including that now works end to end from a standing start, with no EScribe document involved.
+
+**`UserModeVersion = None` is expected, not a failure.** This file established by IL reading that
+`Initialize()` is 36 bytes of wiring and performs **no handshake**; `DEScribe.Core` is the
+orchestrator that sends `get version` and then *sets* the property, and nothing in `DEScribe.Upload`
+ever writes it. So the Programmer is talking to a board whose version it does not know - a plausible
+reason for a transfer to hang, and the first thing the next run tests.
+
+**The layout question is still open, and that is a defect in the probe, not a result.** The check
+looked for properties named `NM`, `IE` and `FE` and skipped any that did not exist *silently*, so an
+empty section means "none of those three names matched", not "no layout". `probe_read2.py` dumps
+**every** property on the Programmer instead.
+
+**`AX(IProgressMonitor, Boolean[])`** - the second argument was passed as null. If it selects which
+regions to transfer, null may mean "nothing" or be dereferenced into a malformed request. The next
+run passes a `Boolean[3]` of `True`, matching the three regions in the layout.
+
+One more candidate worth keeping in mind: this file already warns that **a second HID handle makes
+replies interleave**, and the probe runs inside Device Monitor, which is itself polling the board.
+If the version and the flags both fail to explain the timeout, contention is the next suspect.
+
+**At most two `AX` attempts per run from now on** - each timeout costs real wall-clock time on the
+operator's bench.
 
 ### Where this leaves a push — SUPERSEDED, kept for the reasoning
 

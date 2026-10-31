@@ -1441,6 +1441,15 @@ releases, and everything in `16` and `17` is in service of them.
 
 ### v3.0 - direct device push
 
+**Status 2026-10-30, after eleven probes:** the whole chain is built and a Programmer now holds a
+live link to the board. `AX()` - the download - times out, and that is the only step left before a
+read works. Detail and the three suspects are in `16`. Nothing has ever been written to the device.
+
+    .ecig root -> GGQ -> UWB.FE -> A.WIA -> JSL -> PYB -> UE(func, >=128) -> A.ECC
+    BGQ.FE(port, 9867, 1075, 0, cfg, 1, enum0) -> A.POT        the link
+    PYB.PE() -> LogicalLayout                                   3 regions, 200,448 bytes
+
+
 This is the one that changes how the project is worked on. Today every change is: build a file, hand
 it over, upload it by hand in EScribe, photograph the screen. With a push, the loop closes.
 
