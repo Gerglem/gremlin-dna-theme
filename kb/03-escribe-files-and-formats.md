@@ -38,6 +38,34 @@
 `<DESabertooth Device="109" …>` with many `<Feature Name="…" Index="n">value</Feature>` entries. Text values are base64, and some are XML-escaped plain text. Theme parts live here too: EvolvFont (XML-escaped font XML), EvolvUIDesign, EvolvWallpaper (PNG), EvolvThemeTitle/Author, EvolvColorScheme, EvolvLEDTrack, EvolvBatteryDischargeCurve, EvolvCVMaterialTemperatureProfile.
 - **Default Evolv theme fonts were extracted from the default `.ecig`:** "Built SemiBold" at sizes 18 (Normal), 24 (Big), and 13 (Small), with `<Metrics Ascender/Descender>`. Gremlin uses these exact bitmaps.
 
+### Which menu loads which file, and what it writes
+
+Three separate load paths, each with a different scope. Picking the right one
+controls how much of the device gets rewritten - which matters for safety, and
+for protocol work, where a narrow change produces a readable capture.
+
+| Path in EScribe | File | Scope |
+|---|---|---|
+| **File -> Open** | `.ecig` | **Entire device config** - themes, all profiles, and every other EScribe setting, including charging values and battery-low info |
+| **General tab -> Profile -> Load / Save Copy** | `.ecigprofile` | **One profile only** - power, temperature, material settings |
+| **Theme tab -> Load / Save / Default** | `.ecigtheme` | **Theme only** |
+
+Those three are the paths that produce and consume these file formats. EScribe
+has other upload routes; they do not round-trip through these files.
+
+**Loading a file changes only EScribe's in-memory copy.** Nothing reaches the
+device until **Upload Settings to Device**, and that upload writes only what
+differs from the device's current state - an upload with no changes transmits
+no settings data at all (`16` -> "The write path, captured 2026-10-31").
+
+Worked examples of all three are committed here:
+
+| Ext | Examples in this repo |
+|---|---|
+| `.ecig` | `release/gremlin_v1.0.ecig`, `release/gremlin_v2.3.03.ecig` |
+| `.ecigtheme` | `release/gremlin_v1.0_theme.ecigtheme`, `release/gremlin_v2.3.03_theme.ecigtheme` |
+| `.ecigprofile` | `release/profiles/DTv5XL-Profile.ecigprofile` and the three beside it |
+
 ## The EScribe install tree (reference material)
 A copy of EScribe's installed files lives at `G:\My Drive\Equipment\Thelema\EScribe Suite`, and it is the best authority available on this format short of the firmware:
 - **77 device configs in `Backups/`** — **not** stock files, but EScribe's automatic snapshots of this mod before and after every upload. They hold four themes: ours, Evolv's **Default Theme** (which contains no conditions at all) and **Copyman's** third-party theme, which is the richest example available of someone pushing this format. Scanning all 77 is what established that operator 64 appears nowhere (`10`). Full detail in `13`.
