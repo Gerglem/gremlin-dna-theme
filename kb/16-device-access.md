@@ -1382,6 +1382,72 @@ Tool: `tools/unpack7.py`, with a self-check over all five staircase frames (`--s
   exceeds the 63-byte HID report, so the declared and carried lengths disagree. Reason unknown.
 - What the prologue and terminator exchanges mean.
 
+### The checksum algorithm, found in the IL (2026-10-31)
+
+**It is CRC-16/CCITT-FALSE.** Poly `0x1021`, init `0xFFFF`, not reflected, no final XOR.
+
+`A.ICT` in **`DimensionEngineering.dll`** is the CRC class. Names are obfuscated but the shape is
+unmistakable:
+
+| Member | Role |
+|---|---|
+| `GE() -> UInt16` | the seed. Returns **`0xFFFF`** |
+| `EE(UInt16, Byte) -> UInt16` | per-byte update, the inner step |
+| `XE(Byte[]) -> UInt16` | whole buffer |
+| `XE(Byte[], Int32, Int32) -> UInt16` | a range |
+
+Identified by **invoking it**, not by reading it: `XE` over the ASCII of `123456789` returns
+**`0x29B1`**, the standard check value for CRC-16/CCITT-FALSE. That one call settles the
+polynomial, the init and the reflection questions together.
+
+Worth knowing for anyone reading this IL: the numeric constants are behind an obfuscated
+**constant decryptor** - the IL reads `ldc.i4 <n>; call 0x06000087` rather than the literal, so
+the polynomial is not visible in the bytes. Invoking the method lets the runtime decrypt it for
+you, which is far cheaper than unpicking the decryptor.
+
+#### How to find it again
+
+Name-based searching fails - everything is mangled to `A.XXX`. What worked was **searching by
+signature shape**: methods taking `Byte[]` and returning a small integer, sorted by IL length. A
+CRC is a tiny method with that signature, and `A.ICT::XE(Byte[]) -> UInt16` at 38 bytes of IL
+stood out immediately. Scanning for a CRC lookup table found nothing because this implementation
+is bitwise, with no table.
+
+#### Who calls it, and the better road
+
+Callers, found by resolving every `call`/`callvirt` token in every method of the Evolv and
+Dimension assemblies:
+
+| Caller | Note |
+|---|---|
+| `A.DQT::Write(Byte[],Int32,Int32)` | **`A.DQT` is a `Stream` subclass** - the framed transport |
+| `A.DQT::TE(Byte[],Int32,Int32)` | its read counterpart |
+| `A.GHT::KE`, `A.HWT::AE` | elsewhere in the stack |
+
+`A.DQT` has a factory `OE(String, Int32) -> DQT` - a string path plus an integer, the same
+HID-open shape noted elsewhere in this document.
+
+**That is the better road.** Rather than reimplementing the framing and working out exactly which
+bytes the CRC covers, drive `A.DQT` itself: it is a `Stream`, it builds the frames, and it
+computes the CRC on the way out. Evolv's own transport, used as a library.
+
+#### What is still open
+
+**Which bytes the CRC covers.** A region search over the packed payload, the report, and the
+7-bit-unpacked stream - every start offset 0-7 against every end offset near the tail, with the
+tail read as BE16, LE16 and both 7-bit orderings - produced **no match** on the five staircase
+frames. The CRC is correct; the region is not yet pinned down.
+
+Two things make this harder than it looks, and both are worth knowing before trying again:
+
+- A 16-bit CRC **cannot fit** in the two trailing 7-bit bytes (`0a 6c`, `26 66`, ...). It must be
+  spread across three packed bytes, or placed before the padding rather than after it.
+- The unpacked stream **ends in `ff ff ff ff` padding**, so the CRC is not simply the last two
+  bytes of the unpacked data either.
+
+Decoding `A.DQT::Write` (161 bytes of IL) would answer it directly. So would driving `A.DQT`,
+which makes the question moot.
+
 ### Privacy
 
 A raw `.pcapng` carries the USB string descriptors, one of which is the device serial.

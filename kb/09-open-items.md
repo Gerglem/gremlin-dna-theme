@@ -416,7 +416,14 @@ stream with skip 0 and 5) and four tail readings (7-bit lo/hi both ways, plain L
 Note the tail is **not monotonic** in temperature - 390 F gives the smallest value of the five.
 So it is a genuine digest, not a derived field, and guessing is unlikely to be cheap.
 
-**This strengthens the recommendation above: read it out of EScribe's IL rather than searching.**
+**Done 2026-10-31: the algorithm is CRC-16/CCITT-FALSE** (poly `0x1021`, init `0xFFFF`, not
+reflected, no final XOR), found in `A.ICT` in `DimensionEngineering.dll` and confirmed by invoking
+it on the standard check vector. Which bytes it covers is still open, and the better route is to
+drive Evolv's own transport (`A.DQT`, a `Stream` subclass that frames and CRCs on the way out)
+rather than reimplement it. Full detail in `16` -> "The checksum algorithm, found in the IL".
+
+**The original recommendation stands and was the right call: read it out of EScribe's IL rather
+than searching.** Guessing had already failed; the IL gave it up in a few minutes.
 The search space left is large (region boundaries, bit alignment, whether the frame header or a
 session value is mixed in), and the IL already has the answer written down. Possibilities not yet
 excluded, for whoever resumes: the tail may cover the frame header or sub-header, may be computed
