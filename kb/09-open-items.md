@@ -260,6 +260,47 @@ any ceiling. Independent support: Copyman's third-party theme uses `Operator="65
 collapse from five children to two, the cancel layers disappear, the Color Themes home screen gets its
 theme color back across an XL's healthy range, and the cleaning-profile special case goes away.
 
+## Registered: the v2.3.00 battery overlay - WRITTEN BEFORE RUNNING, 2026-10-30
+
+`v2.3.00` moved the low-battery red off the battery meter onto its own control (`18` A). What is
+unproven is not the 15% threshold - unchanged and working since `v1.0` - but **whether a second
+control drawn over the same rectangle renders at all**.
+
+Draining a pack to test it is a poor ask, and faking the level is unreliable: `Battery Charge` appears
+in Device Monitor's writable table (`14`) but it is a live measurement the ADC re-reads, and `14`
+already warns that a scripted write may not reach a theme field the way a real reading does.
+
+**So flip the threshold, not the battery.** `Downloads\BENCH-BATTERY.ecig` is `v2.3.00` with every
+low-battery compare changed from `< 15` to `< 101`, which is true at any state of charge.
+
+**This one is not a locked bench config** - cold ohms ship 0 and unlocked, exactly as `v2.3.00` does,
+so nothing about resistance is faked and it is safe to fire. Just do not keep it: it reads low battery
+permanently.
+
+### Three compares were flipped, and the third is the control
+
+| Where | Control | Role |
+|---|---|---|
+| Home `(0, 0)` | the **overlay**, 2 children | the thing under test |
+| Session `(0, 0)` | the **overlay**, 2 children | the thing under test |
+| Home `(40, 118)` | battery **percentage text**, 2 children, never an overlay | **positive control** |
+
+The percentage text was never at risk - it has always been a plain 2-child control. So it going red
+proves the upload landed and the compare resolves, which separates *"the overlay does not draw"* from
+*"nothing happened"*.
+
+### Expected, decided before running
+
+| Observation | Meaning |
+|---|---|
+| **Percentage red AND bar red** | the overlay draws. `18` A confirmed, and principle 1 is viable for the ohms row too (`18` C) |
+| **Percentage red, bar NOT red** | **the overlay does not render.** The split is wrong; revert to the v2.2.05 shape and accept the ceiling risk, or find another construction |
+| **Bar red but misplaced, doubled or clipped** | it draws but geometry is off - check `Location`/`Size` on the new control |
+| **Neither red** | void, not negative. The upload did not land; re-check and re-run |
+
+Then, on loading real `v2.3.00` afterwards, **neither should be red** at normal charge - the off state,
+which completes the pair without any extra upload.
+
 ## Registered: does operator 64 (AND) actually work? - WRITTEN BEFORE RUNNING, 2026-10-30
 
 Settles the contradiction in the audit above, and decides whether v3's replace warning is two layers or
