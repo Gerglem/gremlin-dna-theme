@@ -500,9 +500,40 @@ being in temperature control.**
 Against that: the idle frame reads cold 0.524 against live 0.874, a rise that only makes sense if
 the board is sensing temperature. That may simply be a hot coil read moments after a fire.
 
-**What would settle it:** read the profile's mode and the live temperature over `tools/dna-hid.py`
-while that profile fires, and compare against a vaping profile doing the same. No theme change
-until that is known - the correct fix differs depending on the answer.
+**What would settle it:** read the live temperature while that profile fires and compare against a
+vaping profile doing the same. No theme change until that is known - the correct fix differs
+depending on the answer.
+
+### Registered test: is the Clean profile in temperature control? (set 2026-10-31, outcomes below written BEFORE the Clean run)
+
+Done with `tools/probe_clean_profile.py` in Device Monitor, once per profile, compared with
+`tools/compare_profile_probe.py`. Device Monitor turned out to be the right tool, not
+`dna-hid.py`: it fires on command (`ECig.Puff`) and reads temperature in the same session.
+
+**The discriminator is whether reported `Temperature` MOVES while firing.** A regulated profile
+reports a climbing coil temperature; a wattage profile has nothing to report.
+
+**Control case, vaping profile 1 (DTv5XL, 40 W / 380 F), captured first:**
+
+| | |
+|---|---|
+| `Temperature` while firing | climbed to **212.49 F** against a 380 F setpoint |
+| `Cold Ohms` -> `Live Ohms` | 0.458 -> **0.506** under load |
+| `Power` | 39.82 W against 40.00 W set |
+| Lifetime `Temp-Protected` | 206, so temperature limiting does engage on this device |
+
+That is unambiguous temperature sensing, and it is what a Clean profile gets compared against.
+
+| Outcome on the Clean profile | What it means | The fix |
+|---|---|---|
+| **A** - `Temperature` moves like the control case | The profile IS in temperature control. The controls are legitimate; only the live row's condition is wrong | Small: fix that one condition |
+| **B** - `Temperature` flat, or equal to `Temperature Set` | The profile is in wattage mode and the temperature controls are **not conditioned on TC** | Larger: condition the controls, do not just fix the row |
+| **C** - no movement in `Power` or `Current` either | The puff never fired; the run is void | Re-run, check the atomizer and that the profile allows firing |
+
+**The screen question is separate and stays separate.** Device Monitor exposes no theme state
+(`14`), so none of this explains why the live row *blanks*. That still needs a photograph during a
+fire. Outcome A plus a blanking row means the condition is wrong; outcome B plus a blanking row is
+consistent and the row is merely the most visible symptom.
 
 ## Tracked: a board over-temperature warning
 
