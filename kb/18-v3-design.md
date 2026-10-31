@@ -25,6 +25,14 @@ variant to beat a tint, and last is exactly where truncation happens - so every 
 control sits on the ceiling by construction.
 
 > **Rule: a control carries tints, or it carries conditions. Not both.**
+>
+> **Qualified 2026-10-30, on hardware: this only works over a control that does not repaint.**
+> The battery split drew correctly and was then painted over, because the meters under it are
+> bound to the live battery level and the static overlay above them was never re-dirtied
+> (`09`). A control that repaints re-evaluates its whole variant list, which is exactly why the
+> single-control design works on a live value. An overlay needs its own live source to survive
+> - untested - or the control has to give up its tints. **Do not apply this principle to a live
+> readout until that is settled.**
 > Where both are wanted, split them into two controls over the same rectangle, ordered by `ZOrder`,
 > and keep each one small.
 
@@ -39,7 +47,7 @@ limitation that turned out not to exist.
 
 ## Changes, in the order they should be built
 
-### A. Split the battery meter — fixes a live defect  ✅ DONE in v2.3.00, untested on hardware
+### A. Split the battery meter — ⚠️ SHIPPED IN v2.3.00 AND FOUND BROKEN ON HARDWARE
 
 The only functional variant above position 5 in the whole theme is the low-battery red, at **child 8
 of 8** on both the home and session screens (`09`, audit). In `v1.0` it was child 2 of 2.
@@ -89,7 +97,7 @@ disappear with it.
 Four children instead of five, and - more to the point - **no cancels, no cleaning-profile special
 case, and the intent is legible**. `09`'s deferred "collapse to two layers" item is superseded by this.
 
-### C. The one question that decides the theme tint
+### C. The one question that decides the theme tint  ⚠️ in doubt — the ohms row is live too, see A
 
 At four children the ohms row cannot carry the six tints (4 + 6 = 10, over the ceiling), so it **keeps
 reading white** - the compromise `07` #24 accepted.

@@ -5,13 +5,17 @@ Files are named for their version, in the original v1.0 format:
 - `gremlin_v<version>_theme.ecigtheme` — the theme on its own
 - `gremlin_v<version>.ecig` — the theme plus the four Divine Tribe profiles and their materials
 
-The current release is **v2.3**. Older versions stay in this folder, so a link to a specific version keeps working.
+The current release is **v2.2**; v2.3 is withdrawn, see below. Older versions stay in this folder, so a link to a specific version keeps working.
 
 The High Contrast theme is a separate build on its own version track — see [`../high-contrast/RELEASE-NOTES.md`](../high-contrast/RELEASE-NOTES.md).
 
 ---
 
 ## v2.3
+
+> **Do not use this build.** Tested 2026-10-30: the low-battery bar appears for a
+> moment when the screen draws and is then painted over by the normal bar. Run v2.2 until this
+> is fixed.
 
 **Not yet tested on hardware.** Structural only — nothing about how the theme looks or behaves is
 meant to change. See the note at the end of this section.

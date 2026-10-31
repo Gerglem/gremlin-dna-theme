@@ -14,7 +14,7 @@ Rewritten 2026-10-30 at the end of a long session. Everything below is current.
 **Repository is fully pushed.** `main` matches `origin/main`; nothing is held back. The earlier
 instruction to keep work local was discharged on 2026-10-30.
 
-**Current builds:** Color Themes **`v2.3.00`**, High Contrast **`v1.2.07`**. **Neither has been on hardware.** `v2.3.00` carries the battery split (`18` A); `v1.2.06` carries the home-screen warning.
+**Current builds:** Color Themes **`v2.3.00` - DO NOT RELY ON IT**, the low-battery red flashes and is painted over (below); High Contrast **`v1.2.07`**, untested. **Neither has been on hardware.** `v2.3.00` carries the battery split (`18` A); `v1.2.06` carries the home-screen warning.
 
 | | State |
 |---|---|
@@ -367,6 +367,62 @@ the AND survives outside a probe.
 - **Profile 2 or 4 not red** - the AND does not survive in a real chain the way it did on a 2-child
   probe control. That would be a significant finding; re-run the probe before concluding.
 - **Profile 3 not red** - the flat `>0.6` regressed, which contradicts the OHMS page.
+
+### RESULT, 2026-10-30: the overlay draws, then gets painted over
+
+Operator report: *"the low battery shows for a short time when the home screen first displays, but is
+then replaced by the regular battery screen."*
+
+So the red **does** render - `ZOrder`/file order is honoured on the initial paint, and the split is
+geometrically correct. But it does not survive.
+
+**Cause, read straight out of the file:** all seven tinted `Meter`s on that control are bound to
+**field 65537**, the live battery level. The red `Picture` has **no `Source` at all**. The meters
+therefore repaint every time the level refreshes, and the static overlay above them is never dirty,
+so it is never redrawn - the meter simply paints over it.
+
+### This revises `18` principle 1
+
+> **Splitting a warning onto its own control only works over a control that does not repaint.**
+
+The single-control design that `18` set out to replace is *correct* for a live control, and for a
+reason worth stating: when the whole control repaints, its variant list is re-evaluated from scratch,
+so the winning child is re-chosen every frame. An overlay has to be re-dirtied by something, and a
+static child never is.
+
+That leaves the battery with no free lunch, and it **casts real doubt on `18` C** - the ohms readout
+is live too, so the same trap applies there.
+
+**`v2.3.00` is therefore not recommended until this resolves.** A warning that flashes and vanishes is
+worse than one that never appears, because it trains you to disbelieve it. The repo keeps the build;
+`09` and the release notes say not to rely on it.
+
+## Registered: which battery construction actually holds - WRITTEN BEFORE RUNNING
+
+`Downloads\BENCH-BATTERY-2.ecig`, built from **`v2.2.05`** with every low-battery threshold moved to
+`< 101`, true at any charge. Two different constructions, one on each screen, so a single upload
+answers both. Cold ohms ship 0 and unlocked - nothing about resistance is faked, safe to fire, but do
+not keep it.
+
+| Screen | Construction | Question |
+|---|---|---|
+| **Main** (design 2) | the **`v2.2.05` shape** - red `Picture` as child **8** of the meter control | **Is child 8 evaluated at all?** The ceiling of 8 has only ever been inferred |
+| **Lock** (design 1) | the split, but the overlay is a **live red `Meter`** bound to 65537 instead of a static `Picture` | **Does a live overlay get redrawn** when the control under it repaints? |
+
+`tools/check-theme.py` deliberately **fails** this file on the main screen - that control is the old
+shape on purpose, and the failure is the tool working, not a defect in the bench build.
+
+### Expected, decided in advance
+
+| Main screen | Lock screen | Conclusion |
+|---|---|---|
+| red **persists** | either | **The ceiling is at least 8 and child 8 works.** The audit's defect was theoretical; revert the `v2.3.00` split and keep the tints |
+| red flashes or never shows | red **persists** | Child 8 really is dropped, **and a live overlay is the fix.** Rebuild the split with a `Meter`, not a `Picture` |
+| red flashes or never shows | also flashes | Neither construction works over a live control. Fall back to the **`v1.0` shape** - drop the six tints from the battery bar, leaving default + red at 2 children. Costs the bar its theme color, the same trade the ohms row already made |
+| red persists | red flashes | 8 works and overlays do not. Same action as the first row, and `18` C is dead - the ohms row can never be tinted |
+
+The battery **percentage text** on the lock screen is the positive control, as before: it is a plain
+2-child control that was never at risk, so it going red proves the upload landed.
 
 ## Registered: does operator 64 (AND) actually work? - WRITTEN BEFORE RUNNING, 2026-10-30
 
