@@ -5,7 +5,29 @@ This theme is a major departure from the original Gremlin interface — larger t
 - `files/gremlin_high_contrast_<version>_theme.ecigtheme` — the theme on its own
 - `files/gremlin_high_contrast_<version>.ecig` — the theme plus four ready-made profiles
 
-The current release is **v1.2**. The color theme has its own notes in [`../release/RELEASE-NOTES.md`](../release/RELEASE-NOTES.md).
+The current release is **v1.2.07**. The color theme has its own notes in [`../release/RELEASE-NOTES.md`](../release/RELEASE-NOTES.md).
+
+---
+
+## v1.2.07
+
+**Not yet tested on hardware.**
+
+**The worn-cup warning on the home screen now works.** v1.2.06 put it there — the profile name turns
+red once the fitted cup's resistance passes its replace limit — but on the one profile the warning is
+meant to leave alone, the name disappeared instead. The name sits on a white highlight band, and the
+rule that kept it its normal color was painting it white, on white.
+
+That rule is gone. The warning now simply states the two cases it cares about, so nothing but red is
+ever applied and every other profile keeps the name exactly as it has always looked. Behavior is
+otherwise unchanged: red above **0.60Ω** on a V5 XL, above **0.41Ω** on a QuestCup, nothing on either
+cleaning profile unless the cup is genuinely past its limit.
+
+Nothing else in the theme changed — the OHMS page, the new-coil prompt, and every other screen are
+identical to v1.2.06.
+
+**Also confirmed in testing:** **MEASURE** on the Ω OHMS page re-reads the resistance. It has been on
+that screen since v1.2 and had never actually been pressed.
 
 ---
 

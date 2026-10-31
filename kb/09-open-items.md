@@ -14,13 +14,13 @@ Rewritten 2026-10-30 at the end of a long session. Everything below is current.
 **Repository is fully pushed.** `main` matches `origin/main`; nothing is held back. The earlier
 instruction to keep work local was discharged on 2026-10-30.
 
-**Current builds:** Color Themes **`v2.3.00`**, High Contrast **`v1.2.06`**. **Neither has been on hardware.** `v2.3.00` carries the battery split (`18` A); `v1.2.06` carries the home-screen warning.
+**Current builds:** Color Themes **`v2.3.00`**, High Contrast **`v1.2.07`**. **Neither has been on hardware.** `v2.3.00` carries the battery split (`18` A); `v1.2.06` carries the home-screen warning.
 
 | | State |
 |---|---|
 | Replace warning, Color Themes | **Works. Proven on hardware** - `plain / RED / RED / plain` across four locked profiles |
 | Replace warning, High Contrast (OHMS page) | **Works. Proven on hardware** - same four readings |
-| Replace warning on the HC home screen (v1.2.06) | **Built, NOT tested.** The profile name carries it. **Test registered and bench file built 2026-10-30** - `Downloads\BENCH-HC-HOME-WARNING.ecig`, card below |
+| Replace warning on the HC home screen | **Logic proven on hardware 2026-10-30; v1.2.06 showed it in an invisible color.** Recut as `v1.2.07`, untested. Old entry: The profile name carries it. **Test registered and bench file built 2026-10-30** - `Downloads\BENCH-HC-HOME-WARNING.ecig`, card below |
 | 380F starting temperature | **Confirmed on hardware** |
 | Omega OHMS screen (HC) | **Confirmed working** - glyph, child screen, LOCK, MEASURE, BACK all render |
 | New-coil `LOCK?` row hidden until measured | Confirmed on High Contrast; **not retested on Color Themes** |
@@ -73,8 +73,8 @@ board. `tools/probe_pyb.py` is inert and ready to run in Device Monitor.
    test is **registered and the bench file built** (card below), awaiting a sitting with the mod.
 1b. **v2.3.00** - the battery split. Needs the pack under 15%, or the level written from Device
    Monitor (`14`), to confirm the red bar still appears. Nothing else in that build changed.
-2. **`ResampleOhms` from a child screen** - the MEASURE button on the HC OHMS page is present but was
-   never pressed.
+2. ~~**`ResampleOhms` from a child screen.**~~ **Confirmed 2026-10-30** - MEASURE on the HC OHMS page
+   re-reads the current value. `Action` works from a child screen.
 3. **The new-coil screen on Color Themes** - the hidden `LOCK?` row was only confirmed on High Contrast.
 4. Whether the 8-child ceiling is exactly 8.
 
@@ -300,6 +300,73 @@ proves the upload landed and the compare resolves, which separates *"the overlay
 
 Then, on loading real `v2.3.00` afterwards, **neither should be red** at normal charge - the off state,
 which completes the pair without any extra upload.
+
+### RESULT, 2026-10-30: the logic is right, the cancel color is not
+
+| Profile | Locked | Expected | Observed |
+|---|---|---|---|
+| 1 XL | 0.4637 | white | **nothing renders - the name is invisible** |
+| 2 QUEST | 0.4504 | RED | **RED** |
+| 3 XL CLEAN | 0.6500 | RED | **RED** |
+| 4 Q CLEAN | 0.3141 | white | **black and clearly legible** |
+
+**Red on exactly the two profiles that should be red**, so the chain, the thresholds and the
+cleaning-profile handling are all correct. The failure is presentation.
+
+**Cause: white text on the white selection highlight.** The profile name is a selectable control, so
+the firmware draws it on a white highlight band. Profile 1's cancel paints explicit `(1, 1, 1, 1)`
+onto that, and the two disappear into each other. Profile 4 is the proof: no variant matches, it falls
+through to the default, and the firmware renders the default **dark** on the highlight - legible.
+
+**`07` already has this written down** and the `v1.2.06` build walked straight into it: *"Explicit
+`Color="(1, 1, 1, 1)"` on selectable items keeps text white on the white highlight (invisible). Omit
+the color for default white."* The rule was learned on menu rows and never connected to the cancel
+layers, which were inherited from Color Themes - where the background is dark and white is correct.
+
+**Not fixed by picking a better cancel color.** Explicit black would be invisible the moment the
+highlight moved off that control, and a cancel with *no* `Color` is unproven - whether a matching
+variant that sets no color repaints in the default or paints nothing was hypothesis **b** of Probe 1
+and was never cleanly settled, because the child ceiling confounded that run.
+
+**Fixed in `v1.2.07` by deleting the cancels instead.** With operator 64 confirmed the same hours
+earlier, the chain is stated directly and nothing but RED is ever set, so the default is never
+overridden and the highlight problem cannot arise:
+
+    default -> RED if ohms > 0.6
+            -> RED if AND(ohms > 0.41, profile == 2)
+            -> RED if AND(ohms > 0.41, profile == 4)
+            -> Hidden while firing
+
+Five children. `ohms > 0.6` needs no profile test because 0.6 is already past the Quest's own 0.41
+limit, so it is red on every profile anyway - which is what removes the XL rules entirely. This is
+`18` B, applied to the one control that is broken; the OHMS page and the new-coil prompt keep their
+proven five-layer chains until there is a reason to touch them.
+
+### Also confirmed in the same sitting: `ResampleOhms` works from a child screen
+
+MENU -> Ω OHMS -> **MEASURE** re-reads the current value, reported by the operator. That closes one of
+the three long-standing untested items and means **`Action` works from a child screen**, which was
+genuinely open - it matters for any future screen built behind the menu.
+
+## Registered: v1.2.07, the recut home-screen chain - WRITTEN BEFORE RUNNING
+
+`Downloads\BENCH-HC-v1207.ecig`, same four locked resistances. Read the **profile name on the home
+screen**. This is also the **first shipped use of operator 64**, so it doubles as confirmation that
+the AND survives outside a probe.
+
+| Profile | Locked | Matches | Expected |
+|---|---|---|---|
+| 1 XL | 0.4637 | none | **default - dark and legible, like Q CLEAN was** |
+| 2 QUEST | 0.4504 | `AND(>0.41, p==2)` | **RED** |
+| 3 XL CLEAN | 0.6500 | `>0.6` | **RED** |
+| 4 Q CLEAN | 0.3141 | none | **default - dark and legible** |
+
+- **dark / RED / RED / dark** - fixed, and operator 64 is proven in a shipping build.
+- **Profile 1 still invisible** - the default itself is white here and the highlight is the whole
+  problem; the control needs an explicit color that contrasts, or to move off the highlight.
+- **Profile 2 or 4 not red** - the AND does not survive in a real chain the way it did on a 2-child
+  probe control. That would be a significant finding; re-run the probe before concluding.
+- **Profile 3 not red** - the flat `>0.6` regressed, which contradicts the OHMS page.
 
 ## Registered: does operator 64 (AND) actually work? - WRITTEN BEFORE RUNNING, 2026-10-30
 
