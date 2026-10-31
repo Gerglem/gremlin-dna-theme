@@ -526,6 +526,41 @@ and may need the settings document the null is standing in for.
 rebuilds with `None`, an `XElement` and an `XDocument` as the first argument, trying `UE` after each.
 Device-free.
 
+### The PYB's anatomy, read out 2026-10-30
+
+`probe_pyb_state.py`. Useful even though it did not unblock `UE`.
+
+**`KE()` returns four named memory areas**, each a `WYB`:
+
+    'EEPROM'    ''    'KERNEL'    'FLASH'
+
+while `PE()` reports **three** regions. One of those keys is the **empty string** - a nameless area
+that has no counterpart in the layout. A Byte constructor rejecting an `address` is exactly what an
+unpopulated area would cause, so that is the current suspect.
+
+**The `PYB`'s own fields**, which say what state it carries and what a fully-built one would have:
+
+| | |
+|---|---|
+| `YE : GGQ` | the board identity we supplied |
+| `FE : LogicalLayout` | the flash map |
+| `HE : Object` | almost certainly `JSL`'s first argument - the one we pass as null |
+| `AE : Func<>` | a stored delegate, with a setter of its own in `ZE(Func<>)` |
+| `CE`, `TE : Dictionary<>` | settings |
+| `QE`, `WE : UInt32`, `IE : Nullable<>`, `OE : GYB` | |
+
+Worth noting `ZE(Func<>) -> Void` exists separately from `UE`'s `Func` parameter, and
+`NE(LogicalLayout)` / `NE(PagingMethod, Int32, Int32, Int32, Boolean)` can set or build the layout -
+so a PYB can be furnished after construction, not only through `JSL`.
+
+**A false lead corrected:** passing a real document to `JSL` failed with *"expected object, got
+NoneType"*. That is IronPython complaining about the **call shape**, not .NET rejecting the
+argument - a Python list was being handed where a typed `Object[]` was needed. The retry uses an
+explicitly sized `Array[Object]`.
+
+`tools/probe_address.py` reads every `WYB`'s fields to find the bad address, lists `DDY`'s
+constructors, and retries `JSL` properly marshalled.
+
 ### Where this leaves a push — SUPERSEDED, kept for the reasoning
 
 > **Overtaken 2026-10-30 by the section above.** Its second branch - *"or by constructing one once
