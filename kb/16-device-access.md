@@ -253,7 +253,7 @@ the assembly - and it is a second, independent reason not to hand-build a `Logic
 one is derived per config, not fixed per board.
 
 **The practical consequence:** the layout has to come from a live `PYB`. `tools/`-side work cannot
-produce it. `probe_pyb.py` (in Downloads, inert) hunts EScribe's own statics for a live `PYB` or `FWB`
+produce it. `tools/probe_pyb.py` (inert) hunts EScribe's own statics for a live `PYB` or `FWB`
 and dumps `PE()` - region sizes, device offsets, paging and read-only flags. That one report would
 settle the whole question.
 

@@ -6,9 +6,6 @@ Built from screenshots, 2026-10-30. **Incomplete** — tabs and dialogs are adde
 
 ---
 
-> **Screen captures** for everything below are committed under
-> [`../images/escribe/`](../images/escribe/README.md), with an index of what each one shows.
-
 ## Window
 
 **Menus:** File · Edit · Options · Tools · Help
@@ -138,7 +135,7 @@ Neither has been tried. Both are worth a look before the next feature gets squee
 
 **Correction, 2026-10-30:** an earlier version of this file claimed the dropdown offered only three,
 inferred from `en.po` carrying three `tdUsage` strings. **That was wrong.** The screen capture
-(`../images/escribe/escribe-td-screens-special-usage-dropdown.png`) shows all six - None, Lock Screen,
+showed all six - None, Lock Screen,
 Main Screen, New Atomizer, **Power Lock**, **Theme Change**. The GUI sets them directly; the `.po` file
 is simply an incomplete translation list, as its own header says.
 
@@ -371,7 +368,7 @@ mark each group. Reconstructed:
 ### The Atomizer section, transcribed from the dropdown itself
 
 `en.po` is an incomplete list - it says so in its own header - so the entries below were read off the
-open dropdown (`../images/escribe/escribe-td-setting-field-source-list.png`). This is the **visible
+open dropdown in Theme Designer. This is the **visible
 portion only**, scrolled to the top; the list continues past `New Coil`. Entries marked * are in the
 GUI but **absent from `en.po`**, so the reconstructed tree above misses them.
 

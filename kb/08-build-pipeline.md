@@ -41,6 +41,20 @@ Commands: `cd build && python3 assemble.py` (Color Themes) and `cd hc && python3
 
 **Without the kit:** `04`, `05`, `06`, `10`, `11` plus a released `.ecigtheme` (unzip it; every screen is base64 XML) are enough to rebuild or edit by hand.
 
+## Testing and device tools (`../tools/`)
+
+None of these are part of the build; they are how a build gets checked.
+
+| Tool | What it does |
+|---|---|
+| `dna-hid.py` | Read and drive the mod over the vendor HID interface. Needs `pip install hidapi`. Works where the serial port does not, notably macOS (`16`, `17`) |
+| `dna-query.ps1` | The same read-out over the USB serial port |
+| `dna-stream.ps1` | Captures the 64 Hz CSV stream (switch EScribe to CSV first) |
+| `make-bench-config.py` | Builds a throwaway `.ecig` that pre-locks a chosen resistance on each profile. **The only way to exercise the replace warning**, since published configs ship cold ohms 0 (`12`). Do not fire on one; do not commit one |
+| `probe_pyb.py` | Inert IronPython probe for EScribe's Device Monitor. Hunts a live `PYB` and dumps the real flash layout - the next step for programmatic upload (`16`) |
+| `probe_open_link.py` | The proven recipe for opening a device link from inside EScribe and attaching it to a Programmer (`16`). Reads the port string from `dna-port.txt` |
+| `samples/` | A real puff recording, and the device-to-PC half of a settings upload |
+
 ## Common changes
 - **Move or resize a home element:** edit its `ctl(x,y,w,h, …)` in `screens.py`.
 - **Add a menu row:** add `row_field/row_toggle/row_link` in `menus.py` (rows are 0-based, max ~8 per page with BACK).

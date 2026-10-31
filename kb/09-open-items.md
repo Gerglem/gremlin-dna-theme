@@ -57,7 +57,7 @@ driver install, just `pip install hidapi` (installed). Framing and traps in `16`
 **Writing a config is not solved.** The architecture is mapped as far as reflection can take it
 (`16`): the chain is `.ecig root -> GGQ -> DWB.JSL -> PYB -> PYB.UE -> Programmer`, and it is blocked
 on obtaining a live `PYB`, because the flash layout is **derived per config** rather than declared per
-board. `probe_pyb.py` sits in Downloads, inert, ready to run in Device Monitor.
+board. `tools/probe_pyb.py` is inert and ready to run in Device Monitor.
 
 ### Device and environment state
 
@@ -124,7 +124,7 @@ The architecture is mapped as far as reflection goes:
   declared per board (`16`), so inventing offsets is inventing where to write live flash. The
   `dontUpload` dry-run validates the plan it is given, not whether that plan fits the board.
 
-**Next step:** run `probe_pyb.py` (in Downloads, inert) from Device Monitor. It walks EScribe's own
+**Next step:** run `tools/probe_pyb.py` (inert) from Device Monitor. It walks EScribe's own
 statics for a live `PYB` or `FWB` and dumps `PE()` - the real region sizes, offsets and paging. One
 report settles whether this route is viable.
 
