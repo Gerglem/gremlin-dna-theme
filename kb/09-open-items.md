@@ -339,6 +339,58 @@ inside a 0x7f run).
 Set the device to known values first and read back after, because **the ACK cannot be trusted** -
 that is the lesson above.
 
+**Result, 2026-10-31: both, depending on WHERE the byte is changed.**
+
+Two experiments, each with a clean captured group used first to set a known starting value, and a
+readback afterwards. Every run was ACKed, so the ACK distinguished nothing - as expected.
+
+| Change | Where | Result |
+|---|---|---|
+| One padding byte `7f -> 7e` | frame 4 offset 14, inside a `0x7f` run | **Applied normally.** 380 F -> 420 F, exactly as the clean group would |
+| Temperature field rewritten to 365 F | frame 3, the packed data region | **Rejected, and the profile fell back to defaults: 450 F / 20 W** |
+
+So the tail **is** validated, over the data region but not over that padding byte. The padding
+flip passing was a false negative from choosing a byte the check does not cover.
+
+**The failure mode is destructive, and that is the thing to remember.** A bad write is not
+refused - it is ACKed, the post-group phase runs normally, and the profile is left at defaults.
+Nothing says "rejected". The only way to know is to read the value back and find it is neither
+the old value nor the one you asked for.
+
+**Our field decoding is confirmed correct by this.** The composed frame differed from the
+captured one in exactly two bytes, both carrying the temperature field, and round-tripped
+through `tools/unpack7.py` to 365.00 F. The encoding is right; only the tail is missing.
+
+Recovery is straightforward: replay any clean captured group. `tools/samples/replay-380.hex`
+restored 40 W / 380 F immediately, with ohms, board temperature and battery all normal.
+
+### Registered test: derive the frame tail (set 2026-10-31, NOT YET RUN)
+
+The last thing between here and composing arbitrary settings.
+
+**Material already in hand.** `tools/samples/` holds several groups whose data differs by a known
+amount and whose tails differ accordingly - the five staircase steps (380-420 F) are the cleanest
+set, since consecutive pairs differ in one field by exactly +10 F.
+
+**Method.** Brute-force candidate algorithms over those pairs, against both the packed payload and
+the unpacked stream, with and without the frame sub-header, over the whole frame and over the data
+region only:
+
+| Candidate | Note |
+|---|---|
+| Sum / two's-complement sum | cheapest to rule out |
+| XOR | ditto |
+| Fletcher-16, Adler-32 truncated | two-byte tails make these plausible |
+| CRC-16 variants (CCITT, MODBUS, XMODEM, ARC) | try all standard polys and init values |
+
+**A cheaper first move.** Find it in EScribe's IL instead. The object chain in `16` already reaches
+the transfer code, and the tail is computed wherever the frame is assembled - likely a small
+helper called once per frame. Reading it off is faster and less error-prone than guessing polys.
+
+**Do not test candidates on the device.** Each wrong guess costs a profile reset to defaults. Test
+offline by predicting the tail of a captured frame and comparing - a correct algorithm reproduces
+every captured tail exactly, with no device involved.
+
 **Blocking issue regardless of outcome:** nothing composed locally can be uploaded until the
 checksum at offsets 56-57 is understood. Reproducing the block is not enough if the device
 rejects it.
