@@ -60,6 +60,21 @@ def screens(path):
 WHITE = "(1, 1, 1, 1)"
 
 
+def is_pale(color):
+    """True only for pure white.
+
+    A wider rule was tried on 2026-10-30 and withdrawn the same hour. It
+    flagged anything with all channels >= 0.55, which fired on
+    `(0.62, 0.62, 0.62, 1)` - the menu-row value grey used since `v1.0` on 18
+    controls that have worked in service the whole time. One over-exposed
+    photograph of a highlighted setpoint is not evidence against a year of
+    use, and a check that reports 18 false positives gets ignored, which is
+    worse than not having it. Pure white is the only case actually proven
+    invisible (High Contrast `v1.2.06`, `kb/07`).
+    """
+    return color == WHITE
+
+
 def is_selectable(ctl):
     """A control the firmware can highlight.
 
@@ -89,11 +104,13 @@ def check(path):
             where = f"design {did} control at {ctl.get('Location')}"
             if is_selectable(ctl):
                 for i, k in enumerate(kids, 1):
-                    if k.get("Color") == WHITE:
-                        errors.append(f"{where}: child {i} paints explicit white on a selectable "
+                    col = k.get("Color")
+                    if is_pale(col):
+                        errors.append(f"{where}: child {i} paints pure white on a selectable "
                                       f"control, which is drawn on a white highlight - it will be "
-                                      f"invisible (kb/07). Omit the color, or state the condition so "
-                                      f"the default is never overridden")
+                                      f"invisible (kb/07). Omit the color so the firmware inverts "
+                                      f"it against the highlight, or state the condition so the "
+                                      f"default is never overridden")
             if len(kids) > CEILING:
                 errors.append(f"{where}: {len(kids)} children, over the ceiling of {CEILING} "
                               f"- the last {len(kids) - CEILING} are dropped silently (kb/07 #26)")

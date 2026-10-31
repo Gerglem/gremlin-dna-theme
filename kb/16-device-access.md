@@ -469,6 +469,29 @@ pre-upload backup, device identity check, firmware handshake, per-frame CRC, dif
 the write transaction - all live above this layer and are the reason for going through Evolv's code
 rather than around it.
 
+### Step 2 result: `UE` wants a connection factory, so the device-free path ends here
+
+`PYB.UE(Func<A.POT>, Int32) -> OCC`. **`A.POT` is the HID link object** - what
+`probe_open_link.py`'s `FE(port, vid, pid, 0)` returns - so the `Func` is a factory the Programmer
+calls to get a connection. Passing `None` for it threw, from inside the Programmer's own setup:
+
+    ArgumentOutOfRangeException: Parameter name: address
+       at A.DDY..ctor(Byte, NDY) / A.TCC.Initialize() / A.SRB.EE / A.PYB.UE
+
+Consistent with the null delegate rather than with the `Int32`, which was swept over 0, 1 and 109
+with the same result. `PYB.KE()` returned a 4-entry dictionary, so the `PYB` itself is real and
+populated.
+
+**So a Programmer cannot be obtained without a link.** That is the boundary: everything up to the
+layout is device-free, the Programmer is not.
+
+`tools/probe_read.py` is the step-3 experiment - and it is a **read**, not the `dontUpload` dry run.
+The dry run validates the plan it is given rather than whether that plan fits the board, and needs a
+context object nobody has identified; a read exercises the same chain - link, Programmer, layout,
+transfer - and cannot write. `Initialize()` sends `get version`; `AX()` is the download half, the
+same thing EScribe does for *Download Settings from Device*. **No `PerformUpload`, no write, no
+erase.**
+
 ### Where this leaves a push — SUPERSEDED, kept for the reasoning
 
 > **Overtaken 2026-10-30 by the section above.** Its second branch - *"or by constructing one once

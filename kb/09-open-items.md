@@ -1278,6 +1278,37 @@ Fixed in place: the probe now `clr.AddReference`s WinForms before enumerating (f
 thread, and would itself be the finding. **A second empty result will mean something; the first one
 did not.**
 
+### New-atomizer gate, run 1 - 2026-10-30
+
+| Item | Result |
+|---|---|
+| 1. No `LOCK?` row at cold ohms 0, **Color Themes** | **CONFIRMED.** The prompt showed `NEW 0.460 / OLD 0.0000`, YES, NO and MEASURE, and no `LOCK?` row |
+| 2. Does the row appear after YES, and does the prompt survive it? | **Unresolved from the photos.** The next shot is the home screen with cold ohms committed at 0.460 and the lock still open, which is consistent with the prompt having closed on YES - but it is equally consistent with navigating away. **Needs the operator to say which.** |
+| 3. High Contrast resistance on that screen | not exercised - this run was Color Themes |
+| 4. Red warning on the prompt | not exercised - profile 1 at 0.460 is under its own 0.6 limit, which is correct. Needs the **Quest** profile selected with the XL cup fitted |
+
+So item 1 is closed and item 2 is the gate. Everything about it now hinges on one observation nobody
+has written down: **after pressing YES, NEW - does the prompt stay on screen?**
+
+### A suspected `SET` legibility bug, and why it was NOT recorded as one
+
+One photograph of the Color Themes home screen shows `SET` followed by a blank white box where the
+setpoint should be; another, with the highlight elsewhere, reads `SET 385F` normally. The setpoint
+field at design 2 `(38, 50)` is `(0.62, 0.62, 0.62, 1)` - a light grey - on an **editable** Setting,
+which makes it selectable and therefore drawn on the white highlight. That is the same shape as the
+`v1.2.06` bug.
+
+**It was not recorded as a bug, and `check-theme.py` was reverted rather than widened.** The same
+grey is the menu-row value colour from `06`, used on **18 controls since `v1.0`**, all of which have
+worked in service. A rule catching it reported 18 errors against a build that demonstrably works -
+the identical crying-wolf failure this file already warned about over the child-count thresholds.
+One over-exposed photograph is not evidence against a year of use.
+
+**Open question for the operator, and it is a one-look answer:** on the home screen, with the
+setpoint row highlighted, *can you actually read the number*? If yes, the photo is a camera artefact
+and nothing is wrong. If no, the grey needs darkening on that control - and probably only that one,
+since the menu rows are fine.
+
 ### Probe 3, run 2 - the real finding: the script host cannot see EScribe's document
 
 With WinForms loaded, `Application.OpenForms` contains **exactly one form: Device Monitor's own

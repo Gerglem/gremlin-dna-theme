@@ -120,22 +120,57 @@ except Exception, e:
     say("  failed: %s" % e)
 
 # ---- try to get a Programmer ----
+#
+# Run 1 showed UE(Func<A.POT>, Int32). A.POT is the HID *link* object - the
+# thing probe_open_link.py's FE(port, vid, pid, 0) returns - so the Func is a
+# connection factory. Passing None for it threw
+# ArgumentOutOfRangeException("address") from inside TCC.Initialize(), which
+# is consistent with the null delegate rather than with the Int32.
+#
+# So: pass a REAL delegate that returns null. If UE is lazy - if it only calls
+# the factory when it actually needs a link - we get a Programmer and can read
+# its layout with the mod still untouched. If it calls the factory eagerly,
+# the error moves, and that tells us the device-free path ends here.
 say("")
 say("=== calling UE ===")
+
+POT = None
+for a in AppDomain.CurrentDomain.GetAssemblies():
+    for t in types_of(a):
+        if t.Name == "POT" and t.Namespace == "A": POT = t
+say("  A.POT type: %s" % ("found" if POT is not None else "NOT FOUND"))
+
+null_factory = None
+if POT is not None:
+    try:
+        from System import Func
+        pyPOT = clr.GetPythonType(POT)
+        def _no_link():
+            return None
+        null_factory = Func[pyPOT](_no_link)
+        say("  built Func[POT] that returns null - it opens nothing")
+    except Exception, e:
+        say("  could not build the delegate: %s" % e)
+
 occ = None
 for m, ps in ues:
     if occ is not None: break
-    for args in ([None, 0], [None, VERSION], [None, DEVICE]):
-        if len(args) != len(ps): continue
-        try:
-            occ = m.Invoke(pyb, Array[Object](args))
-            say("  UE(None, %s) -> %s" % (args[1], occ.GetType().FullName if occ else "None"))
-            if occ is not None: break
-        except Exception, e:
-            msg = str(e)
-            try: msg = str(e.clsException.InnerException or e.clsException)
-            except: pass
-            say("  UE(None, %s) failed: %s" % (args[1], msg))
+    for fac, facname in ((null_factory, "nullFunc"), (None, "None")):
+        if fac is None and facname == "nullFunc": continue
+        for n in (0, 1, 2, 3, VERSION, DEVICE):
+            if len(ps) != 2: continue
+            try:
+                occ = m.Invoke(pyb, Array[Object]([fac, n]))
+                say("  UE(%s, %s) -> %s"
+                    % (facname, n, occ.GetType().FullName if occ else "None"))
+                if occ is not None: break
+            except Exception, e:
+                msg = str(e)
+                try: msg = str(e.clsException.InnerException or e.clsException)
+                except: pass
+                say("  UE(%s, %s) failed: %s" % (facname, n, msg.split("
+")[0]))
+        if occ is not None: break
 
 # ---- THE QUESTION: does it have a layout? ----
 say("")
