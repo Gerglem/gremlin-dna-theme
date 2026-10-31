@@ -453,6 +453,12 @@ rejects it.
 3. **The new-coil screen on Color Themes** - the hidden `LOCK?` row was only confirmed on High Contrast.
 4. Where the child ceiling actually falls. **8 renders and 11 truncates**, both observed; 9 and 10 are unmeasured.
 
+> **Both tracked items below are unblocked by Production Utility scripting**, which Evolv added
+> in SP66 (2025-05-30) and this install has. Controlled, repeatable firing at a set wattage for a
+> set duration is a **supported feature** - see `13` -> "It supports scripting officially, since
+> SP66". Find that interface before attempting either measurement by hand; both are stuck only
+> because measuring them means holding a button and watching the screen.
+
 ## Tracked: Clean profiles show temperature, and the live row blanks while firing
 
 Observed on hardware 2026-10-30, `v2.3.03`, profile **DTv5XL-Clean**. Jake's call: document now,
