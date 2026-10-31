@@ -338,6 +338,29 @@ order and explicit white on both cancels. Largest control in either theme is now
 
 The cost either way: that row loses its theme tint, which `07` #24 already accepted.
 
+## High Contrast bench test - registered 2026-10-30
+
+Color Themes is proven. High Contrast's two chains are structurally identical and verify clean on
+inspection, but **no HC build has been on the device today**, so this closes the gap rather than
+assuming it.
+
+`BENCH-HC-v05.ecig`, same four locked resistances. Read the ohms from **MENU -> Omega OHMS**.
+
+| Profile | Name | Locked | Expected |
+|---|---|---|---|
+| 1 | XL | 0.4637 | **plain** |
+| 2 | QUEST | 0.4504 | **RED** |
+| 3 | XL CLEAN | 0.6500 | **RED** |
+| 4 | Q CLEAN | 0.3141 | **plain** |
+
+Anything other than `plain / RED / RED / plain` means the HC chains differ from the Color Themes ones
+in some way inspection missed, and HC needs its own diagnosis rather than a re-application of the
+same fix.
+
+Worth checking in the same pass, both outstanding from the original card: the new-atomizer screen
+shows **no `LOCK?` row** until a resistance is committed, and the **Omega OHMS** row opens its child
+screen with MEASURE and BACK working.
+
 ## Deferred: known simplifications
 
 Things we know are now unnecessarily complicated, held back deliberately so they can be applied in one
