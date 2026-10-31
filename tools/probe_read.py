@@ -193,7 +193,13 @@ def main():
         def _give_link(): return pot
         factory = Func[pyPOT](_give_link)
         ue = [m for m in T["PYB"].GetMethods(FLAGS) if m.Name == "UE"][0]
-        for n in (0, 1, 2, 3):
+        # Swept 0..255 (probe_ue_sweep): 0..127 all throw
+        # ArgumentOutOfRangeException("address"), 128..255 all return a
+        # Programmer. The Byte needs its high bit set - which matches the
+        # 0x8093 / 0x8097 feature-id constants kb/16 found in DWB.RSL's IL.
+        # Several are tried so their layouts can be compared before any of
+        # them is allowed near the device.
+        for n in (128, 129, 160, 255):
             try:
                 occ = ue.Invoke(pyb, Array[Object]([factory, n]))
                 say("  UE(factory, %d) -> %s" % (n, occ.GetType().FullName if occ else "None"))
@@ -212,8 +218,8 @@ def main():
         raise _Done()
 
     say("")
-    say("=== does it carry the layout? ===")
-    for nm in ("NM", "IE"):
+    say("=== does it carry the layout? - the whole point of the PYB detour ===")
+    for nm in ("NM", "IE", "FE"):
         try:
             pr = occ.GetType().GetProperty(nm, FLAGS)
             if pr is None: continue

@@ -591,6 +591,32 @@ If every value gives the identical error, the Int32 is not the address and the b
 inside `TCC.Initialize` from `PYB` state not yet identified - in which case the next lead is
 `SRB.EE` / `TCC`, not `UE`.
 
+## SOLVED 2026-10-30: `UE`'s Int32 is an address whose high bit must be set
+
+A clean split, from sweeping all 256 values with a null `Func`:
+
+    0 .. 127     ArgumentOutOfRangeException: address
+    128 .. 255   -> A.ECC        a Programmer, every time
+
+**Bit 7 must be set.** That matches the `0x8093` / `0x8097` constants this file already recorded in
+`DWB.RSL`'s IL, passed to `YUB.XE` - addresses in this system carry a `0x80` prefix. The six values
+tried before the sweep - 0, 1, 2, 3, 109 and the version - were all on the wrong side of the line,
+which is why the error never moved and why it looked like PYB state rather than an argument.
+
+`NDY`, `DDY`'s second argument, is an enum with two members: **`GE`** and **`EE`** - the same two
+names the memory areas use for their start and end offsets. So `DDY(Byte address, NDY which)`
+appears to identify *an endpoint of a memory area*, which fits an address that is an identifier
+rather than an offset.
+
+**So a Programmer can now be built**, and the chain is complete on paper:
+
+    .ecig root -> GGQ -> UWB.FE -> DWB -> JSL -> PYB -> UE(func, >=128) -> OCC
+
+What is still unverified is whether that `OCC` **carries the layout** - the thing
+`CreateForDNAColor` never set and the reason `AX()` threw every way it was tried. `probe_read.py`
+now builds with 128, 129, 160 and 255, compares the layout each returns, and only then opens a link
+for `Initialize()` and `AX()`.
+
 ### Where this leaves a push — SUPERSEDED, kept for the reasoning
 
 > **Overtaken 2026-10-30 by the section above.** Its second branch - *"or by constructing one once
