@@ -23,7 +23,7 @@ instruction to keep work local was discharged on 2026-10-30.
 | Replace warning on the HC home screen | **Works. Proven on hardware** - `v1.2.07` reads dark / RED / RED / dark with the highlight on. `v1.2.06` had the right logic in an invisible color. Old entry: The profile name carries it. **Test registered and bench file built 2026-10-30** - `Downloads\BENCH-HC-HOME-WARNING.ecig`, card below |
 | 380F starting temperature | **Confirmed on hardware** |
 | Omega OHMS screen (HC) | **Confirmed working** - glyph, child screen, LOCK, MEASURE, BACK all render |
-| New-coil `LOCK?` row hidden until measured | Confirmed on High Contrast; **not retested on Color Themes** |
+| New-coil screen, both themes | **The least-tested thing in either build.** One item half-confirmed, three open - see the section below |
 
 ### The big result: a per-control child limit
 
@@ -78,28 +78,57 @@ board. `tools/probe_pyb.py` is inert and ready to run in Device Monitor.
 3. **The new-coil screen on Color Themes** - the hidden `LOCK?` row was only confirmed on High Contrast.
 4. Where the child ceiling actually falls. **8 renders and 11 truncates**, both observed; 9 and 10 are unmeasured.
 
-## Tracked: the new-atomizer screen
+## Tracked: the new-atomizer screen — the least-tested thing in either build
 
-Reworked repeatedly on 2026-10-30 and **never tested as it now stands**. Both themes changed; load
-`gremlin_v2.2.05.ecig` and `gremlin_high_contrast_v1.2.06.ecig`, and remember a full `.ecig` load
-zeroes cold ohms, so a cup has to be re-locked before anything resistance-driven can show.
+Rewritten 2026-10-30 at the end of the session. The previous version of this section still told you to
+load `v2.2.05` and `v1.2.06` and predates everything proven that day, so it is replaced rather than
+amended. **Current builds: `v2.3.02` and `v1.2.08`.**
 
-What is unverified, in the order a single swap would exercise it:
+**Nothing in this session exercised this screen.** Every bench run read the home screen or the OHMS
+page. Of the four things listed here, one is half-answered and three are open.
 
-1. **The LOCK? row is hidden until there is something to lock.** Guarded on cold ohms being non-zero,
-   so on a fresh config it should be absent. Seen working once against the *earlier* guard, which
-   watched the pending reading instead (`07` #22).
-2. **Does the row appear after YES, and does the prompt stay open long enough to use it?** If
-   `NewCoilAccept` dismisses the screen, the first lock has to happen on the ohms page or PROFILE
-   instead, and the toggle on the prompt only helps on later swaps. This is the open question that
-   decides whether the control earns its place.
-3. **High Contrast shows the measured resistance** on that screen now, and MEASURE was removed to fit
-   it (`11`). Never seen on hardware.
-4. **The red replace warning** on the prompt and on the ohms page, rebuilt as a layered chain. The
-   chain's logic is worked through but the layering itself has not run on the mod.
+| | Item | State |
+|---|---|---|
+| 1 | `LOCK?` row hidden until there is something to lock | **Half.** Confirmed on High Contrast - a fresh upload at cold ohms 0 showed YES / NO / MEASURE and no `LOCK?` row. **Never checked on Color Themes** |
+| 2 | Does the row appear after YES, and does the prompt survive `NewCoilAccept`? | **Open, and this is the one that matters** |
+| 3 | High Contrast shows the measured resistance on that screen; MEASURE removed to fit it (`11`) | **Never seen on hardware** |
+| 4 | The red replace warning on the prompt | **Never seen**, and it is now a different construction than when this was written |
 
-A cheap way to exercise 4 without aging a cup: Device Monitor can **write** cold ohms (`14`), so set it
-past a threshold and watch the screen. That tests the layering far faster than swapping cups.
+### Why item 2 is still open despite an earlier "confirmed"
+
+An earlier entry records that `NewCoilAccept` does **not** dismiss the screen before the toggle can be
+reached, confirmed on Color Themes. **That was against the earlier guard**, which watched the *pending*
+reading (1048579) and so showed the `LOCK?` row *before* YES was pressed. The guard now watches
+**committed cold ohms** (17825794), so the row is hidden until YES commits a reading - which makes the
+question "is the prompt still up *after* YES?", and the old observation does not answer it.
+
+If YES dismisses the screen, the row is only ever reachable on a later swap, and a first lock has to
+happen from the OHMS page (High Contrast) or PROFILE (Color Themes). Nothing can lock 0 either way, so
+this decides documentation and whether the control earns its place, not correctness.
+
+### Correction: the Device Monitor shortcut does not work for the prompt
+
+The previous version suggested writing cold ohms from Device Monitor (`14`) to exercise item 4 without
+aging a cup. **That tests the ohms page, not the prompt.** The new-coil prompt compares field
+**1048579**, the pending reading, not cold ohms - so writing cold ohms moves a number the prompt does
+not read. (`14` separately warns that whether a scripted write reaches a theme field the way a real
+measurement does is itself unverified.)
+
+### How to actually test it, no cup swap needed
+
+A fresh `.ecig` load zeroes cold ohms and clears the lock, and that alone produces the prompt on the
+next connect - which is exactly how the High Contrast half of item 1 got confirmed. So:
+
+1. Load the build. The prompt should appear with **no `LOCK?` row** (item 1 on Color Themes).
+2. Press **YES, NEW**. Does the screen stay up? If it does, does the `LOCK?` row appear now? (item 2)
+3. On High Contrast, confirm the measured resistance is on that screen and MEASURE is gone (item 3).
+4. For item 4, the reading has to be past the limit *for the selected profile*. Under the single
+   variant now shipping, a V5 XL at ~0.46 is **under** its 0.6 limit and will correctly not go red.
+   **Select the Quest profile with the XL cup fitted** - 0.46 is past the Quest's 0.41, so the prompt's
+   reading should go red. That exercises the warning with no worn cup and no swap.
+
+Step 4 is also the only remaining use of the per-cup rule that has never run on hardware; the same
+rule is proven on the home screen and the OHMS page.
 
 ## Tracked: programmatic device access
 
