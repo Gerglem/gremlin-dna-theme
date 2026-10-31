@@ -33,6 +33,12 @@
 - TemperatureProfile = base64 of the CSV points with header `F,R` and CRLF line endings.
 - Wattage-only profile: omit Temperature, use `<Atomizer MaterialName="Watts" />`.
 - Loading a profile does **not** lock ohms. Measure and lock the cold resistance afterward.
+- **The resistance lock is per profile, not per device** (Jake, 2026-10-31). `ColdResistance2`
+  lives inside `<Atomizer>` in each `ECigProfile.xml`, and on the device side `EvolvWDColdOhms`
+  and `EvolvWDOhmLock` are indexed **256..263** - one pair per profile slot (`09`, `10`). So each
+  of the eight profiles carries its own locked resistance, and zeroing one leaves the others
+  untouched. That is why overwriting profiles 1 and 2 with probe profiles on 2026-10-31 made
+  those two unfireable while `DTv5XL-Clean` kept its 0.462 lock.
 
 ### `.ecig` (`DEScribe.xml`)
 `<DESabertooth Device="109" …>` with many `<Feature Name="…" Index="n">value</Feature>` entries. Text values are base64, and some are XML-escaped plain text. Theme parts live here too: EvolvFont (XML-escaped font XML), EvolvUIDesign, EvolvWallpaper (PNG), EvolvThemeTitle/Author, EvolvColorScheme, EvolvLEDTrack, EvolvBatteryDischargeCurve, EvolvCVMaterialTemperatureProfile.
