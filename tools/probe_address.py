@@ -108,13 +108,11 @@ def main():
     say("")
     say("=== 2. memory areas in a null-document PYB ===")
     m0 = jsls[0][0]
-    args = Array[Object](3)
-    args[0] = None; args[1] = ggq; args[2] = None
-    pyb = m0.Invoke(dwb, args)
+    pyb = m0.Invoke(dwb, Array[Object]([None, ggq, None]))
     say("  PYB: %s" % pyb.GetType().Name)
 
     try:
-        layout = pyb.GetType().GetMethod("PE", FLAGS).Invoke(pyb, Array[Object](0))
+        layout = pyb.GetType().GetMethod("PE", FLAGS).Invoke(pyb, Array[Object]([]))
         say("  PE(): %d regions" % len([r for r in layout.Regions]))
         for i, r in enumerate(layout.Regions):
             say("    region %d: size %d  dev 0x%06X" % (i, r.Size, r.DeviceOffset))
@@ -122,7 +120,7 @@ def main():
         say("  PE() failed: %s" % e)
 
     try:
-        ke = pyb.GetType().GetMethod("KE", FLAGS).Invoke(pyb, Array[Object](0))
+        ke = pyb.GetType().GetMethod("KE", FLAGS).Invoke(pyb, Array[Object]([]))
         say("")
         say("  KE() has %d areas. Fields of each:" % ke.Count)
         for k in ke.Keys:
@@ -169,16 +167,22 @@ def main():
     # ---- 5. retry JSL with a real document, properly marshalled ----
     say("")
     say("=== 5. JSL with a real first argument, typed Object[] ===")
+    ZVF = None
+    for a in AppDomain.CurrentDomain.GetAssemblies():
+        for t in types_of(a):
+            if t.Name == "ZVF": ZVF = t
+    say("  ZVF (the Nullable's type): %s" % (ZVF.FullName if ZVF is not None else "not found"))
+    if ZVF is not None and ZVF.IsEnum:
+        try: say("  ZVF values: %s" % ", ".join(str(v) for v in ZVF.GetEnumNames()))
+        except Exception, e: say("  ZVF values unreadable: %s" % e)
+
     for label, first in (("XElement", el), ("string", "x")):
         try:
-            a2 = Array[Object](3)
-            a2[0] = first; a2[1] = ggq; a2[2] = None
-            p2 = m0.Invoke(dwb, a2)
+            p2 = m0.Invoke(dwb, Array[Object]([first, ggq, None]))
             say("  JSL(%s, ...) -> %s" % (label, p2.GetType().Name if p2 else "None"))
             try:
                 ue = [m for m in T["PYB"].GetMethods(FLAGS) if m.Name == "UE"][0]
-                ua = Array[Object](2); ua[0] = None; ua[1] = 0
-                occ = ue.Invoke(p2, ua)
+                occ = ue.Invoke(p2, Array[Object]([None, 0]))
                 say("    UE -> %s  <<<<< GOT A PROGRAMMER"
                     % (occ.GetType().FullName if occ else "None"))
             except Exception, e:
