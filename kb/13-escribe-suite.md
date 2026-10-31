@@ -205,9 +205,18 @@ From Evolv's changelog thread (`Early Firmware and EScribe Suite`), **SP66, 2025
 
 > Production Utility has been upgraded to support scripting and higher throughput operation.
 
-**This install is build 2026-05-14, so it is well past SP66.** Controlled firing is therefore a
-*supported feature*, not something to reverse-engineer. Find the scripting interface before
-spending any more effort on capture-and-replay for firing.
+**This install is build 2026-05-14, so it is well past SP66.**
+
+**But read `14` first.** Device Monitor has had documented IronPython scripting for years,
+including `ECig.Puff(seconds)` and a settable `ECig['Power Set']`. Controlled firing is already
+available and already written up; an earlier version of this section implied it was the thing
+Production Utility would unlock, which was wrong.
+
+What Production Utility scripting may still be worth having is **firing without Device Monitor
+holding the HID handle**. EScribe holds that handle exclusively (`16`), so anything driven
+through Device Monitor cannot run alongside `tools/dna-hid.py`, which is the only thing that
+reads board temperature. A job-driven utility might sidestep that. Confirm it does before
+investing in it.
 
 Where to look: the `File` New/Open/Save job format, the `Production` tab, and whatever CLI or
 script hook SP66 added. Device Monitor's Python scripting (`14`) is the closest existing analogue

@@ -453,11 +453,24 @@ rejects it.
 3. **The new-coil screen on Color Themes** - the hidden `LOCK?` row was only confirmed on High Contrast.
 4. Where the child ceiling actually falls. **8 renders and 11 truncates**, both observed; 9 and 10 are unmeasured.
 
-> **Both tracked items below are unblocked by Production Utility scripting**, which Evolv added
-> in SP66 (2025-05-30) and this install has. Controlled, repeatable firing at a set wattage for a
-> set duration is a **supported feature** - see `13` -> "It supports scripting officially, since
-> SP66". Find that interface before attempting either measurement by hand; both are stuck only
-> because measuring them means holding a button and watching the screen.
+> **Correction, 2026-10-31.** An earlier note here said both items were blocked on finding a
+> firing interface, and pointed at Production Utility scripting (SP66). That was wrong, and it
+> was wrong because it ignored `14`, which has documented `ECig.Puff(seconds)` all along.
+> Controlled firing has never been the missing piece. The two items are in different positions:
+>
+> - **Clean-profile temperature is not blocked at all.** Device Monitor exposes `Temperature`,
+>   `Temperature Set`, `Live Ohms` and `Cold Ohms`, and `ECig.Puff(3)` fires the device. The
+>   whole comparison can be scripted today - see `14` and the method below.
+> - **Board over-temperature is blocked, but on reading, not firing.** `Board Temperature` is
+>   **not** in Device Monitor's variable list (`14` -> Limits: "the variable list above is
+>   everything it offers"). `tools/dna-hid.py` does read it, as `T=GET BOARD` - 106.59 F during
+>   today's session - but EScribe holds the HID handle **exclusively** (established today), so
+>   Device Monitor cannot be firing while `dna-hid.py` reads. That contention is the real
+>   obstacle, and `tools/probe_contention.py` is the existing work on it.
+>
+> Production Utility scripting may still be the way around the contention, since it drives firing
+> from a job rather than through Device Monitor. But it is a workaround for a handle conflict,
+> not the enabling feature the earlier note claimed.
 
 ## Tracked: Clean profiles show temperature, and the live row blanks while firing
 
