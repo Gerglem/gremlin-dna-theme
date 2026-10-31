@@ -163,6 +163,21 @@ Session screen `(16, 104)` shows field **1048642**, which `05` records as *reads
 and 0 during the first session after power-on* (`09`, audit). Either guard it - now expressible as
 `AND(not firing, value != 0)` - or give the space to something honest.
 
+> **Observed directly 2026-10-31, and it is worse than "reads 0".** On the home screen the live-ohms
+> row showed **`0.527` while idle**, at the same moment Device Monitor reported `Live Ohms = NaN`
+> for that state. The row was displaying a **stale value held from the previous fire**, not zero and
+> not a live reading. Photographs in `images/clean-profile-idle.jpg` against the CSV in
+> `tools/samples/clean-profile-probe.csv`.
+>
+> **This cost real time.** The 2026-10-30 analysis of the clean-profile bug treated an idle
+> `cold 0.524 / live 0.874` pair as evidence that the board was sensing temperature. It was a stale
+> post-fire reading. A row that displays a plausible-looking wrong number is more dangerous than one
+> that displays 0, because 0 is obviously wrong and 0.527 is not.
+>
+> The guard therefore has to cover **stale** as well as zero, and `AND(not firing, value != 0)` does
+> **not** do that - a stale value is non-zero. Unless a freshness condition is expressible, **drop
+> the row** rather than guard it. Reconsider E and F together: both concern ohms display honesty.
+
 ## Deliberately not in v2.3
 
 - **New screens.** The puff `Chart`, Power Lock (`Usage=4`) and Theme Change (`Usage=5`) are all
