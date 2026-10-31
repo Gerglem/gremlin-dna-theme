@@ -199,6 +199,38 @@ human holding a button, which is what any real test of a theme's live readouts r
 frame protocol (`16`), or through a production-only command set. If it is the former, firing may
 be reachable directly from `tools/dna-hid.py` without the Production Utility at all.
 
+#### It supports scripting officially, since SP66
+
+From Evolv's changelog thread (`Early Firmware and EScribe Suite`), **SP66, 2025-05-30**:
+
+> Production Utility has been upgraded to support scripting and higher throughput operation.
+
+**This install is build 2026-05-14, so it is well past SP66.** Controlled firing is therefore a
+*supported feature*, not something to reverse-engineer. Find the scripting interface before
+spending any more effort on capture-and-replay for firing.
+
+Where to look: the `File` New/Open/Save job format, the `Production` tab, and whatever CLI or
+script hook SP66 added. Device Monitor's Python scripting (`14`) is the closest existing analogue
+and may share the mechanism.
+
+### Other items from the changelog worth knowing
+
+The same thread answers several questions this repo has asked elsewhere:
+
+| Version | Note |
+|---|---|
+| **SP2** | "Upload Settings turns on the screen like it should" - this is exactly the behaviour seen on 2026-10-31 when a replayed write was applied, and confirms the screen waking is the *success* signal, not a glitch |
+| **1.0.34** | "for programmers, the ability to control the buttons via serial commands" - button control over the serial interface (`17`), predating Device Monitor scripting |
+| **1.0.39** | Device Monitor gains "Simulate Button Presses" and Python scripting "for scientific study and automation" |
+| **SP45** | Introduced device firmware **1.1 SP55.1** with Session Mode - the firmware this mod runs. Also: "on-device trace recording only works for the first 64 seconds of a puff", which bounds any firing study |
+| **SP25** | DNA 100 Color first supported (2021-05-07) |
+| **SP53.8 / SP55** | DNA 60 Color and DNA 80 Color added |
+
+Note the pattern across the whole thread: **Windows ships first, Mac and Linux follow**, sometimes
+by weeks. The Linux beta thread is the canonical source for Linux builds, not this one.
+
+
+
 **Caution:** it loads *firmware*, which EScribe's normal upload path does not. Do not run
 `Program & Test` casually to see what happens - capture a run only with a known-good firmware
 file selected, or with the firmware field deliberately left empty if that is permitted. The fire
