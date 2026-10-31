@@ -252,6 +252,67 @@ any ceiling. Independent support: Copyman's third-party theme uses `Operator="65
 collapse from five children to two, the cancel layers disappear, the Color Themes home screen gets its
 theme colour back across an XL's healthy range, and the cleaning-profile special case goes away.
 
+## Registered: does operator 64 (AND) actually work? - WRITTEN BEFORE RUNNING, 2026-10-30
+
+Settles the contradiction in the audit above, and decides whether v3's replace warning is two layers or
+five. Every AND ever put on this device had operator `129` inside it, whose `RefValue` EScribe zeroes,
+so **no previous run could have fired whatever 64 does**.
+
+`Downloads\Condition A and B.ecigtheme` was examined first and **rejected as a test**: its one AND sits
+on a control at `Location="(70, 49)"` on an 80-wide screen, so it renders a few clipped pixels, and it
+is on the new-coil screen. Authored in Theme Designer, never positioned to be read - which is why no
+result was ever recorded for it.
+
+**Bench file:** `Downloads\PROBE-AND.ecig`, built from `v2.2.05` with the four standard locked
+resistances. **Do not fire. Reload the real config after.**
+
+### The probe
+
+Four independent probes on the main screen, each **its own control with exactly 2 children** so the
+child ceiling cannot confound anything, and each using **only operators confirmed on-device** inside
+the nesting. Each reads dark grey `(0.3, 0.3, 0.3, 1)` when its condition is false, so an unmatched
+probe is still legible and cannot be mistaken for a missing control.
+
+| Row | Replaces | Condition | Colour when true |
+|---|---|---|---|
+| `AND1` | the big temperature, `(0, 24)` | `AND(ohms > 0.41, profile == 1)` | **green** |
+| `AND2` | the SET label, `(0, 50)` | `AND(ohms > 0.41, profile == 2)` | **magenta** |
+| `OR13` | the watts readout, `(2, 67)` | `OR(profile == 1, profile == 3)` | **cyan** |
+| `FLAT` | the live-ohms row, `(16, 104)` | `ohms > 0.41` - flat, no nesting | **orange** |
+
+`FLAT` is the positive control: operator 2 is proven, so if it never lights the upload or the lock did
+not take and the run is void rather than negative. The profile name and the ohms readout are kept, and
+menu navigation is untouched - `(56, 140)` still opens MENU, so profiles switch from MENU -> PROFILE.
+
+### Expected, decided before running - a full truth table in four photos
+
+| Profile | Locked | `AND1` | `AND2` | `OR13` | `FLAT` |
+|---|---|---|---|---|---|
+| 1 DTv5XL | 0.4637 | **green** | grey | **cyan** | **orange** |
+| 2 QuestCup | 0.4504 | grey | **magenta** | grey | **orange** |
+| 3 DTv5XL-Clean | 0.6500 | grey | grey | **cyan** | **orange** |
+| 4 QuestCup-Clean | 0.3141 | grey | grey | grey | grey |
+
+Profile 4 is the all-grey row: nothing may light there, which catches a variant that matches
+unconditionally. Profiles 1 and 2 together are what actually prove the AND - each has one probe true
+and one false on the *same* two fields, so an AND that merely ignores its second child is caught.
+
+### What each result means, fixed in advance
+
+- **The table as printed** - operators 64 and 65 both work. v3 collapses all four warning chains to two
+  children, drops the cancel layers, restores the home-screen theme colour on the ohms row, and uses
+  `OR` for the cleaning profiles. `09`'s deferred simplification is live and `10` line 183 is vindicated.
+- **`FLAT` lights, `AND1` never does** - operator 64 does not resolve. Keep the five-layer chains; mark
+  64 dead in `10` with evidence this time, and close the contradiction the other way.
+- **`AND2` lights on profile 1** (or `AND1` on profile 2) - **64 is not an AND.** It behaves as an OR or
+  ignores a child. Worse than useless: never use it, and note that the five-layer chain is the only
+  safe construction.
+- **`OR13` lights but `AND1` does not** - OR works, AND does not. Partial win: the cleaning-profile
+  special case collapses, the thresholds stay layered.
+- **`FLAT` grey on every profile** - void, not negative. The upload did not take or the locks did not
+  land; check MENU -> PROFILE shows a non-zero resistance and re-run.
+- **A row missing entirely** - a layout or font problem in the probe, not a logic result. Re-cut it.
+
 ## Registered: the HC home-screen replace warning (v1.2.06) - WRITTEN BEFORE RUNNING, 2026-10-30
 
 The last untested piece of either shipping build. `v1.2.06` moved the replace warning onto the High
